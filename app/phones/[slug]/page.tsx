@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect, useMemo, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -20,6 +20,8 @@ import {
   BatteryCharging,
   Smartphone,
   Share2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Phone } from "@/lib/data/phones";
 import { formatCFA } from "@/lib/formatters";
@@ -49,6 +51,12 @@ export default function PhoneDetailPage({ params }: PageProps) {
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+
+  // Swipe & Drag gesture state for gallery
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [dragOffset, setDragOffset] = useState<number>(0);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
 
   // Load product and related items strictly from database
   useEffect(() => {
@@ -127,6 +135,137 @@ export default function PhoneDetailPage({ params }: PageProps) {
     }
   }, [isLoading, phone]);
 
+  const activeStorage = phone?.storageVariants?.[selectedStorageIdx] || phone?.storageVariants?.[0] || {
+    id: "default",
+    size: "Standard",
+    price: phone?.basePrice || 0,
+    stock: 5,
+  };
+
+  const currentColor = phone?.colorVariants?.[selectedColorIdx] || phone?.colorVariants?.[0] || {
+    id: "standard",
+    name: "Factory Finish",
+    hex: "#9A958E",
+    image: phone?.images?.[0] || "/placeholder.png",
+  };
+
+  // Compile exhaustive unique images list (from phone.images + any color variants)
+  const imagesList = useMemo(() => {
+    if (!phone) return [];
+    const list: string[] = [];
+    if (Array.isArray(phone.images)) {
+      phone.images.forEach((img) => {
+        if (img && !list.includes(img)) list.push(img);
+      });
+    }
+    if (Array.isArray(phone.colorVariants)) {
+      phone.colorVariants.forEach((c) => {
+        if (c.image && !list.includes(c.image)) list.push(c.image);
+      });
+    }
+    if (list.length === 0) {
+      list.push(currentColor.image || "/placeholder.png");
+    }
+    return list;
+  }, [phone, currentColor.image]);
+
+  // Ensure index stays valid if imagesList changes
+  useEffect(() => {
+    if (selectedImageIdx >= imagesList.length) {
+      setSelectedImageIdx(0);
+    }
+  }, [imagesList.length, selectedImageIdx]);
+
+  // Gallery Navigation Functions
+  const goToNextImage = () => {
+    if (imagesList.length <= 1) return;
+    setSelectedImageIdx((prev) => (prev + 1) % imagesList.length);
+  };
+
+  const goToPrevImage = () => {
+    if (imagesList.length <= 1) return;
+    setSelectedImageIdx((prev) => (prev - 1 + imagesList.length) % imagesList.length);
+  };
+
+  // Touch Swipe Handlers (mobile)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (imagesList.length <= 1) return;
+    setTouchStartX(e.touches[0].clientX);
+    setTouchStartY(e.touches[0].clientY);
+    setIsDragging(true);
+    setDragOffset(0);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || touchStartX === null || touchStartY === null) return;
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const diffX = currentX - touchStartX;
+    const diffY = currentY - touchStartY;
+
+    // Only drag horizontally if motion is mostly horizontal
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+      setDragOffset(diffX);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDragging) return;
+    const threshold = 40;
+    if (dragOffset < -threshold) {
+      goToNextImage();
+    } else if (dragOffset > threshold) {
+      goToPrevImage();
+    }
+    setDragOffset(0);
+    setIsDragging(false);
+    setTouchStartX(null);
+    setTouchStartY(null);
+  };
+
+  // Mouse Drag Handlers (desktop)
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (imagesList.length <= 1) return;
+    setTouchStartX(e.clientX);
+    setTouchStartY(e.clientY);
+    setIsDragging(true);
+    setDragOffset(0);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || touchStartX === null) return;
+    const diffX = e.clientX - touchStartX;
+    setDragOffset(diffX);
+  };
+
+  const handleMouseUpOrLeave = () => {
+    if (!isDragging) return;
+    const threshold = 40;
+    if (dragOffset < -threshold) {
+      goToNextImage();
+    } else if (dragOffset > threshold) {
+      goToPrevImage();
+    }
+    setDragOffset(0);
+    setIsDragging(false);
+    setTouchStartX(null);
+    setTouchStartY(null);
+  };
+
+  // Keyboard navigation for image gallery
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (imagesList.length <= 1) return;
+      if (e.key === "ArrowLeft") {
+        goToPrevImage();
+      } else if (e.key === "ArrowRight") {
+        goToNextImage();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [imagesList.length]);
+
   // Loading Skeleton in Architectural Style
   if (isLoading) {
     return (
@@ -170,27 +309,6 @@ export default function PhoneDetailPage({ params }: PageProps) {
       </div>
     );
   }
-
-  const activeStorage = phone.storageVariants?.[selectedStorageIdx] || phone.storageVariants?.[0] || {
-    id: "default",
-    size: "Standard",
-    price: phone.basePrice,
-    stock: 5,
-  };
-
-  const currentColor = phone.colorVariants?.[selectedColorIdx] || phone.colorVariants?.[0] || {
-    id: "standard",
-    name: "Factory Finish",
-    hex: "#9A958E",
-    image: phone.images?.[0] || "/placeholder.png",
-  };
-
-  const imagesList =
-    Array.isArray(phone.images) && phone.images.length > 0
-      ? phone.images
-      : [currentColor.image || phone.images?.[0] || "/placeholder.png"];
-  
-  const activeImage = imagesList[selectedImageIdx] || imagesList[0] || "/placeholder.png";
 
   const currentPrice = activeStorage.price || phone.basePrice;
   const inWish = isInWishlist(phone.id);
@@ -254,38 +372,117 @@ export default function PhoneDetailPage({ params }: PageProps) {
           {/* LEFT COLUMN: Gallery with Straight Edges & Technical Crosshairs (7 Cols) */}
           <div className="lg:col-span-7 space-y-4 lg:sticky lg:top-24">
             
-            {/* Main Showcase Canvas */}
-            <div className="relative aspect-square sm:aspect-[4/3] lg:aspect-square bg-[#0D0D10] border border-white/15 p-8 sm:p-12 flex items-center justify-center overflow-hidden rounded-none shadow-2xl group">
-              
+            {/* Main Showcase Canvas with Touch & Mouse Swipe Support */}
+            <div
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onTouchCancel={handleTouchEnd}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUpOrLeave}
+              onMouseLeave={handleMouseUpOrLeave}
+              className={`relative aspect-square sm:aspect-[4/3] lg:aspect-square bg-[#0D0D10] border border-white/15 overflow-hidden rounded-none shadow-2xl group select-none touch-pan-y ${
+                imagesList.length > 1 ? "cursor-grab active:cursor-grabbing" : ""
+              }`}
+            >
               {/* Technical Viewfinder Corner Crosshairs */}
-              <span className="absolute top-2 left-2 text-[10px] font-mono text-zinc-600 select-none">+</span>
-              <span className="absolute top-2 right-2 text-[10px] font-mono text-zinc-600 select-none">+</span>
-              <span className="absolute bottom-2 left-2 text-[10px] font-mono text-zinc-600 select-none">+</span>
-              <span className="absolute bottom-2 right-2 text-[10px] font-mono text-zinc-600 select-none">+</span>
+              <span className="absolute top-2 left-2 text-[10px] font-mono text-zinc-600 select-none pointer-events-none z-10">+</span>
+              <span className="absolute top-2 right-2 text-[10px] font-mono text-zinc-600 select-none pointer-events-none z-10">+</span>
+              <span className="absolute bottom-2 left-2 text-[10px] font-mono text-zinc-600 select-none pointer-events-none z-10">+</span>
+              <span className="absolute bottom-2 right-2 text-[10px] font-mono text-zinc-600 select-none pointer-events-none z-10">+</span>
 
               {/* Technical Blueprint Micro-Label */}
-              <div className="absolute top-3 left-4 flex items-center gap-2">
-                <span className="text-[9px] font-mono tracking-widest text-[#D4AF37] uppercase font-bold border border-[#D4AF37]/30 px-2 py-0.5 bg-black/60">
+              <div className="absolute top-3 left-4 flex items-center gap-2 z-10 pointer-events-none">
+                <span className="text-[9px] font-mono tracking-widest text-[#D4AF37] uppercase font-bold border border-[#D4AF37]/30 px-2 py-0.5 bg-black/60 backdrop-blur-sm">
                   {phone.condition === "Certified Refurbished" ? "CERTIFIED PRE-OWNED" : "SEALED HARDWARE"}
                 </span>
                 {phone.isNew && (
-                  <span className="text-[9px] font-mono tracking-widest text-amber-300 uppercase font-bold border border-amber-400/30 px-2 py-0.5 bg-black/60">
+                  <span className="text-[9px] font-mono tracking-widest text-amber-300 uppercase font-bold border border-amber-400/30 px-2 py-0.5 bg-black/60 backdrop-blur-sm">
                     FLAGSHIP RELEASE
                   </span>
                 )}
               </div>
 
-              {/* Product Photo */}
-              <img
-                src={activeImage}
-                alt={phone.name}
-                className="max-h-full max-w-full object-contain filter drop-shadow-[0_30px_40px_rgba(0,0,0,0.95)] transition-transform duration-500 group-hover:scale-105"
-              />
+              {/* Sliding Image Track */}
+              <div
+                className={`flex w-full h-full ${
+                  isDragging ? "transition-none" : "transition-transform duration-300 ease-out"
+                }`}
+                style={{
+                  transform: `translateX(calc(-${selectedImageIdx * 100}% + ${dragOffset}px))`,
+                }}
+              >
+                {imagesList.map((imgUrl, idx) => (
+                  <div
+                    key={idx}
+                    className="w-full h-full shrink-0 flex items-center justify-center p-8 sm:p-12 relative select-none"
+                  >
+                    <img
+                      src={imgUrl}
+                      alt={`${phone.name} view ${idx + 1}`}
+                      draggable={false}
+                      className="max-h-full max-w-full object-contain filter drop-shadow-[0_30px_40px_rgba(0,0,0,0.95)] pointer-events-none select-none transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                ))}
+              </div>
 
-              {/* Image Counter Badge */}
+              {/* Navigation Chevrons (Previous / Next) */}
               {imagesList.length > 1 && (
-                <div className="absolute bottom-3 right-4 px-2 py-0.5 bg-black/80 border border-white/15 text-[9px] font-mono text-zinc-400 rounded-none">
-                  FRAME [ 0{selectedImageIdx + 1} / 0{imagesList.length} ]
+                <>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      goToPrevImage();
+                    }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-9 sm:h-9 bg-black/70 hover:bg-[#D4AF37] hover:text-black border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm z-20 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 rounded-none shadow-lg"
+                    aria-label="Previous photo"
+                  >
+                    <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      goToNextImage();
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-9 sm:h-9 bg-black/70 hover:bg-[#D4AF37] hover:text-black border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm z-20 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 rounded-none shadow-lg"
+                    aria-label="Next photo"
+                  >
+                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </button>
+                </>
+              )}
+
+              {/* Pagination Dots Indicator */}
+              {imagesList.length > 1 && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 bg-black/70 px-2.5 py-1 border border-white/10 backdrop-blur-sm rounded-full">
+                  {imagesList.map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedImageIdx(idx);
+                      }}
+                      className={`h-1.5 transition-all duration-300 cursor-pointer rounded-full ${
+                        selectedImageIdx === idx
+                          ? "w-5 bg-[#D4AF37]"
+                          : "w-1.5 bg-white/40 hover:bg-white/80"
+                      }`}
+                      aria-label={`Jump to photo ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Technical Frame Badge & Swipe Hint */}
+              {imagesList.length > 1 && (
+                <div className="absolute bottom-3 right-4 px-2 py-0.5 bg-black/80 border border-white/15 text-[9px] font-mono text-zinc-400 rounded-none z-10 flex items-center gap-1.5 pointer-events-none">
+                  <span className="text-[#D4AF37] hidden sm:inline">SWIPE ◄►</span>
+                  <span>FRAME [ 0{selectedImageIdx + 1} / 0{imagesList.length} ]</span>
                 </div>
               )}
             </div>
@@ -296,6 +493,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 {imagesList.map((imgUrl, idx) => (
                   <button
                     key={idx}
+                    type="button"
                     onClick={() => setSelectedImageIdx(idx)}
                     className={`relative aspect-square bg-[#121217] border p-2 flex items-center justify-center transition-all cursor-pointer rounded-none ${
                       selectedImageIdx === idx
@@ -306,7 +504,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
                     <img
                       src={imgUrl}
                       alt={`${phone.name} angle ${idx + 1}`}
-                      className="max-h-full max-w-full object-contain"
+                      className="max-h-full max-w-full object-contain pointer-events-none"
                     />
                   </button>
                 ))}
@@ -327,7 +525,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 <Truck className="w-4 h-4 text-[#D4AF37] shrink-0" />
                 <div>
                   <span className="text-[10px] font-mono uppercase text-zinc-400 block font-bold">EXPRESS DELIVERY</span>
-                  <span className="text-white font-medium text-[11px]">Same-Day Douala & Yaoundé</span>
+                  <span className="text-white font-medium text-[11px]">Buea, Molyko • Nationwide Dispatch</span>
                 </div>
               </div>
 
