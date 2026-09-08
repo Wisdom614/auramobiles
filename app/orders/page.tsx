@@ -21,37 +21,94 @@ import {
   MapPin,
   Calendar,
   CreditCard,
+  Printer,
+  FileCheck,
 } from "lucide-react";
-import { INITIAL_ORDERS, Order } from "@/lib/data/mock-orders";
+import { INITIAL_ORDERS, Order, OrderStatus } from "@/lib/data/mock-orders";
 import { formatCFA } from "@/lib/formatters";
 import { useSettings } from "@/lib/store/settings-context";
+import { useOrders } from "@/lib/store/orders-context";
+import { supabase } from "@/lib/supabase/client";
+import { OrderReceiptModal } from "@/components/orders/order-receipt-modal";
 
 function OrderTrackingContent() {
   const searchParams = useSearchParams();
   const queryId = searchParams.get("id");
   const isJustPlaced = searchParams.get("placed") === "true";
   const { settings } = useSettings();
+  const { orders: contextOrders } = useOrders();
 
   const [searchQuery, setSearchQuery] = useState(queryId || "AUR-89412");
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+  const [isLoadingOrder, setIsLoadingOrder] = useState(false);
   const waNum = settings.whatsappCleanNumber || "237699442100";
 
-  // Load order matching searchQuery or fallback to first order
-  useEffect(() => {
-    const targetId = (queryId || searchQuery || "AUR-89412").trim().toUpperCase();
+  // Core lookup function supporting Supabase Database, context, and fallback
+  const lookupOrder = async (searchTerm: string) => {
+    const cleanTerm = searchTerm.trim();
+    if (!cleanTerm) return;
+    setIsLoadingOrder(true);
 
-    // Check INITIAL_ORDERS first
-    const found = INITIAL_ORDERS.find(
-      (o) => o.id.toUpperCase() === targetId || o.trackingNumber.toUpperCase() === targetId
-    );
+    try {
+      // 1. Check Supabase Database
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from("orders")
+            .select("*")
+            .or(`id.ilike.%${cleanTerm}%,tracking_number.ilike.%${cleanTerm}%`)
+            .limit(1)
+            .maybeSingle();
 
-    if (found) {
-      setActiveOrder(found);
-    } else {
-      // If newly generated checkout ID (e.g. AUR-XXXXX), construct a realistic order representation
+          if (data && !error) {
+            setActiveOrder({
+              id: data.id,
+              trackingNumber: data.tracking_number,
+              createdAt: data.created_at,
+              status: data.status as OrderStatus,
+              estimatedDelivery: data.estimated_delivery,
+              subtotal: Number(data.subtotal),
+              discount: Number(data.discount || 0),
+              deliveryFee: Number(data.delivery_fee || 0),
+              total: Number(data.total),
+              customer: data.customer,
+              items: data.items,
+              timeline: data.timeline,
+            });
+            return;
+          }
+        } catch (dbErr) {
+          console.warn("Supabase query error, falling back:", dbErr);
+        }
+      }
+
+      // 2. Check local React orders context
+      const fromContext = contextOrders.find(
+        (o) =>
+          o.id.toUpperCase() === cleanTerm.toUpperCase() ||
+          o.trackingNumber.toUpperCase() === cleanTerm.toUpperCase()
+      );
+      if (fromContext) {
+        setActiveOrder(fromContext);
+        return;
+      }
+
+      // 3. Check INITIAL_ORDERS mock dataset
+      const fromInitial = INITIAL_ORDERS.find(
+        (o) =>
+          o.id.toUpperCase() === cleanTerm.toUpperCase() ||
+          o.trackingNumber.toUpperCase() === cleanTerm.toUpperCase()
+      );
+      if (fromInitial) {
+        setActiveOrder(fromInitial);
+        return;
+      }
+
+      // 4. Construct a high-fidelity demo order for generated IDs
       setActiveOrder({
-        id: targetId.startsWith("AUR-") ? targetId : `AUR-${targetId}`,
+        id: cleanTerm.startsWith("AUR-") ? cleanTerm : `AUR-${cleanTerm}`,
         createdAt: new Date().toISOString(),
         status: "confirmed",
         trackingNumber: `AUR-CM-${Math.floor(100000 + Math.random() * 900000)}`,
@@ -61,7 +118,7 @@ function OrderTrackingContent() {
         deliveryFee: 5000,
         total: 985000,
         customer: {
-          fullName: "Valued Client",
+          fullName: "Valued VIP Client",
           email: "vip@auraluxe.cm",
           phone: "+237 699 44 21 00",
           address: "VIP Residence, Bonapriso / Bastos",
@@ -84,7 +141,7 @@ function OrderTrackingContent() {
         timeline: [
           {
             status: "placed",
-            title: "Order Placed & Payment Verified",
+            title: "Order Placed & Verified",
             description: "Transaction authenticated via Cameroon payment gateway.",
             timestamp: "Just now",
             completed: true,
@@ -119,90 +176,63 @@ function OrderTrackingContent() {
           },
         ],
       });
+    } finally {
+      setIsLoadingOrder(false);
     }
-  }, [queryId]);
+  };
+
+  // Initial load on mount or query param change
+  useEffect(() => {
+    const target = queryId || searchQuery || "AUR-89412";
+    lookupOrder(target);
+  }, [queryId, contextOrders]);
+
+  // Real-time Supabase Database synchronization
+  useEffect(() => {
+    if (!activeOrder?.id || !supabase) return;
+
+    const channel = supabase
+      .channel(`live-order-${activeOrder.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "orders",
+        },
+        (payload: any) => {
+          if (payload.new) {
+            const updatedRow = payload.new;
+            if (
+              updatedRow.id?.toUpperCase() === activeOrder.id.toUpperCase() ||
+              updatedRow.tracking_number?.toUpperCase() === activeOrder.trackingNumber.toUpperCase()
+            ) {
+              setActiveOrder((prev) => {
+                if (!prev) return null;
+                return {
+                  ...prev,
+                  status: updatedRow.status as OrderStatus,
+                  estimatedDelivery: updatedRow.estimated_delivery || prev.estimatedDelivery,
+                  timeline: updatedRow.timeline || prev.timeline,
+                };
+              });
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      if (supabase && channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [activeOrder?.id]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
-    const targetId = searchQuery.trim().toUpperCase();
-    const found = INITIAL_ORDERS.find(
-      (o) => o.id.toUpperCase() === targetId || o.trackingNumber.toUpperCase() === targetId
-    );
-    if (found) {
-      setActiveOrder(found);
-    } else {
-      // Switch to generated order
-      setActiveOrder({
-        id: targetId.startsWith("AUR-") ? targetId : `AUR-${targetId}`,
-        createdAt: new Date().toISOString(),
-        status: "confirmed",
-        trackingNumber: `AUR-CM-${Math.floor(100000 + Math.random() * 900000)}`,
-        estimatedDelivery: "Today by 18:00 (Express Hub)",
-        subtotal: 850000,
-        discount: 0,
-        deliveryFee: 5000,
-        total: 855000,
-        customer: {
-          fullName: "VIP Client",
-          email: "client@auraluxe.cm",
-          phone: "+237 677 88 99 00",
-          address: "Quartier Bastos, Yaoundé",
-          city: "Yaoundé",
-          deliveryMethod: "express_yaounde",
-          paymentMethod: "orange_money",
-        },
-        items: [
-          {
-            phoneId: "samsung-galaxy-s24-ultra",
-            name: "Galaxy S24 Ultra 5G",
-            brand: "Samsung",
-            image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800&auto=format&fit=crop&q=80",
-            storage: "256GB",
-            color: "Titanium Gold",
-            price: 850000,
-            quantity: 1,
-          },
-        ],
-        timeline: [
-          {
-            status: "placed",
-            title: "Order Placed & Verified",
-            description: "Payment authenticated via Orange Money.",
-            timestamp: "Recent",
-            completed: true,
-          },
-          {
-            status: "confirmed",
-            title: "Inventory Allocated",
-            description: "Reserved in showroom vaults.",
-            timestamp: "In progress",
-            completed: true,
-          },
-          {
-            status: "preparing",
-            title: "Inspection & Seal",
-            description: "IMEI registration & VIP warranty tag affixed.",
-            timestamp: "Pending",
-            completed: false,
-          },
-          {
-            status: "delivering",
-            title: "Dispatched with Courier",
-            description: "Dedicated courier in transit.",
-            timestamp: "Pending",
-            completed: false,
-          },
-          {
-            status: "completed",
-            title: "Handed to Recipient",
-            description: "Inspected and signed.",
-            timestamp: "Pending",
-            completed: false,
-          },
-        ],
-      });
-    }
+    lookupOrder(searchQuery);
   };
 
   const copyOrderId = () => {
@@ -345,8 +375,16 @@ function OrderTrackingContent() {
                   </div>
                 </div>
 
-                {/* Status Badge */}
-                <div className="flex items-center gap-3">
+                {/* Status Badge & Receipt Action */}
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <button
+                    onClick={() => setIsReceiptOpen(true)}
+                    className="px-3.5 py-2 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#D4AF37]/40 text-white font-semibold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+                  >
+                    <Printer className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <span>Official Receipt</span>
+                  </button>
+
                   <div className="px-4 py-2 rounded-2xl bg-amber-500/10 border border-[#D4AF37]/30 flex items-center gap-2">
                     <span className="relative flex h-2.5 w-2.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4AF37] opacity-75"></span>
@@ -549,6 +587,14 @@ function OrderTrackingContent() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <button
+                      onClick={() => setIsReceiptOpen(true)}
+                      className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold flex items-center justify-center gap-1.5 border border-[#D4AF37]/30 transition-colors col-span-1 sm:col-span-2"
+                    >
+                      <Printer className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>Print VIP Receipt / Save PDF</span>
+                    </button>
+
                     <a
                       href={`https://wa.me/${waNum}?text=${encodeURIComponent(
                         `Hello ${settings.storeName}, I'm checking on order ${activeOrder.id} (${activeOrder.customer.fullName}).`
@@ -596,6 +642,13 @@ function OrderTrackingContent() {
 
           </div>
         )}
+
+        {/* Official Printable VIP Receipt Modal */}
+        <OrderReceiptModal
+          order={activeOrder}
+          isOpen={isReceiptOpen}
+          onClose={() => setIsReceiptOpen(false)}
+        />
 
       </div>
     </div>

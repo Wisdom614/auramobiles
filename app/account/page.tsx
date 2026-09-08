@@ -23,6 +23,7 @@ import {
   AlertCircle,
   Save,
   Crown,
+  Printer,
 } from "lucide-react";
 import { useAuth } from "@/lib/store/auth-context";
 import { useOrders } from "@/lib/store/orders-context";
@@ -30,6 +31,7 @@ import { useSettings } from "@/lib/store/settings-context";
 import { formatCFA } from "@/lib/formatters";
 import { Order, OrderStatus } from "@/lib/data/mock-orders";
 import { getOrdersFromDB, supabase } from "@/lib/supabase/client";
+import { OrderReceiptModal } from "@/components/orders/order-receipt-modal";
 
 export default function CustomerAccountPage() {
   const router = useRouter();
@@ -38,6 +40,7 @@ export default function CustomerAccountPage() {
   const { settings } = useSettings();
 
   const [activeTab, setActiveTab] = useState<"orders" | "profile" | "trade-in" | "security">("orders");
+  const [selectedReceiptOrder, setSelectedReceiptOrder] = useState<Order | null>(null);
 
   // Editable Profile state
   const [fullName, setFullName] = useState("");
@@ -539,6 +542,15 @@ export default function CustomerAccountPage() {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2.5">
+                          {/* Receipt Action */}
+                          <button
+                            onClick={() => setSelectedReceiptOrder(order)}
+                            className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#D4AF37]/40 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors"
+                          >
+                            <Printer className="w-3.5 h-3.5 text-[#D4AF37]" />
+                            <span>Receipt</span>
+                          </button>
+
                           {/* WhatsApp Inquiry */}
                           <a
                             href={`https://wa.me/${waClean}?text=${encodeURIComponent(waSupportText)}`}
@@ -838,6 +850,13 @@ export default function CustomerAccountPage() {
             </form>
           </div>
         )}
+
+        {/* Official Printable VIP Receipt Modal */}
+        <OrderReceiptModal
+          order={selectedReceiptOrder}
+          isOpen={Boolean(selectedReceiptOrder)}
+          onClose={() => setSelectedReceiptOrder(null)}
+        />
 
       </div>
     </div>
