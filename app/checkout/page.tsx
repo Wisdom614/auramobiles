@@ -17,11 +17,14 @@ import {
   Store,
 } from "lucide-react";
 import { useCart } from "@/lib/store/cart-context";
+import { useOrders } from "@/lib/store/orders-context";
+import { OrderItem, CustomerDetails } from "@/lib/data/mock-orders";
 import { formatCFA } from "@/lib/formatters";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal, clearCart } = useCart();
+  const { createOrder } = useOrders();
 
   // Low-effort, minimum typing form state
   const [fullName, setFullName] = useState("");
@@ -92,11 +95,53 @@ export default function CheckoutPage() {
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      const orderId = `AUR-${Math.floor(10000 + Math.random() * 90000)}`;
-      clearCart();
-      router.push(`/orders?id=${orderId}&placed=true`);
-    }, 800);
+
+    const orderItems: OrderItem[] = items.map((it) => ({
+      phoneId: it.phone.id,
+      name: it.phone.name,
+      brand: it.phone.brand,
+      image: it.selectedColor.image || it.phone.images[0] || "/placeholder.png",
+      storage: it.selectedStorage.size,
+      color: it.selectedColor.name,
+      price: it.selectedStorage.price,
+      quantity: it.quantity,
+    }));
+
+    const deliveryMethodMapped: CustomerDetails["deliveryMethod"] =
+      deliveryOption === "douala"
+        ? "express_douala"
+        : deliveryOption === "yaounde"
+        ? "express_yaounde"
+        : deliveryOption === "pickup"
+        ? "pickup_bonapriso"
+        : "nationwide";
+
+    const paymentMethodMapped: CustomerDetails["paymentMethod"] =
+      paymentMethod === "mtn"
+        ? "mtn_momo"
+        : paymentMethod === "orange"
+        ? "orange_money"
+        : "cash_on_delivery";
+
+    const newOrder = createOrder({
+      items: orderItems,
+      customer: {
+        fullName: fullName.trim(),
+        email: "client@auraluxe.cm",
+        phone: phoneNum.trim(),
+        address: address.trim() || (deliveryOption === "pickup" ? "Showroom Pick-Up" : "Address to confirm via call"),
+        city: deliveryOption === "douala" ? "Douala" : deliveryOption === "yaounde" ? "Yaoundé" : "Cameroon",
+        deliveryMethod: deliveryMethodMapped,
+        paymentMethod: paymentMethodMapped,
+      },
+      subtotal,
+      discount: 0,
+      deliveryFee,
+      total,
+    });
+
+    clearCart();
+    router.push(`/checkout/success?id=${newOrder.id}`);
   };
 
   return (

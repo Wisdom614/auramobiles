@@ -227,8 +227,8 @@ function OrderTrackingContent() {
                 <h2 className="text-lg font-bold text-white mt-0.5">
                   Thank you! Your device allocation is active.
                 </h2>
-                <p className="text-xs text-zinc-400 mt-1">
-                  Our Bonapriso & Bastos logistics team has reserved your genuine sealed phone.
+                <p className="text-xs text-amber-200/90 mt-1 font-medium">
+                  📞 Our concierge will contact you via WhatsApp or Direct Call within 15–30 minutes to confirm your delivery before dispatching.
                 </p>
               </div>
             </div>
