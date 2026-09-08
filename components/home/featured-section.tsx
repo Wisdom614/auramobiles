@@ -13,52 +13,36 @@ interface BestSellerCardProps {
 }
 
 function BestSellerCard({ phone }: BestSellerCardProps) {
-  const { isInWishlist, toggleWishlist } = useWishlist();
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
 
-  const inWish = isInWishlist(phone.id);
   const activeImage = phone.colorVariants[0]?.image || phone.images[0];
-  const storage = phone.storageVariants[0]?.size || "128GB";
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     addItem(phone, phone.storageVariants[0], phone.colorVariants[0], 1);
     setAdded(true);
-    setTimeout(() => setAdded(false), 1500);
+    setTimeout(() => setAdded(false), 1400);
   };
 
   return (
-    <div className="group relative rounded-2xl bg-[#121217] border border-white/8 hover:border-[#D4AF37]/40 p-4 transition-all duration-300 hover:shadow-xl hover:shadow-black/60 flex items-center gap-4 shrink-0 w-[270px] sm:w-[290px] lg:w-auto">
-      {/* Top right wishlist button */}
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          toggleWishlist(phone.id);
-        }}
-        aria-label="Toggle Wishlist"
-        className="absolute top-3 right-3 p-1.5 text-zinc-400 hover:text-white transition-colors z-10"
-      >
-        <Heart className={`w-4 h-4 ${inWish ? "fill-rose-500 text-rose-500" : ""}`} />
-      </button>
-
-      {/* Left: Product Thumbnail */}
+    <div className="group rounded-2xl bg-[#121217] border border-white/8 hover:border-[#D4AF37]/50 p-3.5 sm:p-4 transition-all duration-200 hover:shadow-xl hover:shadow-black/60 flex flex-col justify-between shrink-0 w-[200px] sm:w-[220px] lg:w-auto h-full">
+      {/* Product Image Link */}
       <Link
         href={`/phones/${phone.slug}`}
-        className="w-20 h-24 sm:w-22 sm:h-26 rounded-xl bg-[#09090C] border border-white/5 p-2 flex items-center justify-center shrink-0 overflow-hidden block"
+        className="w-full h-36 sm:h-40 rounded-xl bg-[#09090C] border border-white/5 p-3 flex items-center justify-center overflow-hidden block"
       >
         <img
           src={activeImage}
           alt={phone.name}
-          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+          className="h-full w-auto max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
         />
       </Link>
 
-      {/* Right: Info */}
-      <div className="flex-1 min-w-0 space-y-1">
-        <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 block font-semibold">
+      {/* Info */}
+      <div className="pt-3 pb-2 space-y-1">
+        <span className="text-[10px] uppercase font-mono tracking-wider text-[#D4AF37] block font-semibold">
           {phone.brand}
         </span>
 
@@ -68,39 +52,37 @@ function BestSellerCard({ phone }: BestSellerCardProps) {
           </h3>
         </Link>
 
-        {/* Rating */}
-        <div className="flex items-center gap-1 text-[11px] text-amber-300">
-          <Star className="w-3 h-3 fill-amber-300 text-amber-300" />
-          <span className="font-semibold text-zinc-200">{phone.rating}</span>
-          <span className="text-zinc-500 text-[10px]">({phone.reviewCount})</span>
-        </div>
-
-        {/* Storage Badge */}
-        <div className="inline-block px-1.5 py-0.5 rounded bg-[#1A1A22] border border-white/5 text-[10px] font-mono text-zinc-300">
-          {storage}
-        </div>
-
-        {/* Price & Stock */}
-        <div className="flex items-center justify-between pt-1">
-          <div>
-            <span className="text-xs sm:text-sm font-bold text-[#D4AF37] block leading-tight">
-              {formatCFA(phone.basePrice)}
-            </span>
-            <div className="flex items-center gap-1 mt-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span className="text-[10px] text-emerald-400 font-medium">In Stock</span>
-            </div>
-          </div>
-
-          <button
-            onClick={handleQuickAdd}
-            aria-label="Add to cart"
-            className="p-1.5 rounded-lg bg-white/5 hover:bg-[#D4AF37] hover:text-black text-zinc-300 transition-colors"
-          >
-            {added ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <ShoppingBag className="w-3.5 h-3.5" />}
-          </button>
+        {/* Price & In Stock */}
+        <div className="flex items-baseline justify-between pt-1">
+          <span className="text-xs sm:text-sm font-black text-white font-mono">
+            {formatCFA(phone.basePrice)}
+          </span>
+          <span className="text-[10px] text-emerald-400 font-medium">In Stock</span>
         </div>
       </div>
+
+      {/* Obvious Add to Cart Button */}
+      <button
+        onClick={handleQuickAdd}
+        aria-label={`Add ${phone.name} to cart`}
+        className={`w-full py-2 px-3 rounded-xl font-bold text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all min-h-[40px] cursor-pointer ${
+          added
+            ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/20"
+            : "gold-gradient-bg text-black hover:opacity-95 shadow-md shadow-amber-500/10 active:scale-[0.98]"
+        }`}
+      >
+        {added ? (
+          <>
+            <Check className="w-3.5 h-3.5 stroke-[3]" />
+            <span>Added!</span>
+          </>
+        ) : (
+          <>
+            <ShoppingBag className="w-3.5 h-3.5" />
+            <span>Add to Cart</span>
+          </>
+        )}
+      </button>
     </div>
   );
 }

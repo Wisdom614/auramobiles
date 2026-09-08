@@ -15,6 +15,7 @@ import {
   Zap,
   ArrowRight,
   Package,
+  MessageCircle,
 } from "lucide-react";
 import { PHONES, getPhoneBySlug, getRelatedPhones, Phone } from "@/lib/data/phones";
 import { formatCFA } from "@/lib/formatters";
@@ -247,15 +248,15 @@ export default function PhoneDetailPage({ params }: PageProps) {
 
             {/* Primary Action Buttons */}
             <div className="space-y-3 pt-2">
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 py-4 rounded-xl gold-gradient-bg text-black font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-amber-500/15 hover:opacity-95 transition-all"
+                  className="flex-1 py-4 rounded-xl gold-gradient-bg text-black font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-amber-500/15 hover:opacity-95 transition-all min-h-[48px] cursor-pointer"
                 >
                   {isAdded ? (
                     <>
-                      <Check className="w-4 h-4 text-black" />
-                      <span>Added to Cart</span>
+                      <Check className="w-4 h-4 stroke-[3] text-black" />
+                      <span>Added to Bag!</span>
                     </>
                   ) : (
                     <>
@@ -265,23 +266,39 @@ export default function PhoneDetailPage({ params }: PageProps) {
                   )}
                 </button>
 
+                <a
+                  href={`https://wa.me/237699442100?text=${encodeURIComponent(
+                    `Hello AURA Mobile, I want to order the ${phone.name} (${activeStorage.size}, ${activeColor.name}) for ${formatCFA(
+                      currentPrice
+                    )}. Please confirm availability and delivery in Douala/Yaoundé.`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-4 px-6 rounded-xl bg-emerald-950/50 hover:bg-emerald-900/60 border border-emerald-500/40 text-emerald-400 font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all min-h-[48px]"
+                >
+                  <MessageCircle className="w-4 h-4 text-emerald-400" />
+                  <span>Order via WhatsApp</span>
+                </a>
+              </div>
+
+              <div className="flex gap-3">
                 <button
                   onClick={handleBuyNow}
-                  className="px-6 py-4 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs sm:text-sm uppercase tracking-wider transition-all"
+                  className="flex-1 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs uppercase tracking-wider transition-all"
                 >
-                  Buy Now
+                  Direct Checkout
                 </button>
 
                 <button
                   onClick={() => toggleWishlist(phone.id)}
                   aria-label="Wishlist"
-                  className={`p-4 rounded-xl border transition-colors ${
+                  className={`px-4 py-3 rounded-xl border transition-colors ${
                     inWish
                       ? "bg-rose-950/40 border-rose-500 text-rose-400"
                       : "bg-[#141419] border-white/10 text-zinc-400 hover:text-white"
                   }`}
                 >
-                  <Heart className={`w-5 h-5 ${inWish ? "fill-rose-500 text-rose-500" : ""}`} />
+                  <Heart className={`w-4 h-4 ${inWish ? "fill-rose-500 text-rose-500" : ""}`} />
                 </button>
               </div>
 

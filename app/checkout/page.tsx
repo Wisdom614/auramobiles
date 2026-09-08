@@ -5,12 +5,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ShieldCheck,
-  Truck,
-  CreditCard,
   ShoppingBag,
   ArrowRight,
+  MessageCircle,
   CheckCircle2,
-  Lock,
+  Phone,
+  User,
+  MapPin,
+  Banknote,
+  Smartphone,
+  Store,
 } from "lucide-react";
 import { useCart } from "@/lib/store/cart-context";
 import { formatCFA } from "@/lib/formatters";
@@ -19,347 +23,363 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal, clearCart } = useCart();
 
+  // Low-effort, minimum typing form state
   const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  const [phoneNum, setPhoneNum] = useState("");
+  const [deliveryOption, setDeliveryOption] = useState<"douala" | "yaounde" | "nationwide" | "pickup">("douala");
   const [address, setAddress] = useState("");
-  const [city, setCity] = useState("Douala");
-  const [deliveryMethod, setDeliveryMethod] = useState<string>("express_douala");
-  const [paymentMethod, setPaymentMethod] = useState<string>("cash_on_delivery");
-  const [momoNumber, setMomoNumber] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "mtn" | "orange">("cod");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Delivery fee calculation
   const deliveryFee =
-    deliveryMethod === "pickup_bonapriso" || deliveryMethod === "pickup_bastos"
+    deliveryOption === "pickup"
       ? 0
-      : deliveryMethod === "nationwide"
-      ? 7500
-      : 5000;
+      : deliveryOption === "nationwide"
+      ? 5000
+      : 2500; // Flat 2,500 FCFA for Douala/Yaoundé express
 
   const total = subtotal + deliveryFee;
 
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center text-center px-4 py-20">
-        <ShoppingBag className="w-12 h-12 text-zinc-600 mb-3 stroke-1" />
-        <h1 className="text-2xl font-bold text-white mb-1">Your Shopping Cart is Empty</h1>
-        <p className="text-xs text-zinc-400 mb-6 max-w-sm">
-          Please add a smartphone from our official flagship boutique before proceeding to checkout.
+        <div className="w-16 h-16 rounded-2xl bg-[#141419] border border-white/10 flex items-center justify-center mb-4">
+          <ShoppingBag className="w-8 h-8 text-[#D4AF37]" />
+        </div>
+        <h1 className="text-xl font-bold text-white mb-2">Your Bag is Empty</h1>
+        <p className="text-xs text-zinc-400 mb-6 max-w-xs">
+          Select a smartphone from our curated collection before checking out.
         </p>
         <Link
           href="/phones"
-          className="px-6 py-3.5 rounded-xl gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider"
+          className="px-6 py-3 rounded-xl gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider"
         >
-          Browse Smartphones Catalog
+          Browse Smartphones
         </Link>
       </div>
     );
   }
 
+  // Preformatted WhatsApp message for instant 1-tap ordering
+  const handleWhatsAppOrder = () => {
+    const itemList = items
+      .map(
+        (it) =>
+          `• ${it.phone.name} (${it.selectedStorage.size}, ${it.selectedColor.name}) × ${it.quantity} = ${formatCFA(
+            it.selectedStorage.price * it.quantity
+          )}`
+      )
+      .join("\n");
+
+    const deliveryText =
+      deliveryOption === "pickup"
+        ? "Showroom Pickup (Bonapriso/Bastos)"
+        : `${deliveryOption.toUpperCase()} - ${address || "Address to specify"}`;
+
+    const text = `Hello AURA Mobile, I want to confirm my order:\n\n*Customer:* ${fullName || "Customer"}\n*Phone:* ${phoneNum || "Via WhatsApp"}\n*Delivery:* ${deliveryText}\n*Payment:* ${
+      paymentMethod === "cod" ? "Cash on Delivery" : paymentMethod === "mtn" ? "MTN MoMo" : "Orange Money"
+    }\n\n*Items:*\n${itemList}\n\n*Total:* ${formatCFA(total)}\n\nPlease proceed with order dispatch.`;
+
+    window.open(`https://wa.me/237699442100?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
   const handlePlaceOrder = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName || !phone) return;
+    if (!fullName.trim() || !phoneNum.trim()) {
+      alert("Please provide your Name and WhatsApp phone number.");
+      return;
+    }
 
     setIsSubmitting(true);
     setTimeout(() => {
       const orderId = `AUR-${Math.floor(10000 + Math.random() * 90000)}`;
       clearCart();
       router.push(`/orders?id=${orderId}&placed=true`);
-    }, 1000);
+    }, 800);
   };
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-zinc-100 py-10 sm:py-14">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#09090B] text-zinc-100 py-6 sm:py-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
         
-        {/* Header */}
-        <div className="mb-10">
-          <span className="text-xs font-mono uppercase tracking-widest text-[#D4AF37] font-semibold">
-            Secure Retail Checkout
-          </span>
-          <h1 className="text-3xl font-extrabold text-white mt-1">
-            Complete Your Order
-          </h1>
+        {/* Simple Top Header */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <span className="text-[11px] font-mono uppercase tracking-wider text-[#D4AF37] font-semibold">
+              Fast Checkout
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-black text-white">
+              Confirm Your Purchase
+            </h1>
+          </div>
+          <Link
+            href="/phones"
+            className="text-xs text-zinc-400 hover:text-white underline underline-offset-4 hidden sm:block"
+          >
+            ← Continue Shopping
+          </Link>
         </div>
 
-        <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          {/* Left Column: Customer Details, Delivery & Payment (7 Cols) */}
-          <div className="lg:col-span-7 space-y-8">
+          {/* Main Single-Screen Form (7 Cols) */}
+          <div className="lg:col-span-7 space-y-4">
             
-            {/* 1. Recipient Details */}
-            <div className="p-6 rounded-3xl bg-[#121217] border border-white/8 space-y-4">
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                <span>1. Client Information</span>
+            {/* 1. Contact Information */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#121217] border border-white/8 space-y-3">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                <User className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <span>1. Your Contact</span>
               </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="space-y-3 text-xs">
                 <div>
-                  <label className="block text-zinc-400 mb-1">Full Name *</label>
+                  <label className="block text-zinc-400 mb-1 font-medium">
+                    Full Name <span className="text-[#D4AF37]">*</span>
+                  </label>
                   <input
                     type="text"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. Samuel Eto'o"
-                    className="w-full p-3 rounded-xl bg-[#16161D] border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:border-[#D4AF37]"
+                    placeholder="e.g. Jean-Paul Mbarga"
+                    className="w-full bg-[#181820] border border-white/10 rounded-xl px-3.5 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-[#D4AF37]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-zinc-400 mb-1">Phone Number (WhatsApp) *</label>
-                  <input
-                    type="tel"
-                    required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+237 6XX XX XX XX"
-                    className="w-full p-3 rounded-xl bg-[#16161D] border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:border-[#D4AF37]"
-                  />
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="block text-zinc-400 mb-1">Email Address</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="For official warranty registration"
-                    className="w-full p-3 rounded-xl bg-[#16161D] border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:border-[#D4AF37]"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* 2. Delivery Destination */}
-            <div className="p-6 rounded-3xl bg-[#121217] border border-white/8 space-y-4">
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                2. Fulfillment Method
-              </h2>
-
-              <div className="space-y-2 text-xs">
-                {[
-                  {
-                    id: "express_douala",
-                    title: "Same-Day Express Courier — Douala",
-                    desc: "Delivered to your door in Bonapriso, Akwa, Deido, or Bonamoussadi (5,000 FCFA)",
-                    fee: 5000,
-                  },
-                  {
-                    id: "express_yaounde",
-                    title: "Same-Day Express Courier — Yaoundé",
-                    desc: "Delivered to your door in Bastos, Omnisports, Melen, or Odza (5,000 FCFA)",
-                    fee: 5000,
-                  },
-                  {
-                    id: "pickup_bonapriso",
-                    title: "Showroom Collection — Douala Bonapriso Lounge",
-                    desc: "Free physical pickup & complimentary data migration at Rue Tokoto (FREE)",
-                    fee: 0,
-                  },
-                  {
-                    id: "pickup_bastos",
-                    title: "Showroom Collection — Yaoundé Bastos Lounge",
-                    desc: "Free physical pickup & complimentary data migration at Avenue Bastos (FREE)",
-                    fee: 0,
-                  },
-                  {
-                    id: "nationwide",
-                    title: "Secured Nationwide Transit (Bafoussam, Bamenda, Garoua...)",
-                    desc: "Dispatched via secured VIP agency transit within 24–48 hours (7,500 FCFA)",
-                    fee: 7500,
-                  },
-                ].map((option) => (
-                  <label
-                    key={option.id}
-                    className={`p-3.5 rounded-xl border flex items-start justify-between cursor-pointer transition-all ${
-                      deliveryMethod === option.id
-                        ? "bg-[#D4AF37]/15 border-[#D4AF37]"
-                        : "bg-[#16161D] border-white/10 hover:border-white/20"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="radio"
-                        name="deliveryMethod"
-                        checked={deliveryMethod === option.id}
-                        onChange={() => setDeliveryMethod(option.id)}
-                        className="mt-1 text-[#D4AF37] focus:ring-0"
-                      />
-                      <div>
-                        <strong className="text-white block font-semibold">
-                          {option.title}
-                        </strong>
-                        <span className="text-[11px] text-zinc-400 block mt-0.5">
-                          {option.desc}
-                        </span>
-                      </div>
-                    </div>
-                    <span className="text-xs font-mono font-bold text-[#D4AF37] shrink-0 ml-2">
-                      {option.fee === 0 ? "FREE" : formatCFA(option.fee)}
+                  <label className="block text-zinc-400 mb-1 font-medium">
+                    WhatsApp / Phone Number <span className="text-[#D4AF37]">*</span>
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 font-mono text-xs">
+                      +237
                     </span>
-                  </label>
-                ))}
-              </div>
-
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1">
-                  Street / Quarter Address (if home delivery)
-                </label>
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="e.g. Rue Tokoto, derrière la clinique"
-                  className="w-full p-3 rounded-xl bg-[#16161D] border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D4AF37]"
-                />
+                    <input
+                      type="tel"
+                      required
+                      value={phoneNum}
+                      onChange={(e) => setPhoneNum(e.target.value)}
+                      placeholder="699 00 00 00"
+                      className="w-full bg-[#181820] border border-white/10 rounded-xl pl-16 pr-3.5 py-3 text-sm text-white placeholder-zinc-500 font-mono focus:outline-none focus:border-[#D4AF37]"
+                    />
+                  </div>
+                  <span className="text-[11px] text-zinc-500 mt-1 block">
+                    We will send delivery tracking updates to this number via WhatsApp or SMS.
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* 3. Payment Method */}
-            <div className="p-6 rounded-3xl bg-[#121217] border border-white/8 space-y-4">
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                3. Payment Method
+            {/* 2. Delivery Option */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#121217] border border-white/8 space-y-3">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                <MapPin className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <span>2. Delivery Location</span>
               </h2>
 
-              <div className="space-y-2 text-xs">
+              {/* City Choice Pills */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[
-                  {
-                    id: "cash_on_delivery",
-                    title: "Cash on Delivery / Physical Handover",
-                    desc: "Inspect your sealed phone, verify the official IMEI, and pay the courier directly.",
-                  },
-                  {
-                    id: "mtn_momo",
-                    title: "MTN Mobile Money",
-                    desc: "Direct push prompt to your MTN Cameroon MoMo account (*126#).",
-                  },
-                  {
-                    id: "orange_money",
-                    title: "Orange Money Cameroon",
-                    desc: "Direct OTP authorization via Orange Money Cameroon (#150#).",
-                  },
-                  {
-                    id: "card",
-                    title: "Credit / Debit Card (Visa, Mastercard)",
-                    desc: "Secured encrypted international checkout.",
-                  },
-                ].map((pm) => (
-                  <label
-                    key={pm.id}
-                    className={`p-3.5 rounded-xl border flex items-start gap-3 cursor-pointer transition-all ${
-                      paymentMethod === pm.id
-                        ? "bg-[#D4AF37]/15 border-[#D4AF37]"
-                        : "bg-[#16161D] border-white/10 hover:border-white/20"
+                  { id: "douala", label: "Douala", sub: "Same Day", fee: "2,500 F" },
+                  { id: "yaounde", label: "Yaoundé", sub: "Same Day", fee: "2,500 F" },
+                  { id: "nationwide", label: "Other Towns", sub: "24-48h", fee: "5,000 F" },
+                  { id: "pickup", label: "Boutique", sub: "Showroom", fee: "FREE" },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setDeliveryOption(opt.id as any)}
+                    className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                      deliveryOption === opt.id
+                        ? "bg-[#D4AF37]/15 border-[#D4AF37] text-white"
+                        : "bg-[#181820] border-white/5 text-zinc-400 hover:text-white"
                     }`}
                   >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      checked={paymentMethod === pm.id}
-                      onChange={() => setPaymentMethod(pm.id)}
-                      className="mt-1 text-[#D4AF37] focus:ring-0"
-                    />
-                    <div>
-                      <strong className="text-white block font-semibold">
-                        {pm.title}
-                      </strong>
-                      <span className="text-[11px] text-zinc-400 block mt-0.5">
-                        {pm.desc}
-                      </span>
-                    </div>
-                  </label>
+                    <span className="text-xs font-bold block">{opt.label}</span>
+                    <span className="text-[10px] text-zinc-400 block">{opt.sub}</span>
+                    <span className={`text-[10px] font-mono font-bold block mt-1 ${deliveryOption === opt.id ? "text-[#D4AF37]" : "text-zinc-500"}`}>
+                      {opt.fee}
+                    </span>
+                  </button>
                 ))}
               </div>
 
-              {(paymentMethod === "mtn_momo" || paymentMethod === "orange_money") && (
-                <div className="pt-2">
-                  <label className="block text-xs text-zinc-400 mb-1">
-                    {paymentMethod === "mtn_momo" ? "MTN MoMo" : "Orange Money"} Account Number:
+              {/* Quarter / Street Address */}
+              {deliveryOption !== "pickup" ? (
+                <div>
+                  <label className="block text-zinc-400 text-xs mb-1 font-medium">
+                    Quarter / Street / Landmark
                   </label>
                   <input
-                    type="tel"
-                    required
-                    value={momoNumber}
-                    onChange={(e) => setMomoNumber(e.target.value)}
-                    placeholder="+237 6XX XX XX XX"
-                    className="w-full p-3 rounded-xl bg-[#16161D] border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D4AF37]"
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="e.g. Bonapriso, Rue Tokoto or Bastos, face ambassade"
+                    className="w-full bg-[#181820] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D4AF37]"
                   />
+                </div>
+              ) : (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-[#D4AF37]/30 text-xs text-amber-200">
+                  <div className="flex items-center gap-2 font-bold mb-0.5">
+                    <Store className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <span>Showroom Pick-up Available:</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-300">
+                    AURA Bonapriso (Douala) or AURA Bastos (Yaoundé). Ready in 30 minutes after confirmation.
+                  </p>
                 </div>
               )}
             </div>
 
+            {/* 3. Payment Option */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#121217] border border-white/8 space-y-3">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                <Banknote className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <span>3. Payment Method</span>
+              </h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {[
+                  {
+                    id: "cod",
+                    title: "Cash on Delivery",
+                    desc: "Pay when you receive & inspect phone",
+                  },
+                  {
+                    id: "mtn",
+                    title: "MTN MoMo",
+                    desc: "Dial *126# upon order arrival",
+                  },
+                  {
+                    id: "orange",
+                    title: "Orange Money",
+                    desc: "Dial *150# upon order arrival",
+                  },
+                ].map((pay) => (
+                  <button
+                    key={pay.id}
+                    type="button"
+                    onClick={() => setPaymentMethod(pay.id as any)}
+                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                      paymentMethod === pay.id
+                        ? "bg-[#D4AF37]/15 border-[#D4AF37] text-white"
+                        : "bg-[#181820] border-white/5 text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-white block">{pay.title}</span>
+                      {paymentMethod === pay.id && (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      )}
+                    </div>
+                    <span className="text-[10px] text-zinc-400 block mt-1 leading-snug">
+                      {pay.desc}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
           </div>
 
-          {/* Right Column: Order Summary & Placement (5 Cols) */}
-          <div className="lg:col-span-5 space-y-6 sticky top-24">
-            <div className="p-6 sm:p-7 rounded-3xl bg-[#121217] border border-white/10 shadow-2xl space-y-5">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider pb-3 border-b border-white/10">
-                Order Summary ({items.length} Items)
-              </h3>
+          {/* Right Column: Order Review & Instant Confirm (5 Cols) */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="p-5 rounded-2xl bg-[#121217] border border-white/8 space-y-4 sticky top-24">
+              
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-white">
+                  Order Summary ({items.length} {items.length === 1 ? "device" : "devices"})
+                </h3>
+                <Link
+                  href="/phones"
+                  className="text-[11px] text-[#D4AF37] hover:underline"
+                >
+                  Edit
+                </Link>
+              </div>
 
-              {/* Items List */}
-              <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+              {/* Items Mini List */}
+              <div className="space-y-2.5 max-h-52 overflow-y-auto pr-1">
                 {items.map((it) => (
                   <div key={it.id} className="flex items-center gap-3 text-xs">
                     <img
                       src={it.selectedColor.image || it.phone.images[0]}
                       alt={it.phone.name}
-                      className="w-12 h-12 rounded-lg bg-black object-contain p-1 border border-white/5"
+                      className="w-10 h-12 object-contain rounded-lg bg-black border border-white/5 p-1 shrink-0"
                     />
                     <div className="flex-1 min-w-0">
                       <h4 className="font-bold text-white truncate">{it.phone.name}</h4>
-                      <p className="text-[11px] text-zinc-400 font-mono">
+                      <span className="text-[10px] text-zinc-400 block">
                         {it.selectedStorage.size} • {it.selectedColor.name} × {it.quantity}
-                      </p>
+                      </span>
                     </div>
-                    <span className="font-mono font-bold text-[#D4AF37]">
+                    <span className="font-mono font-bold text-[#D4AF37] text-xs">
                       {formatCFA(it.selectedStorage.price * it.quantity)}
                     </span>
                   </div>
                 ))}
               </div>
 
-              {/* Price Calculation */}
-              <div className="space-y-2 pt-4 border-t border-white/10 text-xs text-zinc-300">
-                <div className="flex justify-between">
-                  <span>Subtotal:</span>
-                  <span className="font-mono text-white">{formatCFA(subtotal)}</span>
+              {/* Cost Calculation */}
+              <div className="pt-3 border-t border-white/10 space-y-1.5 text-xs">
+                <div className="flex justify-between text-zinc-400">
+                  <span>Subtotal</span>
+                  <span className="font-mono text-zinc-200">{formatCFA(subtotal)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Delivery Fee:</span>
-                  <span className="font-mono text-white">
+                <div className="flex justify-between text-zinc-400">
+                  <span>Delivery Fee</span>
+                  <span className="font-mono text-zinc-200">
                     {deliveryFee === 0 ? "FREE" : formatCFA(deliveryFee)}
                   </span>
                 </div>
-                <div className="flex justify-between pt-2 border-t border-white/5 text-sm font-bold">
-                  <span className="text-white">Total Amount:</span>
+                <div className="flex justify-between items-baseline pt-2 border-t border-white/10">
+                  <span className="font-bold text-white text-sm">Total Due</span>
                   <span className="text-xl font-black text-[#D4AF37] font-mono">
                     {formatCFA(total)}
                   </span>
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-4 rounded-xl gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-amber-500/15 hover:opacity-95 disabled:opacity-50 transition-all"
-              >
-                <Lock className="w-4 h-4 text-black" />
-                <span>{isSubmitting ? "Securing Order..." : "Place Official Order"}</span>
-              </button>
+              {/* High-Impact Actions */}
+              <div className="space-y-2.5 pt-2">
+                {/* Primary Confirm Button */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full py-4 rounded-xl gold-gradient-bg text-black font-extrabold text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-amber-500/20 hover:opacity-95 transition-all min-h-[48px] cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <span>Processing Order...</span>
+                  ) : (
+                    <>
+                      <span>Confirm Order</span>
+                      <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+                    </>
+                  )}
+                </button>
 
-              <div className="pt-2 text-[11px] text-zinc-400 space-y-1.5 border-t border-white/5">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>100% Genuine Sealed IMEI guarantee</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Truck className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Same-day dispatch for Douala & Yaoundé</span>
-                </div>
+                {/* 1-Tap WhatsApp Direct Option */}
+                <button
+                  type="button"
+                  onClick={handleWhatsAppOrder}
+                  className="w-full py-3 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/30 text-emerald-400 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all min-h-[44px] cursor-pointer"
+                >
+                  <MessageCircle className="w-4 h-4 text-emerald-400" />
+                  <span>Order Directly via WhatsApp</span>
+                </button>
               </div>
+
+              {/* Guarantees */}
+              <div className="pt-2 text-center text-[10px] text-zinc-500 space-y-1">
+                <div className="flex items-center justify-center gap-1 text-emerald-400 font-medium">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>100% Guaranteed Genuine • Official Warranty</span>
+                </div>
+                <p>Inspection allowed before payment upon delivery.</p>
+              </div>
+
             </div>
           </div>
 
