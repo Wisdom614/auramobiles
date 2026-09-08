@@ -6,11 +6,9 @@ import {
   X,
   Send,
   PhoneCall,
-  Sparkles,
   MapPin,
   Clock,
-  ChevronRight,
-  ShieldCheck,
+  ArrowRight,
 } from "lucide-react";
 import { useSettings } from "@/lib/store/settings-context";
 
@@ -21,7 +19,7 @@ const PRESET_INQUIRIES = [
     text: "Hello AURA Luxe Mobile, I am visiting your online boutique and would like to check current stock and pricing for your flagships.",
   },
   {
-    label: "🚚 Same-Day Delivery Inquiry",
+    label: "🚚 Same-Day Express Delivery",
     text: "Hello AURA, I would like to know about your same-day express delivery in Douala & Yaoundé.",
   },
   {
@@ -29,7 +27,7 @@ const PRESET_INQUIRIES = [
     text: "Hello! I want to trade in my old smartphone for a new flagship. How does the showroom appraisal work?",
   },
   {
-    label: "💳 Cash on Delivery Confirmation",
+    label: "💳 Cash on Delivery Terms",
     text: "Hello, can I inspect my smartphone and pay cash on delivery at my address?",
   },
 ];
@@ -42,7 +40,6 @@ export function FloatingWhatsApp() {
   const [isDismissed, setIsDismissed] = useState(false);
 
   const cleanWaNumber = settings.whatsappCleanNumber || "237699442100";
-  const displayPhone = settings.whatsappPhone || "+237 699 44 21 00";
 
   // Gentle greeting popup 2.5s after user visits the boutique
   useEffect(() => {
@@ -68,8 +65,12 @@ export function FloatingWhatsApp() {
   };
 
   const handleOpenWhatsApp = (messageText: string) => {
-    const finalMessage = messageText.trim() || `Hello ${settings.storeName}, I am visiting your online store and need assistance.`;
-    const url = `https://wa.me/${cleanWaNumber}?text=${encodeURIComponent(finalMessage)}`;
+    const finalMessage =
+      messageText.trim() ||
+      `Hello ${settings.storeName}, I am visiting your online store and need assistance.`;
+    const url = `https://wa.me/${cleanWaNumber}?text=${encodeURIComponent(
+      finalMessage
+    )}`;
     window.open(url, "_blank");
     setIsOpen(false);
     setHasPrompted(false);
@@ -77,50 +78,57 @@ export function FloatingWhatsApp() {
 
   return (
     <div className="fixed bottom-20 md:bottom-6 left-4 sm:left-6 z-40 transition-all duration-300">
-      
       {/* 1. First-Visit Slide-In Greeting Bubble (When collapsed) */}
       {!isOpen && hasPrompted && !isDismissed && (
-        <div className="mb-3 max-w-[280px] sm:max-w-xs p-3.5 rounded-2xl bg-[#121217]/95 backdrop-blur-xl border border-[#25D366]/40 shadow-2xl shadow-black/80 animate-in fade-in slide-in-from-bottom-3 duration-300 relative">
+        <div className="mb-3 max-w-[290px] sm:max-w-xs p-4 rounded-none bg-[#09090D]/95 backdrop-blur-xl border border-[#25D366]/40 shadow-2xl shadow-black/90 animate-in fade-in slide-in-from-bottom-3 duration-300 relative font-mono">
+          {/* Corner Crosshairs */}
+          <span className="absolute top-1.5 left-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
+          <span className="absolute top-1.5 right-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
+          <span className="absolute bottom-1.5 left-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
+          <span className="absolute bottom-1.5 right-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
+
           <button
             onClick={handleDismissPrompt}
             aria-label="Dismiss greeting"
-            className="absolute top-2 right-2 text-zinc-400 hover:text-white p-1 rounded-md hover:bg-white/5 transition-colors"
+            className="absolute top-2.5 right-2.5 text-zinc-400 hover:text-white p-1 rounded-none border border-white/10 hover:border-white/30 transition-colors"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-3 h-3" />
           </button>
 
-          <div className="flex items-start gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-[#25D366]/20 border border-[#25D366]/40 flex items-center justify-center shrink-0">
-              <MessageCircle className="w-4 h-4 text-[#25D366]" />
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-none bg-black border border-[#25D366]/50 flex items-center justify-center shrink-0 text-[#25D366]">
+              <MessageCircle className="w-4 h-4" />
             </div>
 
             <div className="space-y-1 pr-3">
               <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-                  Showroom Advisor Online
+                <span className="w-1.5 h-1.5 rounded-none bg-emerald-400 animate-pulse" />
+                <span className="text-[9px] font-mono font-bold text-emerald-400 uppercase tracking-widest">
+                  [ WA // SHOWROOM ONLINE ]
                 </span>
               </div>
-              <p className="text-xs font-bold text-white leading-tight">
-                Need phone advice or checking stock?
-              </p>
-              <p className="text-[11px] text-zinc-400 leading-snug">
-                Chat with our boutique concierge directly on WhatsApp.
+              <h4 className="text-xs font-bold text-white leading-tight font-sans">
+                Need phone advice or stock check?
+              </h4>
+              <p className="text-[11px] text-zinc-400 leading-snug font-sans">
+                Direct hotline to our Douala &amp; Yaoundé retail specialists.
               </p>
             </div>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-white/5 flex items-center justify-between">
-            <span className="text-[10px] text-zinc-500">Fast Cameroon reply</span>
+          <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between">
+            <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
+              FAST CAMEROON DISPATCH
+            </span>
             <button
               onClick={() => {
                 setHasPrompted(false);
                 setIsOpen(true);
               }}
-              className="px-3 py-1 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-black font-bold text-xs flex items-center gap-1 shadow-sm transition-all"
+              className="px-3.5 py-1.5 rounded-none bg-[#25D366] hover:bg-[#20bd5a] text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all border border-[#25D366]"
             >
-              <span>Quick Chat</span>
-              <ChevronRight className="w-3 h-3" />
+              <span>[ QUICK CHAT ]</span>
+              <ArrowRight className="w-3 h-3" />
             </button>
           </div>
         </div>
@@ -128,84 +136,88 @@ export function FloatingWhatsApp() {
 
       {/* 2. Expanded WhatsApp Concierge Card */}
       {isOpen ? (
-        <div className="w-[320px] sm:w-[350px] rounded-3xl bg-[#121217]/95 backdrop-blur-2xl border border-[#25D366]/30 shadow-2xl shadow-black/90 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-          
+        <div className="w-[320px] sm:w-[350px] rounded-none bg-[#09090D]/98 backdrop-blur-2xl border border-[#25D366]/40 shadow-2xl shadow-black/95 overflow-hidden animate-in fade-in zoom-in-95 duration-200 font-mono relative">
+          {/* Corner Crosshairs */}
+          <span className="absolute top-1.5 left-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
+          <span className="absolute top-1.5 right-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
+          <span className="absolute bottom-1.5 left-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
+          <span className="absolute bottom-1.5 right-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
+
           {/* Card Header */}
-          <div className="p-4 bg-gradient-to-r from-[#0E1E14] via-[#122A1C] to-[#121217] border-b border-white/10 relative">
+          <div className="p-3.5 bg-black/90 border-b border-white/10 relative">
             <button
               onClick={() => setIsOpen(false)}
               aria-label="Close"
-              className="absolute top-3.5 right-3.5 text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+              className="absolute top-3 right-3 text-zinc-400 hover:text-white p-1 rounded-none border border-white/10 hover:border-white/30 transition-colors"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
 
             <div className="flex items-center gap-3">
               {/* WhatsApp Medallion */}
-              <div className="relative">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#25D366] to-[#128C7E] flex items-center justify-center shadow-lg shadow-emerald-500/20 text-black">
-                  <MessageCircle className="w-6 h-6 fill-current text-white" />
-                </div>
-                <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[#121217] flex items-center justify-center">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-                </span>
+              <div className="w-9 h-9 rounded-none bg-black border border-[#25D366]/60 flex items-center justify-center text-[#25D366]">
+                <MessageCircle className="w-5 h-5" />
               </div>
 
               <div>
-                <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                  <span>{settings.storeName || "AURA"} Concierge</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
-                    LIVE
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                    [ WA // {settings.storeName || "AURA"} ]
                   </span>
-                </h3>
-                <p className="text-[11px] text-zinc-300 flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-[#D4AF37]" />
-                  <span>Douala & Yaoundé Hubs</span>
-                </p>
-                <p className="text-[10px] text-emerald-400 flex items-center gap-1 mt-0.5">
-                  <Clock className="w-2.5 h-2.5" />
-                  <span>Typically replies in under 3 minutes</span>
-                </p>
+                  <span className="px-1.5 py-0.2 rounded-none text-[8px] bg-[#25D366]/15 text-[#25D366] font-mono border border-[#25D366]/30 uppercase">
+                    ACTIVE
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] text-zinc-400 mt-0.5">
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-2.5 h-2.5 text-[#D4AF37]" />
+                    DLA &amp; YDE
+                  </span>
+                  <span>//</span>
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <Clock className="w-2.5 h-2.5" />
+                    REPLY &lt; 3M
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Card Body */}
-          <div className="p-4 space-y-3.5 max-h-[380px] overflow-y-auto no-scrollbar">
-            
+          <div className="p-4 space-y-3.5 max-h-[380px] overflow-y-auto no-scrollbar font-sans">
             {/* Friendly Greeting Note */}
-            <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-xs text-zinc-300 space-y-1">
-              <p className="font-semibold text-white">
-                👋 Hello! Welcome to AURA Luxe Mobile.
+            <div className="p-3 rounded-none bg-white/5 border border-white/10 text-xs text-zinc-300 space-y-1">
+              <p className="font-semibold text-white font-mono text-[11px] uppercase tracking-wider">
+                [ BOUTIQUE DESK // ACTIVE ]
               </p>
-              <p className="text-[11px] text-zinc-400 leading-relaxed">
-                Click any topic below to send an instant pre-filled inquiry, or type a custom question:
+              <p className="text-[11px] text-zinc-300 leading-relaxed">
+                Select an immediate inquiry topic below or input a custom question for our advisors:
               </p>
             </div>
 
             {/* Quick Inquiries List */}
             <div className="space-y-1.5">
-              <span className="text-[10px] uppercase font-mono font-semibold tracking-wider text-zinc-400 block">
-                Popular Inquiries:
+              <span className="text-[9px] uppercase font-mono font-bold tracking-widest text-zinc-400 block">
+                [ POPULAR INQUIRIES ]:
               </span>
               {PRESET_INQUIRIES.map((item, index) => (
                 <button
                   key={index}
                   onClick={() => handleOpenWhatsApp(item.text)}
-                  className="w-full text-left p-2.5 rounded-xl bg-[#181820] hover:bg-[#20202C] border border-white/5 hover:border-[#25D366]/40 text-xs text-zinc-200 transition-all flex items-center justify-between group"
+                  className="w-full text-left p-2.5 rounded-none bg-black hover:bg-zinc-900 border border-white/10 hover:border-[#25D366] text-xs text-zinc-200 hover:text-white transition-all flex items-center justify-between group"
                 >
-                  <span className="font-medium group-hover:text-white line-clamp-1">
+                  <span className="font-medium line-clamp-1 text-[11px]">
                     {item.label}
                   </span>
-                  <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-[#25D366] shrink-0 ml-2" />
+                  <ArrowRight className="w-3 h-3 text-zinc-500 group-hover:text-[#25D366] shrink-0 ml-2 group-hover:translate-x-0.5 transition-all" />
                 </button>
               ))}
             </div>
 
             {/* Custom Input */}
             <div className="space-y-1.5 pt-1">
-              <span className="text-[10px] uppercase font-mono font-semibold tracking-wider text-zinc-400 block">
-                Or Type a Custom Question:
+              <span className="text-[9px] uppercase font-mono font-bold tracking-widest text-zinc-400 block">
+                [ CUSTOM QUERY ]:
               </span>
               <div className="relative">
                 <input
@@ -217,73 +229,68 @@ export function FloatingWhatsApp() {
                       handleOpenWhatsApp(customMessage);
                     }
                   }}
-                  placeholder="e.g. Do you have iPhone 16 Pro 256GB in Desert Titanium?"
-                  className="w-full bg-[#181820] border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#25D366] transition-colors pr-9"
+                  placeholder="e.g. Check S24 Ultra 512GB in Douala showroom..."
+                  className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#25D366] transition-colors pr-9 font-sans"
                 />
                 <button
                   onClick={() => handleOpenWhatsApp(customMessage)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-[#25D366] text-black hover:opacity-90 transition-opacity"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-none bg-[#25D366] text-black hover:bg-[#20bd5a] transition-colors"
                   title="Send via WhatsApp"
                 >
                   <Send className="w-3 h-3" />
                 </button>
               </div>
             </div>
-
           </div>
 
           {/* Card Footer: Call & Direct WhatsApp CTA */}
-          <div className="p-3.5 bg-[#16161D] border-t border-white/10 flex items-center justify-between gap-2">
+          <div className="p-3 bg-black border-t border-white/10 flex items-center justify-between gap-2">
             <a
               href={`tel:${cleanWaNumber}`}
-              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              className="px-3 py-2 rounded-none bg-white/5 hover:bg-white/10 border border-white/15 text-zinc-300 hover:text-white text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 transition-colors"
             >
-              <PhoneCall className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span>Call Us</span>
+              <PhoneCall className="w-3 h-3 text-[#D4AF37]" />
+              <span>[ CALL ]</span>
             </a>
 
             <button
-              onClick={() => handleOpenWhatsApp(customMessage || PRESET_INQUIRIES[0].text)}
-              className="flex-1 py-2 px-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-black font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all"
+              onClick={() =>
+                handleOpenWhatsApp(customMessage || PRESET_INQUIRIES[0].text)
+              }
+              className="flex-1 py-2 px-3 rounded-none bg-[#25D366] hover:bg-[#20bd5a] text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 border border-[#25D366] transition-all"
             >
-              <MessageCircle className="w-4 h-4 fill-black" />
-              <span>Open WhatsApp</span>
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span>[ DISPATCH TO WA ]</span>
             </button>
           </div>
-
         </div>
       ) : (
-        /* 3. Floating Trigger Button with Pulsing Wave */
+        /* 3. Floating Trigger Button with Technical Frame */
         <button
           onClick={() => {
             setIsOpen(true);
             setHasPrompted(false);
           }}
-          className="relative group p-3.5 rounded-full bg-gradient-to-tr from-[#128C7E] to-[#25D366] text-white shadow-2xl shadow-emerald-500/30 hover:scale-105 transition-all flex items-center gap-2.5 border-2 border-white/20"
-          title="Chat with AURA on WhatsApp"
+          className="relative group p-3 rounded-none bg-black/90 border border-[#25D366]/60 text-[#25D366] hover:bg-[#25D366] hover:text-black transition-all shadow-2xl flex items-center gap-2.5 font-mono"
+          title="Chat with AURA Showroom on WhatsApp"
         >
-          {/* Animated Wave Ping */}
-          <span className="absolute -inset-1 rounded-full bg-[#25D366]/40 animate-ping pointer-events-none" />
+          {/* Corner Crosshairs */}
+          <span className="absolute top-1 left-1 text-[8px] select-none font-mono opacity-50">+</span>
+          <span className="absolute top-1 right-1 text-[8px] select-none font-mono opacity-50">+</span>
+          <span className="absolute bottom-1 left-1 text-[8px] select-none font-mono opacity-50">+</span>
+          <span className="absolute bottom-1 right-1 text-[8px] select-none font-mono opacity-50">+</span>
 
-          <MessageCircle className="w-6 h-6 fill-white text-white relative z-10" />
-
-          {/* Desktop Text Expansion */}
-          <div className="hidden sm:flex flex-col text-left pr-1 relative z-10">
-            <span className="text-[10px] uppercase font-bold tracking-wider text-black/80 font-mono leading-none">
-              Need Help?
-            </span>
-            <span className="text-xs font-black text-black leading-tight">
-              WhatsApp Us
-            </span>
+          <div className="w-5 h-5 rounded-none bg-black border border-current flex items-center justify-center">
+            <MessageCircle className="w-3.5 h-3.5" />
           </div>
 
-          {/* Active Online Indicator */}
-          <span className="absolute top-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-300 border-2 border-[#121217] flex items-center justify-center">
-            <span className="w-1.5 h-1.5 rounded-full bg-black" />
+          <span className="text-xs font-mono font-bold uppercase tracking-wider hidden sm:inline">
+            [ WA // CONCIERGE ]
           </span>
+
+          <span className="w-1.5 h-1.5 rounded-none bg-emerald-400 animate-pulse" />
         </button>
       )}
-
     </div>
   );
 }
