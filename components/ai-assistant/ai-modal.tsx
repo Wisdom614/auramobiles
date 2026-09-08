@@ -13,14 +13,26 @@ import {
 } from "lucide-react";
 import { useAi } from "@/lib/store/ai-context";
 import { useCart } from "@/lib/store/cart-context";
-import { PHONES } from "@/lib/data/phones";
+import { PHONES, Phone } from "@/lib/data/phones";
 import { formatCFA } from "@/lib/formatters";
+import { getPhonesFromDB } from "@/lib/supabase/client";
 
 export function AiModal() {
-  const { isAiOpen, setIsAiOpen, messages, sendMessage, quickPrompts } = useAi();
+  const { isAiOpen, setIsAiOpen, messages, sendMessage, quickPrompts, isTyping } = useAi();
   const { addItem } = useCart();
   const [inputValue, setInputValue] = useState("");
+  const [catalogPhones, setCatalogPhones] = useState<Phone[]>(PHONES);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    getPhonesFromDB()
+      .then((dbPhones) => {
+        if (dbPhones && dbPhones.length > 0) {
+          setCatalogPhones(dbPhones);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -30,16 +42,17 @@ export function AiModal() {
     if (isAiOpen) {
       scrollToBottom();
     }
-  }, [messages, isAiOpen]);
+  }, [messages, isAiOpen, isTyping]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isTyping) return;
     sendMessage(inputValue.trim());
     setInputValue("");
   };
 
   const handlePromptClick = (prompt: string) => {
+    if (isTyping) return;
     sendMessage(prompt);
   };
 
@@ -142,7 +155,17 @@ export function AiModal() {
                     </p>
                     <div className="space-y-2">
                       {msg.recommendedPhoneIds.map((phoneId) => {
-                        const phone = PHONES.find((p) => p.id === phoneId);
+                        const phone =
+                          catalogPhones.find(
+                            (p) =>
+                              p.id.toLowerCase() === phoneId.toLowerCase() ||
+                              p.slug.toLowerCase() === phoneId.toLowerCase()
+                          ) ||
+                          PHONES.find(
+                            (p) =>
+                              p.id.toLowerCase() === phoneId.toLowerCase() ||
+                              p.slug.toLowerCase() === phoneId.toLowerCase()
+                          );
                         if (!phone) return null;
                         return (
                           <div
@@ -194,6 +217,17 @@ export function AiModal() {
               </div>
             </div>
           ))}
+          {isTyping && (
+            <div className="flex gap-2.5 flex-row animate-in fade-in duration-150">
+              <div className="w-7 h-7 rounded-none flex items-center justify-center shrink-0 border bg-black border-[#D4AF37]/50 text-[#D4AF37]">
+                <Bot className="w-3.5 h-3.5" />
+              </div>
+              <div className="rounded-none p-3 border bg-black/90 border-[#D4AF37]/30 text-zinc-300 font-mono text-[11px] flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-[#D4AF37] animate-pulse"></span>
+                <span className="text-[#D4AF37] font-bold">[ CONSULTING HARDWARE ARCHIVE... ]</span>
+              </div>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -207,7 +241,8 @@ export function AiModal() {
               <button
                 key={prompt}
                 onClick={() => handlePromptClick(prompt)}
-                className="whitespace-nowrap px-2.5 py-1 rounded-none bg-black hover:bg-[#D4AF37] text-[10px] text-zinc-300 hover:text-black border border-white/15 hover:border-[#D4AF37] transition-all shrink-0 font-mono uppercase tracking-wider"
+                disabled={isTyping}
+                className="whitespace-nowrap px-2.5 py-1 rounded-none bg-black hover:bg-[#D4AF37] text-[10px] text-zinc-300 hover:text-black border border-white/15 hover:border-[#D4AF37] transition-all shrink-0 font-mono uppercase tracking-wider disabled:opacity-40 disabled:hover:bg-black disabled:hover:text-zinc-300"
               >
                 {prompt}
               </button>
@@ -224,12 +259,13 @@ export function AiModal() {
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Ask specs, cameras, battery or price..."
-            className="flex-1 bg-zinc-950 border border-white/15 rounded-none px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D4AF37] font-sans transition-colors"
+            disabled={isTyping}
+            placeholder={isTyping ? "Consulting AI Concierge..." : "Ask specs, cameras, battery or price..."}
+            className="flex-1 bg-zinc-950 border border-white/15 rounded-none px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D4AF37] font-sans transition-colors disabled:opacity-50"
           />
           <button
             type="submit"
-            disabled={!inputValue.trim()}
+            disabled={!inputValue.trim() || isTyping}
             className="p-2.5 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black disabled:opacity-30 transition-all shrink-0 border border-[#D4AF37]"
             title="Send Query"
           >

@@ -313,6 +313,25 @@ function TradeInContent() {
         status: "pending",
         notes: notesSummary,
       });
+
+      // Dispatch trade-in appraisal certificate & admin alert asynchronously
+      fetch("/api/email/swap", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientName: customerName,
+          clientPhone: customerPhone,
+          city: inspectionProtocol === "buea_showroom" ? "Buea" : "Nationwide",
+          brand: sourceBrand,
+          model: sourceModel,
+          storage: sourceStorage,
+          condition: currentCondition.title,
+          valuationFcfa: algorithmicValuation,
+          voucherCode: voucher,
+        }),
+      }).catch((err) => {
+        console.warn("Background swap email trigger warning:", err);
+      });
     } catch {
       // Graceful fallback
     }

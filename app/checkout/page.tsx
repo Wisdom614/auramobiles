@@ -197,6 +197,15 @@ export default function CheckoutPage() {
       total,
     });
 
+    // Dispatch transactional order invoice & admin alert asynchronously
+    fetch("/api/email/order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order: newOrder }),
+    }).catch((emailErr) => {
+      console.warn("Background order email trigger warning:", emailErr);
+    });
+
     // Step progression provides clear visual feedback to reassure user
     setTimeout(() => setSubmissionStep(2), 500);
     setTimeout(() => setSubmissionStep(3), 1100);
