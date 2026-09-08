@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Smartphone,
@@ -22,6 +23,13 @@ import {
   Database,
   X,
   Store,
+  Shield,
+  ShieldCheck,
+  KeyRound,
+  Users,
+  LogOut,
+  UserPlus,
+  Lock,
 } from "lucide-react";
 import { formatCFA } from "@/lib/formatters";
 import { Phone, PHONES } from "@/lib/data/phones";
@@ -38,16 +46,31 @@ import {
   getTradeInsFromDB,
   updateTradeInStatusInDB,
   TradeInRecord,
+  SUPER_ADMIN_EMAIL,
+  isAuthorizedAdmin,
+  getAdminUsersFromDB,
+  addAdminUserToDB,
+  removeAdminUserFromDB,
+  AdminUserRecord,
 } from "@/lib/supabase/client";
 import { uploadToCloudinary } from "@/lib/cloudinary/upload";
 
 export default function AdminDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "orders" | "trade-ins">("overview");
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "orders" | "trade-ins" | "settings">("overview");
 
-  // State
+  // Auth State
+  const [authChecked, setAuthChecked] = useState(false);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
+  const [currentUserName, setCurrentUserName] = useState<string | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  // Business Data State
   const [phones, setPhones] = useState<Phone[]>(PHONES);
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
   const [tradeIns, setTradeIns] = useState<TradeInRecord[]>([]);
+  const [adminUsers, setAdminUsers] = useState<AdminUserRecord[]>([]);
   const [isSupabaseConnected, setIsSupabaseConnected] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: "success" | "error" | "info" } | null>(null);
@@ -76,86 +99,119 @@ export default function AdminDashboardPage() {
     rearCamera: "48MP Main + 12MP 5x Telephoto + 48MP Ultrawide",
   });
 
-  // Show status notification
+  // Settings & Team Forms State
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [newAdminFullName, setNewAdminFullName] = useState("");
+  const [newAdminRole, setNewAdminRole] = useState<"admin" | "super_admin">("admin");
+  const [isAddingAdmin, setIsAddingAdmin] = useState(false);
+
+  // Toast Notification
   const showToast = (text: string, type: "success" | "error" | "info" = "success") => {
     setStatusMessage({ text, type });
     setTimeout(() => setStatusMessage(null), 5000);
   };
 
-  // Load data on mount
+  // Check Authentication & Authorizations on mount
   useEffect(() => {
-    async function loadAllData() {
+    async function checkAuthAndLoad() {
       setIsLoading(true);
 
-      // Check Supabase connection
-      if (supabase) {
-        setIsSupabaseConnected(true);
-        const dbPhones = await getPhonesFromDB();
-        if (dbPhones && dbPhones.length > 0) {
-          setPhones(dbPhones);
-        }
-
-        const dbOrders = await getOrdersFromDB();
-        if (dbOrders && dbOrders.length > 0) {
-          setOrders(dbOrders);
-        } else {
-          try {
-            const savedOrders = localStorage.getItem("aura_orders_v1");
-            if (savedOrders) setOrders(JSON.parse(savedOrders));
-          } catch {
-            // ignore
-          }
-        }
-
-        const dbTradeIns = await getTradeInsFromDB();
-        if (dbTradeIns && dbTradeIns.length > 0) {
-          setTradeIns(dbTradeIns);
-        } else {
-          setTradeIns([
-            {
-              id: "TRD-8491",
-              created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-              client_name: "Alain Nguemo",
-              phone: "+237 675 44 22 11",
-              city: "Douala",
-              brand: "Apple",
-              model: "iPhone 14 Pro 128GB",
-              storage: "128GB",
-              condition: "Good - Minor body wear",
-              valuation_fcfa: 410000,
-              voucher_code: "SWAP-410K-9B21",
-              status: "pending",
-            },
-            {
-              id: "TRD-8492",
-              created_at: new Date(Date.now() - 3600000 * 26).toISOString(),
-              client_name: "Sandrine Mbi",
-              phone: "+237 699 18 33 00",
-              city: "Yaoundé",
-              brand: "Samsung",
-              model: "Galaxy S23 Ultra 256GB",
-              storage: "256GB",
-              condition: "Flawless - Like New",
-              valuation_fcfa: 495000,
-              voucher_code: "SWAP-495K-47A1",
-              status: "approved",
-            },
-          ]);
-        }
-      } else {
+      if (!supabase) {
         setIsSupabaseConnected(false);
+        // In local mode without Supabase credentials, allow local demo owner
+        setCurrentUserEmail(SUPER_ADMIN_EMAIL);
+        setCurrentUserName("Wisdom Besong (Owner)");
+        setIsSuperAdmin(true);
+        setIsAuthorized(true);
+        setAuthChecked(true);
+        setIsLoading(false);
+        return;
+      }
+
+      setIsSupabaseConnected(true);
+
+      // Check Supabase session
+      const { data } = await supabase.auth.getSession();
+      const sessionUser = data.session?.user;
+
+      if (!sessionUser?.email) {
+        // Not logged in -> redirect to /admin/login
+        setAuthChecked(true);
+        setIsAuthorized(false);
+        setIsLoading(false);
+        router.replace("/admin/login");
+        return;
+      }
+
+      const email = sessionUser.email;
+      const authorized = await isAuthorizedAdmin(email);
+
+      if (!authorized) {
+        // Logged in but not on the admin roster
+        setCurrentUserEmail(email);
+        setIsAuthorized(false);
+        setAuthChecked(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // Authorized admin
+      setCurrentUserEmail(email);
+      setCurrentUserName(sessionUser.user_metadata?.full_name || email.split("@")[0]);
+      setIsSuperAdmin(email.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase());
+      setIsAuthorized(true);
+      setAuthChecked(true);
+
+      // Load all business data
+      const [dbPhones, dbOrders, dbTradeIns, dbAdmins] = await Promise.all([
+        getPhonesFromDB(),
+        getOrdersFromDB(),
+        getTradeInsFromDB(),
+        getAdminUsersFromDB(),
+      ]);
+
+      if (dbPhones && dbPhones.length > 0) setPhones(dbPhones);
+      if (dbOrders && dbOrders.length > 0) {
+        setOrders(dbOrders);
+      } else {
         try {
           const savedOrders = localStorage.getItem("aura_orders_v1");
           if (savedOrders) setOrders(JSON.parse(savedOrders));
-        } catch {
-          // ignore
-        }
+        } catch {}
       }
+
+      if (dbTradeIns && dbTradeIns.length > 0) setTradeIns(dbTradeIns);
+      if (dbAdmins && dbAdmins.length > 0) setAdminUsers(dbAdmins);
+
       setIsLoading(false);
     }
 
-    loadAllData();
-  }, []);
+    checkAuthAndLoad();
+
+    // Listen to Auth State Changes
+    if (supabase) {
+      const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === "SIGNED_OUT" || !session?.user) {
+          router.replace("/admin/login");
+        }
+      });
+      return () => {
+        authListener.subscription.unsubscribe();
+      };
+    }
+  }, [router]);
+
+  // Handle Logout
+  const handleSignOut = async () => {
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+    router.replace("/admin/login");
+  };
 
   // Handle Seeding Supabase Catalog
   const handleSeedCatalog = async () => {
@@ -309,9 +365,7 @@ export default function AdminDashboardPage() {
     setOrders(updated);
     try {
       localStorage.setItem("aura_orders_v1", JSON.stringify(updated));
-    } catch {
-      // ignore
-    }
+    } catch {}
 
     if (supabase) {
       const target = updated.find((o) => o.id === orderId);
@@ -332,6 +386,120 @@ export default function AdminDashboardPage() {
     }
     showToast(`Trade-in ${id} status updated to ${status.toUpperCase()}`);
   };
+
+  // Change Password
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      showToast("Passwords do not match.", "error");
+      return;
+    }
+    if (newPassword.length < 6) {
+      showToast("Password must be at least 6 characters long.", "error");
+      return;
+    }
+
+    if (!supabase) {
+      showToast("Supabase is not configured.", "error");
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      setIsChangingPassword(false);
+      if (error) {
+        showToast(error.message, "error");
+      } else {
+        showToast("Password updated successfully!", "success");
+        setNewPassword("");
+        setConfirmPassword("");
+      }
+    } catch (err: any) {
+      setIsChangingPassword(false);
+      showToast(err.message || "Failed to update password", "error");
+    }
+  };
+
+  // Add New Administrator
+  const handleAddAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAdminEmail) return;
+
+    setIsAddingAdmin(true);
+    const res = await addAdminUserToDB(
+      newAdminEmail,
+      newAdminFullName,
+      newAdminRole,
+      currentUserEmail || "Super Admin"
+    );
+    setIsAddingAdmin(false);
+
+    if (!res.success) {
+      showToast(res.error || "Failed to add admin", "error");
+    } else {
+      showToast(`Authorized ${newAdminEmail} as ${newAdminRole.toUpperCase()}!`, "success");
+      setNewAdminEmail("");
+      setNewAdminFullName("");
+      const updated = await getAdminUsersFromDB();
+      setAdminUsers(updated);
+    }
+  };
+
+  // Remove Administrator
+  const handleRemoveAdmin = async (email: string) => {
+    if (!confirm(`Revoke administrator access for ${email}?`)) return;
+
+    const res = await removeAdminUserFromDB(email);
+    if (!res.success) {
+      showToast(res.error || "Failed to remove admin", "error");
+    } else {
+      showToast(`Revoked access for ${email}`);
+      const updated = await getAdminUsersFromDB();
+      setAdminUsers(updated);
+    }
+  };
+
+  // Loading Screen
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center text-white">
+        <RefreshCw className="w-8 h-8 text-[#D4AF37] animate-spin mb-4" />
+        <p className="text-sm font-semibold tracking-wide text-white/70">
+          Verifying boutique security credentials...
+        </p>
+      </div>
+    );
+  }
+
+  // Access Denied Screen (Logged in but email is not on admin roster)
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center p-6 text-center text-white">
+        <div className="w-16 h-16 rounded-2xl bg-red-950/60 border border-red-500/40 text-red-400 flex items-center justify-center mb-4">
+          <AlertCircle className="w-8 h-8" />
+        </div>
+        <h1 className="text-xl font-bold mb-2">Access Restricted</h1>
+        <p className="text-xs text-white/60 max-w-md mb-6 leading-relaxed">
+          The account <strong className="text-white">{currentUserEmail}</strong> is not recognized as an authorized AURA Luxe boutique administrator.
+        </p>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleSignOut}
+            className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-semibold text-white border border-white/20 transition"
+          >
+            Sign Out & Switch Account
+          </button>
+          <Link
+            href="/"
+            className="px-5 py-2.5 rounded-xl bg-[#D4AF37] text-black text-xs font-bold transition"
+          >
+            Return to Storefront
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   // Metrics
   const totalRevenueFCFA = orders.reduce((acc, o) => acc + o.total, 0);
@@ -391,7 +559,7 @@ export default function AdminDashboardPage() {
                   AURA LUXE BOUTIQUE
                 </h1>
                 <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 uppercase">
-                  Admin
+                  {isSuperAdmin ? "Super Admin" : "Admin"}
                 </span>
               </div>
               <p className="text-xs text-white/50">Central Africa Luxury Smartphone Operations</p>
@@ -411,12 +579,29 @@ export default function AdminDashboardPage() {
               <span>{isSupabaseConnected ? "Supabase Connected" : "Local Mock Storage"}</span>
             </div>
 
+            {/* Current Admin User Badge */}
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#17171F] border border-white/10 text-xs">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span className="text-white/80 font-medium truncate max-w-[160px]">
+                {currentUserEmail}
+              </span>
+            </div>
+
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/30 text-xs font-semibold transition"
+              title="Sign Out of Admin"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </button>
+
             <Link
               href="/"
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 hover:text-white border border-white/10 text-xs font-medium transition"
             >
               <Store className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span>View Storefront</span>
+              <span className="hidden sm:inline">Storefront</span>
             </Link>
           </div>
         </div>
@@ -481,6 +666,18 @@ export default function AdminDashboardPage() {
                   {pendingTradeInsCount}
                 </span>
               )}
+            </button>
+
+            <button
+              onClick={() => setActiveTab("settings")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition ${
+                activeTab === "settings"
+                  ? "bg-[#D4AF37] text-black font-semibold shadow-lg shadow-[#D4AF37]/10"
+                  : "text-white/70 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              <span>Team & Security</span>
             </button>
           </div>
 
@@ -552,7 +749,7 @@ export default function AdminDashboardPage() {
                     <h2 className="text-lg font-bold text-white">Supabase Cloud Sync & Catalog Seeder</h2>
                   </div>
                   <p className="text-sm text-white/70 max-w-xl">
-                    Run the SQL schema in your Supabase SQL editor (`supabase/schema.sql`). Then click below to seed all 15 default luxury flagship models into your live Supabase database with one click.
+                    Populate your Supabase database with all 15 default luxury flagship models in one click.
                   </p>
                 </div>
                 <button
@@ -923,6 +1120,223 @@ export default function AdminDashboardPage() {
                               <MessageCircle className="w-3.5 h-3.5" />
                               <span>Offer</span>
                             </a>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: TEAM & SECURITY MANAGEMENT */}
+        {activeTab === "settings" && (
+          <div className="space-y-8 animate-fade-in">
+            {/* Grid 2 Columns: Profile/Password & Add Admin */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Profile Card & Password Reset */}
+              <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#17171F] border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-white">Administrator Profile</h2>
+                    <p className="text-xs text-white/50">Your active boutique credentials</p>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/50">Active Email:</span>
+                    <strong className="text-white font-mono">{currentUserEmail}</strong>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/50">Access Level:</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 uppercase">
+                      {isSuperAdmin ? "Primary Super Administrator" : "Boutique Administrator"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Change Password Form */}
+                <form onSubmit={handleChangePassword} className="space-y-3 pt-2 border-t border-white/10">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#D4AF37] flex items-center gap-2">
+                    <KeyRound className="w-3.5 h-3.5" />
+                    <span>Change Security Password</span>
+                  </h3>
+
+                  <div>
+                    <label className="block text-[11px] text-white/70 mb-1">New Password</label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="At least 6 characters"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/30 focus:border-[#D4AF37] focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] text-white/70 mb-1">Confirm New Password</label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="Repeat new password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/30 focus:border-[#D4AF37] focus:outline-none"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isChangingPassword}
+                    className="w-full py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-bold text-xs transition shadow flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isChangingPassword ? "Updating..." : "Update Password"}
+                  </button>
+                </form>
+              </div>
+
+              {/* Authorize New Admin Card */}
+              <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#17171F] border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
+                    <UserPlus className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-white">Authorize New Administrator</h2>
+                    <p className="text-xs text-white/50">Grant dashboard access to trusted boutique staff</p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleAddAdmin} className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-white/80 mb-1">Staff Member Email *</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="colleague@auramobiles.com"
+                      value={newAdminEmail}
+                      onChange={(e) => setNewAdminEmail(e.target.value)}
+                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/30 focus:border-[#D4AF37] focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-white/80 mb-1">Full Name</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Marie Claire"
+                      value={newAdminFullName}
+                      onChange={(e) => setNewAdminFullName(e.target.value)}
+                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/30 focus:border-[#D4AF37] focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-white/80 mb-1">Privilege Role</label>
+                    <select
+                      value={newAdminRole}
+                      onChange={(e) => setNewAdminRole(e.target.value as any)}
+                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                    >
+                      <option value="admin">Administrator (Orders, Inventory & Trade-ins)</option>
+                      <option value="super_admin">Super Administrator (Full Team & DB Access)</option>
+                    </select>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isAddingAdmin}
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#B38F26] text-black font-bold text-xs hover:brightness-110 transition shadow flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    <span>{isAddingAdmin ? "Authorizing..." : "Grant Admin Privileges"}</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {/* Admin Team Table */}
+            <div className="bg-[#121217] border border-white/10 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-white">Authorized Boutique Team Roster</h3>
+                  <p className="text-xs text-white/50">Personnel authorized to access the AURA Luxe operations portal</p>
+                </div>
+                <span className="px-2.5 py-1 rounded-full bg-white/5 text-xs text-white/70 border border-white/10">
+                  {adminUsers.length} Active Admins
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-white/10 text-white/40 text-xs uppercase tracking-wider">
+                      <th className="pb-3 font-medium">Administrator</th>
+                      <th className="pb-3 font-medium">Role</th>
+                      <th className="pb-3 font-medium">Added By</th>
+                      <th className="pb-3 font-medium">Member Since</th>
+                      <th className="pb-3 font-medium text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {adminUsers.map((admin) => {
+                      const isOwner = admin.email.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase();
+
+                      return (
+                        <tr key={admin.id} className="hover:bg-white/[0.02]">
+                          <td className="py-3.5">
+                            <div className="font-medium text-white flex items-center gap-2">
+                              <span>{admin.full_name || "Administrator"}</span>
+                              {isOwner && (
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#D4AF37] text-black uppercase">
+                                  Owner
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs font-mono text-white/50">{admin.email}</div>
+                          </td>
+
+                          <td className="py-3.5">
+                            <span
+                              className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                admin.role === "super_admin"
+                                  ? "bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30"
+                                  : "bg-white/10 text-white/80 border border-white/20"
+                              }`}
+                            >
+                              {admin.role.replace("_", " ")}
+                            </span>
+                          </td>
+
+                          <td className="py-3.5 text-xs text-white/60">{admin.created_by || "System"}</td>
+
+                          <td className="py-3.5 text-xs text-white/40">
+                            {new Date(admin.created_at).toLocaleDateString("en-GB", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </td>
+
+                          <td className="py-3.5 text-right">
+                            {isOwner ? (
+                              <span className="text-[11px] text-white/30 italic">Protected</span>
+                            ) : (
+                              <button
+                                onClick={() => handleRemoveAdmin(admin.email)}
+                                className="p-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-400 text-xs transition"
+                                title="Revoke access"
+                              >
+                                Revoke
+                              </button>
+                            )}
                           </td>
                         </tr>
                       );

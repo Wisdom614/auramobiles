@@ -305,3 +305,120 @@ export async function updateTradeInStatusInDB(
     return false;
   }
 }
+
+// ==========================================================
+// ADMIN AUTHENTICATION & MULTI-ADMIN MANAGEMENT
+// ==========================================================
+
+export const SUPER_ADMIN_EMAIL = "wisdombesong123@gmail.com";
+
+export interface AdminUserRecord {
+  id: string;
+  email: string;
+  role: "super_admin" | "admin";
+  full_name?: string;
+  created_at: string;
+  created_by?: string;
+}
+
+export async function isAuthorizedAdmin(email: string): Promise<boolean> {
+  const clean = email.trim().toLowerCase();
+  if (clean === SUPER_ADMIN_EMAIL.toLowerCase()) return true;
+
+  if (!supabase) return false;
+  try {
+    const { data, error } = await supabase
+      .from("admin_users")
+      .select("email")
+      .ilike("email", clean)
+      .maybeSingle();
+
+    if (error || !data) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function getAdminUsersFromDB(): Promise<AdminUserRecord[]> {
+  const defaultList: AdminUserRecord[] = [
+    {
+      id: "super-admin-root",
+      email: SUPER_ADMIN_EMAIL,
+      role: "super_admin",
+      full_name: "Wisdom Besong (Owner)",
+      created_at: new Date().toISOString(),
+      created_by: "System",
+    },
+  ];
+
+  if (!supabase) return defaultList;
+  try {
+    const { data, error } = await supabase
+      .from("admin_users")
+      .select("*")
+      .order("created_at", { ascending: true });
+
+    if (error || !data || data.length === 0) {
+      return defaultList;
+    }
+    return data;
+  } catch {
+    return defaultList;
+  }
+}
+
+export async function addAdminUserToDB(
+  email: string,
+  fullName: string,
+  role: "super_admin" | "admin" = "admin",
+  createdBy: string = "Admin"
+): Promise<{ success: boolean; error?: string }> {
+  const cleanEmail = email.trim().toLowerCase();
+  if (!cleanEmail || !cleanEmail.includes("@")) {
+    return { success: false, error: "Please provide a valid email address." };
+  }
+
+  if (!supabase) {
+    return { success: true };
+  }
+
+  try {
+    const { error } = await supabase.from("admin_users").upsert(
+      {
+        email: cleanEmail,
+        full_name: fullName.trim() || "Boutique Admin",
+        role,
+        created_by: createdBy,
+      },
+      { onConflict: "email" }
+    );
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Failed to add administrator." };
+  }
+}
+
+export async function removeAdminUserFromDB(email: string): Promise<{ success: boolean; error?: string }> {
+  const cleanEmail = email.trim().toLowerCase();
+  if (cleanEmail === SUPER_ADMIN_EMAIL.toLowerCase()) {
+    return { success: false, error: "Cannot remove primary Super Administrator." };
+  }
+
+  if (!supabase) return { success: true };
+
+  try {
+    const { error } = await supabase.from("admin_users").delete().ilike("email", cleanEmail);
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+

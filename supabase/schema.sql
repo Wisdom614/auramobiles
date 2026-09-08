@@ -90,15 +90,32 @@ CREATE TABLE IF NOT EXISTS public.trade_ins (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 4. ADMIN USERS TABLE (ROLE-BASED AUTHORIZATION)
+CREATE TABLE IF NOT EXISTS public.admin_users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email TEXT UNIQUE NOT NULL,
+    role TEXT NOT NULL DEFAULT 'admin',
+    full_name TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    created_by TEXT DEFAULT 'system'
+);
+
+-- Seed Primary Super Admin: wisdombesong123@gmail.com
+INSERT INTO public.admin_users (email, role, full_name, created_by)
+VALUES ('wisdombesong123@gmail.com', 'super_admin', 'Wisdom Besong', 'system')
+ON CONFLICT (email) DO NOTHING;
+
 -- GRANT PRIVILEGES ON SPECIFIC TABLES
 GRANT ALL ON TABLE public.phones TO postgres, anon, authenticated, service_role;
 GRANT ALL ON TABLE public.orders TO postgres, anon, authenticated, service_role;
 GRANT ALL ON TABLE public.trade_ins TO postgres, anon, authenticated, service_role;
+GRANT ALL ON TABLE public.admin_users TO postgres, anon, authenticated, service_role;
 
 -- ENABLE ROW LEVEL SECURITY (RLS)
 ALTER TABLE public.phones ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.trade_ins ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
 
 -- POLICIES:
 DROP POLICY IF EXISTS "Allow all on phones" ON public.phones;
@@ -109,3 +126,7 @@ CREATE POLICY "Allow all on orders" ON public.orders FOR ALL USING (true) WITH C
 
 DROP POLICY IF EXISTS "Allow all on trade_ins" ON public.trade_ins;
 CREATE POLICY "Allow all on trade_ins" ON public.trade_ins FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all on admin_users" ON public.admin_users;
+CREATE POLICY "Allow all on admin_users" ON public.admin_users FOR ALL USING (true) WITH CHECK (true);
+
