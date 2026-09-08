@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useMemo, Suspense } from "react";
+import React, { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Search, X, Check } from "lucide-react";
-import { PHONES } from "@/lib/data/phones";
+import { PHONES, Phone } from "@/lib/data/phones";
 import { BRANDS } from "@/lib/data/brands";
 import { ProductCard } from "@/components/product/product-card";
+import { getPhonesFromDB } from "@/lib/supabase/client";
 
 function PhonesCatalogContent() {
   const searchParams = useSearchParams();
@@ -14,14 +15,25 @@ function PhonesCatalogContent() {
   const initialCategory = searchParams.get("category") || "all";
   const initialSearch = searchParams.get("search") || "";
 
+  const [phonesList, setPhonesList] = useState<Phone[]>(PHONES);
   const [selectedBrand, setSelectedBrand] = useState<string>(initialBrand);
   const [selectedCondition, setSelectedCondition] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>(initialSearch);
   const [sortBy, setSortBy] = useState<"featured" | "price_asc" | "price_desc">("featured");
 
+  useEffect(() => {
+    async function loadCatalog() {
+      const dbPhones = await getPhonesFromDB();
+      if (dbPhones && dbPhones.length > 0) {
+        setPhonesList(dbPhones);
+      }
+    }
+    loadCatalog();
+  }, []);
+
   // Filter phones
   const filteredPhones = useMemo(() => {
-    return PHONES.filter((phone) => {
+    return phonesList.filter((phone) => {
       // Brand filter
       if (selectedBrand !== "all" && phone.brand.toLowerCase() !== selectedBrand.toLowerCase()) {
         return false;

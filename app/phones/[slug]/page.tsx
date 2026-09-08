@@ -22,6 +22,7 @@ import { formatCFA } from "@/lib/formatters";
 import { useCart } from "@/lib/store/cart-context";
 import { useWishlist } from "@/lib/store/wishlist-context";
 import { ProductCard } from "@/components/product/product-card";
+import { getPhonesFromDB } from "@/lib/supabase/client";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -30,7 +31,17 @@ interface PageProps {
 export default function PhoneDetailPage({ params }: PageProps) {
   const resolvedParams = use(params);
   const router = useRouter();
-  const phone = getPhoneBySlug(resolvedParams.slug);
+  const initialPhone = getPhoneBySlug(resolvedParams.slug);
+  const [phone, setPhone] = useState<Phone | undefined>(initialPhone);
+
+  React.useEffect(() => {
+    if (!initialPhone) {
+      getPhonesFromDB().then((list) => {
+        const found = list?.find((p) => p.slug === resolvedParams.slug);
+        if (found) setPhone(found);
+      });
+    }
+  }, [resolvedParams.slug, initialPhone]);
 
   const { addItem, setIsCartOpen } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();

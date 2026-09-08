@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Order, INITIAL_ORDERS, CustomerDetails, OrderItem } from "@/lib/data/mock-orders";
+import { insertOrderToDB } from "@/lib/supabase/client";
 
 interface OrdersContextType {
   orders: Order[];
@@ -125,6 +126,10 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
     };
 
     setOrders((prev) => [newOrder, ...prev]);
+    // Asynchronously write to Supabase
+    insertOrderToDB(newOrder).catch(() => {
+      // Graceful fallback to local storage
+    });
     return newOrder;
   };
 

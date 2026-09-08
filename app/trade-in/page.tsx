@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { formatCFA } from "@/lib/formatters";
+import { insertTradeInToDB } from "@/lib/supabase/client";
 import { PHONES } from "@/lib/data/phones";
 
 interface DeviceModel {
@@ -92,10 +93,26 @@ export default function TradeInPage() {
 
   const filteredModels = TRADE_MODELS.filter((m) => m.brand === selectedBrand);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (customerName && customerPhone) {
       setSubmitted(true);
+      const voucherCode = `SWAP-${Math.round(estimatedValue / 1000)}K-${Math.floor(1000 + Math.random() * 9000)}`;
+      insertTradeInToDB({
+        id: `TRD-${Math.floor(1000 + Math.random() * 9000)}`,
+        client_name: customerName,
+        phone: customerPhone,
+        city: customerCity,
+        brand: selectedBrand,
+        model: selectedModel,
+        storage: "Standard",
+        condition: conditionObj.title,
+        valuation_fcfa: estimatedValue,
+        voucher_code: voucherCode,
+        status: "pending",
+      }).catch(() => {
+        // Fallback gracefully
+      });
     }
   };
 

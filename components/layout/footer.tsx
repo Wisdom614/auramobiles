@@ -236,6 +236,12 @@ export function Footer() {
                   Warranty & Return Policy
                 </Link>
               </li>
+              <li>
+                <Link href="/admin" className="text-zinc-500 hover:text-[#D4AF37] transition-colors flex items-center gap-1 font-mono text-[11px]">
+                  <span>Boutique Admin Portal</span>
+                  <ArrowUpRight className="w-3 h-3" />
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
