@@ -8,6 +8,7 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { CartDrawer } from "@/components/layout/cart-drawer";
 import { AiModal } from "@/components/ai-assistant/ai-modal";
 import { FloatingConcierge } from "@/components/ai-assistant/floating-concierge";
+import { FloatingWhatsApp } from "@/components/layout/floating-whatsapp";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -60,6 +61,7 @@ export default function RootLayout({
             <CartDrawer />
             <AiModal />
             <FloatingConcierge />
+            <FloatingWhatsApp />
           </div>
         </AppProviders>
       </body>
