@@ -3,6 +3,7 @@ import { PHONES, Phone } from "@/lib/data/phones";
 import { getPhonesFromDB } from "@/lib/supabase/client";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 interface ChatRequestMessage {
   role: "user" | "assistant";
