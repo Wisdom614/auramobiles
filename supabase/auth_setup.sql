@@ -11,7 +11,6 @@ UPDATE auth.users
 SET 
   encrypted_password = crypt('wisdombesong123@gmail.com', gen_salt('bf')),
   email_confirmed_at = NOW(),
-  confirmed_at = NOW(),
   updated_at = NOW()
 WHERE email = 'wisdombesong123@gmail.com';
 
@@ -24,7 +23,6 @@ INSERT INTO auth.users (
   email,
   encrypted_password,
   email_confirmed_at,
-  confirmed_at,
   raw_app_meta_data,
   raw_user_meta_data,
   created_at,
@@ -37,7 +35,6 @@ SELECT
   'authenticated',
   'wisdombesong123@gmail.com',
   crypt('wisdombesong123@gmail.com', gen_salt('bf')),
-  NOW(),
   NOW(),
   '{"provider":"email","providers":["email"]}'::jsonb,
   '{"full_name":"Wisdom Besong","role":"super_admin"}'::jsonb,
