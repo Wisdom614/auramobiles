@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import React, { Suspense } from "react";
 import { AppProviders } from "@/components/providers";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -9,6 +10,7 @@ import { CartDrawer } from "@/components/layout/cart-drawer";
 import { AiModal } from "@/components/ai-assistant/ai-modal";
 import { FloatingConcierge } from "@/components/ai-assistant/floating-concierge";
 import { FloatingWhatsApp } from "@/components/layout/floating-whatsapp";
+import { NavigationProgressBar } from "@/components/ui/navigation-progress-bar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,6 +55,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#09090B] text-[#F4F4F5]">
         <AppProviders>
+          <Suspense fallback={null}>
+            <NavigationProgressBar />
+          </Suspense>
           <div className="flex flex-col min-h-screen">
             <Navbar />
             <main className="flex-1 pb-20 md:pb-0">{children}</main>

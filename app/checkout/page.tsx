@@ -41,6 +41,7 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "mtn" | "orange">("cod");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionStep, setSubmissionStep] = useState(1);
 
   // Auto-fill from authenticated VIP Profile
   useEffect(() => {
@@ -140,6 +141,7 @@ export default function CheckoutPage() {
     }
 
     setIsSubmitting(true);
+    setSubmissionStep(1);
 
     const orderItems: OrderItem[] = items.map((it) => ({
       phoneId: it.phone.id,
@@ -185,8 +187,13 @@ export default function CheckoutPage() {
       total,
     });
 
-    clearCart();
-    router.push(`/checkout/success?id=${newOrder.id}`);
+    // Step progression provides clear visual feedback to reassure user
+    setTimeout(() => setSubmissionStep(2), 500);
+    setTimeout(() => setSubmissionStep(3), 1100);
+    setTimeout(() => {
+      clearCart();
+      router.push(`/checkout/success?id=${newOrder.id}`);
+    }, 1700);
   };
 
   return (
@@ -570,6 +577,86 @@ export default function CheckoutPage() {
         </form>
 
       </div>
+
+      {/* Interactive Acquisition Processing Modal */}
+      {isSubmitting && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 select-none font-sans animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-[#0E0E12] border border-[#D4AF37] p-6 sm:p-8 relative shadow-2xl">
+            {/* Viewfinder crosshairs */}
+            <span className="absolute top-2 left-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
+            <span className="absolute top-2 right-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
+            <span className="absolute bottom-2 left-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
+            <span className="absolute bottom-2 right-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
+
+            <div className="space-y-5 text-center">
+              {/* Spinning gold radar indicator */}
+              <div className="w-14 h-14 bg-black border border-white/20 flex items-center justify-center mx-auto relative">
+                <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent animate-spin"></div>
+                <span className="absolute text-[8px] font-mono font-bold text-[#D4AF37]">
+                  {submissionStep * 33}%
+                </span>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37] block">
+                  [ EXECUTING ACQUISITION PROTOCOL ]
+                </span>
+                <h3 className="text-base font-bold text-white uppercase tracking-wider font-mono mt-1">
+                  Authorizing Order Placement
+                </h3>
+              </div>
+
+              {/* Progress gauge */}
+              <div className="w-full h-1.5 bg-black border border-white/10 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-[#B38F28] via-[#D4AF37] to-[#F3E5AB] transition-all duration-300 ease-out"
+                  style={{ width: `${submissionStep * 33 + (submissionStep === 3 ? 1 : 0)}%` }}
+                />
+              </div>
+
+              {/* Step progression ticker */}
+              <div className="space-y-2 text-left pt-2 font-mono text-[11px]">
+                <div
+                  className={`p-2 border flex items-center gap-2 transition-colors ${
+                    submissionStep >= 1
+                      ? "bg-[#141419] border-[#D4AF37]/50 text-white"
+                      : "bg-black border-white/5 text-zinc-600"
+                  }`}
+                >
+                  <span className="text-[#D4AF37] font-bold">01 //</span>
+                  <span>Allocating Sealed Unit from Boutique Vault...</span>
+                </div>
+
+                <div
+                  className={`p-2 border flex items-center gap-2 transition-colors ${
+                    submissionStep >= 2
+                      ? "bg-[#141419] border-[#D4AF37]/50 text-white"
+                      : "bg-black border-white/5 text-zinc-600"
+                  }`}
+                >
+                  <span className="text-[#D4AF37] font-bold">02 //</span>
+                  <span>Generating Order Ref & Serial Registry...</span>
+                </div>
+
+                <div
+                  className={`p-2 border flex items-center gap-2 transition-colors ${
+                    submissionStep >= 3
+                      ? "bg-[#141419] border-[#D4AF37]/50 text-white"
+                      : "bg-black border-white/5 text-zinc-600"
+                  }`}
+                >
+                  <span className="text-[#D4AF37] font-bold">03 //</span>
+                  <span>Routing Dispatch to Regional Courier Hub...</span>
+                </div>
+              </div>
+
+              <p className="text-[10px] font-mono text-zinc-500">
+                Please hold. Preparing your order manifest & receipt...
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

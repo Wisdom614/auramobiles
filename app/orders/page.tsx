@@ -337,8 +337,33 @@ function OrderTrackingContent() {
           ))}
         </div>
 
-        {/* Active Order Details */}
-        {activeOrder && (
+        {/* Active Order Details or Loading Radar Scanner */}
+        {isLoadingOrder ? (
+          <div className="p-10 sm:p-14 bg-[#0E0E12] border border-white/15 text-center space-y-4 relative animate-in fade-in duration-150">
+            {/* Viewfinder crosshairs */}
+            <span className="absolute top-2 left-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
+            <span className="absolute top-2 right-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
+            <span className="absolute bottom-2 left-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
+            <span className="absolute bottom-2 right-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
+
+            <div className="w-14 h-14 bg-black border border-white/20 flex items-center justify-center mx-auto relative">
+              <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent animate-spin"></div>
+            </div>
+
+            <div>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37] block">
+                [ RADAR TELEMETRY // SCANNING SUPABASE DISPATCH DATABASE ]
+              </span>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono mt-1">
+                Querying Dispatch Registry: {searchQuery}
+              </h3>
+            </div>
+
+            <p className="text-xs font-mono text-zinc-500 max-w-sm mx-auto">
+              Scanning real-time courier coordinates, milestone timestamps, and IMEI allocation status...
+            </p>
+          </div>
+        ) : activeOrder ? (
           <div className="space-y-8">
             
             {/* 1. Header Information Card */}
@@ -642,7 +667,7 @@ function OrderTrackingContent() {
             </div>
 
           </div>
-        )}
+        ) : null}
 
         {/* Official Printable VIP Receipt Modal */}
         <OrderReceiptModal

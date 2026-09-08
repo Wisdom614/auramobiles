@@ -40,6 +40,7 @@ function PhonesCatalogContent() {
   const initialSearch = searchParams.get("search") || "";
 
   const [phonesList, setPhonesList] = useState<Phone[]>(PHONES);
+  const [isLoadingCatalog, setIsLoadingCatalog] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState<string>(initialBrand);
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [selectedCondition, setSelectedCondition] = useState<string>("all");
@@ -51,9 +52,16 @@ function PhonesCatalogContent() {
 
   useEffect(() => {
     async function loadCatalog() {
-      const dbPhones = await getPhonesFromDB();
-      if (dbPhones && dbPhones.length > 0) {
-        setPhonesList(dbPhones);
+      setIsLoadingCatalog(true);
+      try {
+        const dbPhones = await getPhonesFromDB();
+        if (dbPhones && dbPhones.length > 0) {
+          setPhonesList(dbPhones);
+        }
+      } catch (err) {
+        console.error("Failed to load phones from DB:", err);
+      } finally {
+        setIsLoadingCatalog(false);
       }
     }
     loadCatalog();
@@ -383,16 +391,42 @@ function PhonesCatalogContent() {
 
         </div>
 
-        {/* 5. Product Cards Grid: 2 columns on mobile, 3 on tablet, 4 on desktop */}
-        {filteredPhones.length === 0 ? (
-          <div className="py-20 text-center space-y-4 rounded-2xl bg-[#121217] border border-white/8 p-8">
-            <p className="text-zinc-300 font-bold text-base">No smartphones match your exact combination.</p>
+        {/* 5. Product Cards Grid or Loading Skeletons */}
+        {isLoadingCatalog ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6 animate-pulse">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div
+                key={i}
+                className="bg-[#0E0E12] border border-white/10 p-4 space-y-3"
+              >
+                <div className="flex justify-between">
+                  <div className="h-2.5 w-16 bg-[#D4AF37]/20"></div>
+                  <div className="h-2.5 w-12 bg-white/10"></div>
+                </div>
+                <div className="w-full h-44 bg-black border border-white/10 flex items-center justify-center">
+                  <div className="w-16 h-28 bg-white/5"></div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="h-4 w-3/4 bg-white/10"></div>
+                  <div className="h-2.5 w-1/2 bg-white/5"></div>
+                </div>
+                <div className="flex justify-between items-baseline pt-1">
+                  <div className="h-4 w-20 bg-[#D4AF37]/30"></div>
+                  <div className="h-2.5 w-12 bg-white/5"></div>
+                </div>
+                <div className="h-9 w-full bg-white/10"></div>
+              </div>
+            ))}
+          </div>
+        ) : filteredPhones.length === 0 ? (
+          <div className="py-20 text-center space-y-4 rounded-none bg-[#0E0E12] border border-white/10 p-8">
+            <p className="text-zinc-300 font-bold text-base font-mono">[ NO SPECIFICATIONS MATCHED ]</p>
             <p className="text-zinc-500 text-xs max-w-sm mx-auto">
               Try adjusting your max price slider, clearing the storage variant, or searching for another brand.
             </p>
             <button
               onClick={resetAllFilters}
-              className="px-6 py-2.5 rounded-xl gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider"
+              className="px-6 py-2.5 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-widest cursor-pointer"
             >
               Reset All Filters
             </button>
