@@ -18,8 +18,9 @@ import {
 import { useCart } from "@/lib/store/cart-context";
 import { useWishlist } from "@/lib/store/wishlist-context";
 import { useSettings } from "@/lib/store/settings-context";
-import { PHONES } from "@/lib/data/phones";
+import { PHONES, Phone } from "@/lib/data/phones";
 import { formatCFA } from "@/lib/formatters";
+import { getPhonesFromDB } from "@/lib/supabase/client";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -28,11 +29,18 @@ export function Navbar() {
   const { wishlistCount } = useWishlist();
   const { settings } = useSettings();
 
+  const [phonesList, setPhonesList] = useState<Phone[]>(PHONES);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    getPhonesFromDB().then((data) => {
+      if (data && data.length > 0) setPhonesList(data);
+    });
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -77,7 +85,7 @@ export function Navbar() {
 
   // Filter phones for live search
   const filteredSearchPhones = searchQuery.trim()
-    ? PHONES.filter(
+    ? phonesList.filter(
         (p) =>
           p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||

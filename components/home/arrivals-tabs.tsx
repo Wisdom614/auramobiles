@@ -5,20 +5,30 @@ import Link from "next/link";
 import { ArrowRight, Flame, Sparkles, ShieldCheck } from "lucide-react";
 import { PHONES, Phone } from "@/lib/data/phones";
 import { ProductCard } from "@/components/product/product-card";
+import { getPhonesFromDB } from "@/lib/supabase/client";
 
 type TabType = "new" | "bestsellers" | "certified";
 
 export function ArrivalsTabs() {
   const [activeTab, setActiveTab] = useState<TabType>("new");
+  const [phonesList, setPhonesList] = useState<Phone[]>(PHONES);
+
+  React.useEffect(() => {
+    getPhonesFromDB().then((data) => {
+      if (data && data.length > 0) {
+        setPhonesList(data);
+      }
+    });
+  }, []);
 
   const getPhonesByTab = (): Phone[] => {
     switch (activeTab) {
       case "new":
-        return PHONES.filter((p) => p.isNew).slice(0, 4);
+        return phonesList.filter((p) => p.isNew).slice(0, 4);
       case "bestsellers":
-        return PHONES.filter((p) => p.isBestSeller).slice(0, 4);
+        return phonesList.filter((p) => p.isBestSeller).slice(0, 4);
       case "certified":
-        return PHONES.filter((p) => p.condition === "Certified Refurbished").slice(0, 4);
+        return phonesList.filter((p) => p.condition === "Certified Refurbished").slice(0, 4);
     }
   };
 

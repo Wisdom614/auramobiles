@@ -104,50 +104,82 @@ function mapModelToDbPhone(phone: Phone): any {
 // ==========================================================
 
 export async function getPhonesFromDB(): Promise<Phone[] | null> {
-  if (!supabase) return null;
-  try {
-    const { data, error } = await supabase
-      .from("phones")
-      .select("*")
-      .order("created_at", { ascending: false });
+  // 1. Try Supabase first
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from("phones")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      return null;
-    }
-    return data.map(mapDbPhoneToModel);
-  } catch {
-    return null;
+      if (!error && data && data.length > 0) {
+        const mapped = data.map(mapDbPhoneToModel);
+        try {
+          localStorage.setItem("aura_phones_v1", JSON.stringify(mapped));
+        } catch {}
+        return mapped;
+      }
+    } catch {}
   }
+
+  // 2. Fallback to localStorage (holds newly created/edited admin phones)
+  try {
+    const cached = localStorage.getItem("aura_phones_v1");
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch {}
+
+  // 3. Fallback to default catalog
+  return PHONES;
 }
 
 export async function getPhoneBySlugFromDB(slug: string): Promise<Phone | null> {
-  if (!supabase) return null;
-  try {
-    const { data, error } = await supabase
-      .from("phones")
-      .select("*")
-      .or(`slug.eq.${slug},id.eq.${slug}`)
-      .maybeSingle();
+  const cleanSlug = slug?.toLowerCase().trim();
 
-    if (!error && data) {
-      return mapDbPhoneToModel(data);
-    }
+  // 1. Try Supabase
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from("phones")
+        .select("*")
+        .or(`slug.eq.${cleanSlug},id.eq.${cleanSlug}`)
+        .maybeSingle();
 
-    // Fallback: search all DB records for matching slug or name
-    const all = await getPhonesFromDB();
-    if (all && all.length > 0) {
-      const match = all.find((p) => p.slug === slug || p.id === slug);
-      if (match) return match;
-    }
-
-    return null;
-  } catch {
-    return null;
+      if (!error && data) {
+        return mapDbPhoneToModel(data);
+      }
+    } catch {}
   }
+
+  // 2. Check full catalog (Supabase or localStorage cache)
+  const all = await getPhonesFromDB();
+  if (all && all.length > 0) {
+    const match = all.find(
+      (p) =>
+        p.slug?.toLowerCase() === cleanSlug ||
+        p.id?.toLowerCase() === cleanSlug ||
+        p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") === cleanSlug
+    );
+    if (match) return match;
+  }
+
+  return null;
 }
 
 export async function insertPhoneToDB(phone: Phone): Promise<boolean> {
-  if (!supabase) return false;
+  // Sync to localStorage immediately
+  try {
+    const cached = localStorage.getItem("aura_phones_v1");
+    const currentList: Phone[] = cached ? JSON.parse(cached) : PHONES;
+    const filtered = currentList.filter((p) => p.id !== phone.id);
+    localStorage.setItem("aura_phones_v1", JSON.stringify([phone, ...filtered]));
+  } catch {}
+
+  if (!supabase) return true;
   try {
     const payload = mapModelToDbPhone(phone);
     const { error } = await supabase.from("phones").upsert(payload);
@@ -158,19 +190,39 @@ export async function insertPhoneToDB(phone: Phone): Promise<boolean> {
 }
 
 export async function updatePhoneInDB(id: string, updates: Partial<Phone>): Promise<boolean> {
-  if (!supabase) return false;
+  // Sync to localStorage
+  try {
+    const cached = localStorage.getItem("aura_phones_v1");
+    const currentList: Phone[] = cached ? JSON.parse(cached) : PHONES;
+    const updatedList = currentList.map((p) => (p.id === id ? { ...p, ...updates } : p));
+    localStorage.setItem("aura_phones_v1", JSON.stringify(updatedList));
+  } catch {}
+
+  if (!supabase) return true;
   try {
     const dbPayload: any = { updated_at: new Date().toISOString() };
+    if (updates.name !== undefined) {
+      dbPayload.name = updates.name;
+      dbPayload.model = updates.name;
+    }
+    if (updates.slug !== undefined) dbPayload.slug = updates.slug;
+    if (updates.brand !== undefined) dbPayload.brand = updates.brand;
+    if (updates.tagline !== undefined) dbPayload.tagline = updates.tagline;
     if (updates.basePrice !== undefined) dbPayload.price_fcfa = updates.basePrice;
     if (updates.originalPrice !== undefined) dbPayload.original_price_fcfa = updates.originalPrice;
     if (updates.isFeatured !== undefined) dbPayload.is_featured = updates.isFeatured;
     if (updates.isBestSeller !== undefined) dbPayload.is_bestseller = updates.isBestSeller;
+    if (updates.condition !== undefined) dbPayload.condition = updates.condition;
+    if (updates.warranty !== undefined) dbPayload.warranty = updates.warranty;
+    if (updates.storageVariants !== undefined) dbPayload.storage_variants = updates.storageVariants;
+    if (updates.colorVariants !== undefined) dbPayload.color_variants = updates.colorVariants;
     if (updates.images !== undefined) {
       dbPayload.images = updates.images;
-      dbPayload.thumbnail = updates.images[0];
+      dbPayload.thumbnail = updates.images[0] || "";
     }
-    if (updates.name !== undefined) dbPayload.name = updates.name;
-    if (updates.brand !== undefined) dbPayload.brand = updates.brand;
+    if (updates.specs !== undefined) dbPayload.specs = updates.specs;
+    if (updates.highlights !== undefined) dbPayload.highlights = updates.highlights;
+    if (updates.boxContents !== undefined) dbPayload.box_contents = updates.boxContents;
 
     const { error } = await supabase.from("phones").update(dbPayload).eq("id", id);
     return !error;
@@ -180,7 +232,17 @@ export async function updatePhoneInDB(id: string, updates: Partial<Phone>): Prom
 }
 
 export async function deletePhoneFromDB(id: string): Promise<boolean> {
-  if (!supabase) return false;
+  // Sync to localStorage
+  try {
+    const cached = localStorage.getItem("aura_phones_v1");
+    if (cached) {
+      const currentList: Phone[] = JSON.parse(cached);
+      const filtered = currentList.filter((p) => p.id !== id);
+      localStorage.setItem("aura_phones_v1", JSON.stringify(filtered));
+    }
+  } catch {}
+
+  if (!supabase) return true;
   try {
     const { error } = await supabase.from("phones").delete().eq("id", id);
     return !error;
