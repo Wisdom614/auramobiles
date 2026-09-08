@@ -30,10 +30,17 @@ import {
   LogOut,
   UserPlus,
   Lock,
+  SlidersHorizontal,
+  MapPin,
+  Mail,
+  Clock,
+  Truck,
+  PhoneCall,
 } from "lucide-react";
 import { formatCFA } from "@/lib/formatters";
 import { Phone, PHONES } from "@/lib/data/phones";
 import { Order, INITIAL_ORDERS, OrderStatus } from "@/lib/data/mock-orders";
+import { useSettings, DEFAULT_SETTINGS, SiteSettings } from "@/lib/store/settings-context";
 import {
   supabase,
   getPhonesFromDB,
@@ -57,7 +64,16 @@ import { uploadToCloudinary } from "@/lib/cloudinary/upload";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "orders" | "trade-ins" | "settings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "orders" | "trade-ins" | "site-settings" | "settings">("overview");
+
+  // Boutique Site Settings State
+  const { settings, updateSettings } = useSettings();
+  const [siteForm, setSiteForm] = useState<SiteSettings>(settings);
+  const [isSavingSiteSettings, setIsSavingSiteSettings] = useState(false);
+
+  useEffect(() => {
+    setSiteForm(settings);
+  }, [settings]);
 
   // Auth State
   const [authChecked, setAuthChecked] = useState(false);
@@ -460,6 +476,35 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Save Boutique Site Settings
+  const handleSaveSiteSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingSiteSettings(true);
+    try {
+      const ok = await updateSettings(siteForm);
+      if (ok) {
+        showToast("Boutique settings saved to Supabase & broadcast system-wide!", "success");
+      } else {
+        showToast("Boutique settings saved locally!", "info");
+      }
+    } catch (err: any) {
+      showToast(err.message || "Failed to update settings", "error");
+    } finally {
+      setIsSavingSiteSettings(false);
+    }
+  };
+
+  // Reset Boutique Site Settings
+  const handleResetSiteSettings = async () => {
+    if (confirm("Reset all boutique settings to official factory defaults?")) {
+      setIsSavingSiteSettings(true);
+      setSiteForm(DEFAULT_SETTINGS);
+      await updateSettings(DEFAULT_SETTINGS);
+      setIsSavingSiteSettings(false);
+      showToast("Boutique settings restored to defaults.", "info");
+    }
+  };
+
   // Loading Screen
   if (!authChecked) {
     return (
@@ -666,6 +711,18 @@ export default function AdminDashboardPage() {
                   {pendingTradeInsCount}
                 </span>
               )}
+            </button>
+
+            <button
+              onClick={() => setActiveTab("site-settings")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition ${
+                activeTab === "site-settings"
+                  ? "bg-[#D4AF37] text-black font-semibold shadow-lg shadow-[#D4AF37]/10"
+                  : "text-white/70 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              <span>Site Settings</span>
             </button>
 
             <button
@@ -1131,7 +1188,404 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* TAB 5: TEAM & SECURITY MANAGEMENT */}
+        {/* TAB 5: BOUTIQUE & SITE CONFIGURATION */}
+        {activeTab === "site-settings" && (
+          <div className="space-y-8 animate-fade-in">
+            {/* Header & Quick Save Bar */}
+            <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-[#17171F] border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
+                  <SlidersHorizontal className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    <span>Boutique & System Configuration</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 uppercase">
+                      Live Settings
+                    </span>
+                  </h2>
+                  <p className="text-xs text-white/50">
+                    All system modules (storefront, navbar, footer, checkout, support) adapt dynamically to these values.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={handleResetSiteSettings}
+                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 text-xs font-semibold transition"
+                >
+                  Reset Defaults
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveSiteSettings}
+                  disabled={isSavingSiteSettings}
+                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#B38F26] text-black font-bold text-xs hover:brightness-110 transition shadow-lg shadow-[#D4AF37]/15 flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>{isSavingSiteSettings ? "Broadcasting..." : "Save Settings"}</span>
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleSaveSiteSettings} className="space-y-8">
+              {/* SECTION 1: BRAND IDENTITY & ANNOUNCEMENT BAR */}
+              <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-5">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-white/10">
+                  <Store className="w-5 h-5 text-[#D4AF37]" />
+                  <div>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                      1. Brand Identity & Header Announcement
+                    </h3>
+                    <p className="text-xs text-white/50">
+                      Controls the store name in navigation, footer, metadata, and top announcement banner
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                      Store Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={siteForm.storeName}
+                      onChange={(e) => setSiteForm({ ...siteForm, storeName: e.target.value })}
+                      placeholder="e.g. AURA LUXE MOBILE"
+                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                      Brand Tagline / Subtitle
+                    </label>
+                    <input
+                      type="text"
+                      value={siteForm.tagline}
+                      onChange={(e) => setSiteForm({ ...siteForm, tagline: e.target.value })}
+                      placeholder="e.g. Central Africa's Premier Luxury Smartphone Boutique"
+                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-white/80 mb-1">
+                    Storefront Top Announcement Bar Message
+                  </label>
+                  <input
+                    type="text"
+                    value={siteForm.announcementText}
+                    onChange={(e) => setSiteForm({ ...siteForm, announcementText: e.target.value })}
+                    placeholder="e.g. Free VIP delivery on orders over FCFA 500,000 • 100% Genuine Sealed Devices"
+                    className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                  />
+                  <div className="mt-2.5 p-3 rounded-xl bg-[#09090B] border border-white/10 flex items-center justify-between text-[11px] text-zinc-400">
+                    <div className="flex items-center gap-1.5 text-zinc-300">
+                      <Truck className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>Free delivery over FCFA {siteForm.freeDeliveryThreshold?.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[#D4AF37] font-medium">
+                      <span>Live Preview:</span>
+                      <span className="text-zinc-200 truncate max-w-[280px] sm:max-w-md">
+                        {siteForm.announcementText}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 2: CONCIERGE & DIRECT CONTACTS */}
+              <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-5">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-white/10">
+                  <PhoneCall className="w-5 h-5 text-[#D4AF37]" />
+                  <div>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                      2. Concierge Desk & Client Contacts
+                    </h3>
+                    <p className="text-xs text-white/50">
+                      Direct phone, WhatsApp order dispatch, and customer support channels
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                      Official WhatsApp Business Line *
+                    </label>
+                    <div className="relative">
+                      <MessageCircle className="w-4 h-4 text-emerald-400 absolute left-3 top-3" />
+                      <input
+                        type="text"
+                        required
+                        value={siteForm.whatsappPhone}
+                        onChange={(e) => setSiteForm({ ...siteForm, whatsappPhone: e.target.value })}
+                        placeholder="+237 699 44 21 00"
+                        className="w-full bg-[#17171F] border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                      />
+                    </div>
+                    <span className="text-[10px] text-white/40 block mt-1">
+                      Used for WhatsApp checkout & quick order confirmations.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                      Direct Telephone Line
+                    </label>
+                    <div className="relative">
+                      <PhoneCall className="w-4 h-4 text-[#D4AF37] absolute left-3 top-3" />
+                      <input
+                        type="text"
+                        value={siteForm.secondaryPhone}
+                        onChange={(e) => setSiteForm({ ...siteForm, secondaryPhone: e.target.value })}
+                        placeholder="+237 677 88 99 00"
+                        className="w-full bg-[#17171F] border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                      />
+                    </div>
+                    <span className="text-[10px] text-white/40 block mt-1">
+                      Shown on footer, contact page, and order receipts.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                      Support / Concierge Email
+                    </label>
+                    <div className="relative">
+                      <Mail className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                      <input
+                        type="email"
+                        value={siteForm.supportEmail}
+                        onChange={(e) => setSiteForm({ ...siteForm, supportEmail: e.target.value })}
+                        placeholder="concierge@auraluxe.cm"
+                        className="w-full bg-[#17171F] border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                      />
+                    </div>
+                    <span className="text-[10px] text-white/40 block mt-1">
+                      Official email for client inquiries and order invoices.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 3: PHYSICAL FLAGSHIP BOUTIQUES */}
+              <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-5">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-white/10">
+                  <MapPin className="w-5 h-5 text-[#D4AF37]" />
+                  <div>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                      3. Physical Flagship Lounges & Working Hours
+                    </h3>
+                    <p className="text-xs text-white/50">
+                      Physical locations for client pickups, trade-in device inspections, and luxury lounges
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                      Douala Flagship Showroom Address
+                    </label>
+                    <input
+                      type="text"
+                      value={siteForm.doualaAddress}
+                      onChange={(e) => setSiteForm({ ...siteForm, doualaAddress: e.target.value })}
+                      placeholder="Rue Tokoto, Bonapriso, Douala"
+                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                      Yaoundé Bastos Lounge Address
+                    </label>
+                    <input
+                      type="text"
+                      value={siteForm.yaoundeAddress}
+                      onChange={(e) => setSiteForm({ ...siteForm, yaoundeAddress: e.target.value })}
+                      placeholder="Avenue Bastos, Face Ambassade, Yaoundé"
+                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-white/80 mb-1">
+                    Operating / Concierge Hours
+                  </label>
+                  <div className="relative max-w-md">
+                    <Clock className="w-4 h-4 text-[#D4AF37] absolute left-3 top-3" />
+                    <input
+                      type="text"
+                      value={siteForm.openingHours}
+                      onChange={(e) => setSiteForm({ ...siteForm, openingHours: e.target.value })}
+                      placeholder="Mon - Sat: 08:30 – 19:30"
+                      className="w-full bg-[#17171F] border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 4: DELIVERY FEES & FREE THRESHOLD */}
+              <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-5">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-white/10">
+                  <Truck className="w-5 h-5 text-[#D4AF37]" />
+                  <div>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                      4. Logistics, Delivery Fees & Free Delivery Minimum
+                    </h3>
+                    <p className="text-xs text-white/50">
+                      Calculates delivery costs automatically at checkout in Douala, Yaoundé, and nationwide
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                      Douala & Yaoundé Local Express Fee (FCFA)
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={0}
+                      step={500}
+                      value={siteForm.deliveryFeeDoualaYaounde}
+                      onChange={(e) =>
+                        setSiteForm({ ...siteForm, deliveryFeeDoualaYaounde: Number(e.target.value) })
+                      }
+                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono font-bold text-amber-300"
+                    />
+                    <span className="text-[10px] text-white/40 block mt-1">
+                      Same-day courier to customer doorsteps in Douala/Yaoundé.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                      Nationwide Secured Transit Fee (FCFA)
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={0}
+                      step={500}
+                      value={siteForm.deliveryFeeNationwide}
+                      onChange={(e) =>
+                        setSiteForm({ ...siteForm, deliveryFeeNationwide: Number(e.target.value) })
+                      }
+                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono font-bold text-amber-300"
+                    />
+                    <span className="text-[10px] text-white/40 block mt-1">
+                      Secured transit to Bafoussam, Garoua, Bamenda, Kribi, etc.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                      Free VIP Delivery Minimum Order (FCFA)
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={0}
+                      step={10000}
+                      value={siteForm.freeDeliveryThreshold}
+                      onChange={(e) =>
+                        setSiteForm({ ...siteForm, freeDeliveryThreshold: Number(e.target.value) })
+                      }
+                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono font-bold text-emerald-400"
+                    />
+                    <span className="text-[10px] text-white/40 block mt-1">
+                      Orders reaching this amount enjoy complimentary zero-fee delivery.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 5: MOBILE MONEY PAYMENT INSTRUCTIONS */}
+              <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-5">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-white/10">
+                  <DollarSign className="w-5 h-5 text-[#D4AF37]" />
+                  <div>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                      5. Local Cameroon Mobile Money Instructions
+                    </h3>
+                    <p className="text-xs text-white/50">
+                      Displayed on checkout page when customers select MTN Mobile Money or Orange Money
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                      MTN Mobile Money Instructions / Number
+                    </label>
+                    <input
+                      type="text"
+                      value={siteForm.mtnMomoNumber}
+                      onChange={(e) => setSiteForm({ ...siteForm, mtnMomoNumber: e.target.value })}
+                      placeholder="e.g. *126# / 677 88 99 00"
+                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                      Orange Money Instructions / Number
+                    </label>
+                    <input
+                      type="text"
+                      value={siteForm.orangeMoneyNumber}
+                      onChange={(e) => setSiteForm({ ...siteForm, orangeMoneyNumber: e.target.value })}
+                      placeholder="e.g. #150# / 699 44 21 00"
+                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* BOTTOM FLOATING SAVE BAR */}
+              <div className="p-4 rounded-2xl bg-[#0F0F14] border border-[#D4AF37]/30 flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-4 shadow-2xl backdrop-blur-md">
+                <div className="text-xs text-white/70 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#D4AF37]" />
+                  <span>
+                    Settings automatically synchronize across Supabase cloud and client browsers.
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={handleResetSiteSettings}
+                    className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 text-xs font-semibold transition flex-1 sm:flex-initial"
+                  >
+                    Reset Defaults
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSavingSiteSettings}
+                    className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#B38F26] text-black font-bold text-xs hover:brightness-110 transition shadow-lg shadow-[#D4AF37]/20 flex items-center justify-center gap-2 flex-1 sm:flex-initial disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{isSavingSiteSettings ? "Saving Settings..." : "Save Boutique Settings"}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* TAB 6: TEAM & SECURITY MANAGEMENT */}
         {activeTab === "settings" && (
           <div className="space-y-8 animate-fade-in">
             {/* Grid 2 Columns: Profile/Password & Add Admin */}

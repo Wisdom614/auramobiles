@@ -1,271 +1,171 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import {
   MapPin,
   Phone,
   Mail,
   ShieldCheck,
-  Truck,
-  RotateCcw,
-  Sparkles,
-  CheckCircle2,
   ArrowUpRight,
+  MessageCircle,
+  Clock,
+  Lock,
 } from "lucide-react";
+import { useSettings } from "@/lib/store/settings-context";
 
 export function Footer() {
-  const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleNewsletter = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newsletterEmail) {
-      setSubscribed(true);
-      setNewsletterEmail("");
-    }
-  };
+  const { settings } = useSettings();
 
   return (
-    <footer className="bg-[#0A0A0D] border-t border-white/10 text-zinc-400 text-sm mt-auto">
-      {/* 4 Pillars Trust Bar */}
-      <div className="border-b border-white/5 bg-[#0E0E12] py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-[#D4AF37]/30 flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-5 h-5 text-[#D4AF37]" />
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-white">100% Official Origin</h4>
-                <p className="text-xs text-zinc-500 mt-0.5">
-                  IMEI registered with direct 12-month manufacturer guarantee.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-[#D4AF37]/30 flex items-center justify-center shrink-0">
-                <Truck className="w-5 h-5 text-[#D4AF37]" />
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-white">VIP Express Logistics</h4>
-                <p className="text-xs text-zinc-500 mt-0.5">
-                  Same-day delivery in Douala & Yaoundé before 14:00.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-[#D4AF37]/30 flex items-center justify-center shrink-0">
-                <RotateCcw className="w-5 h-5 text-[#D4AF37]" />
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-white">7-Day Replacement</h4>
-                <p className="text-xs text-zinc-500 mt-0.5">
-                  No questions asked hardware exchange for peace of mind.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-[#D4AF37]/30 flex items-center justify-center shrink-0">
-                <Sparkles className="w-5 h-5 text-[#D4AF37]" />
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-white">Certified Phone Swap</h4>
-                <p className="text-xs text-zinc-500 mt-0.5">
-                  Instant trade-in credit against your new flagship purchase.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Footer Links */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
-          {/* Brand Col */}
-          <div className="lg:col-span-2 space-y-4">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl overflow-hidden bg-black border border-[#D4AF37]/40 shadow-md">
-                <img
-                  src="/aura-monogram.jpg"
-                  alt="AURA"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div>
-                <span className="text-lg font-black tracking-[0.22em] text-white uppercase block leading-none">
-                  AURA
-                </span>
-                <span className="text-[9px] tracking-[0.3em] text-[#D4AF37] uppercase font-mono font-semibold block mt-0.5">
-                  LUXE MOBILE BOUTIQUE
-                </span>
-              </div>
-            </Link>
-
-            <p className="text-xs text-zinc-400 max-w-sm leading-relaxed">
-              Central Africa’s premier technology boutique for luxury flagship smartphones, verified phone trade-ins, and bespoke concierge device servicing.
-            </p>
-
-            {/* Newsletter */}
-            <div className="pt-2">
-              <p className="text-xs font-semibold text-white mb-2">
-                Join the VIP Circle for Private Releases & Price Drops
-              </p>
-              {subscribed ? (
-                <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-950/30 border border-emerald-800/40 p-2.5 rounded-xl">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Welcome to the VIP roster. Check your inbox for your 25,000 FCFA welcome voucher.</span>
+    <footer className="bg-[#09090B] border-t border-white/10 text-zinc-400 text-xs mt-auto">
+      {/* MINIMAL ARCHITECTURAL TABLE MATRIX */}
+      <div className="max-w-7xl mx-auto border-x border-white/10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-white/10">
+          
+          {/* Table Cell 1: Brand & Authentication */}
+          <div className="p-6 sm:p-7 space-y-3 bg-[#0C0C10]/40 flex flex-col justify-between">
+            <div className="space-y-2.5">
+              <Link href="/" className="inline-flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-black border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] font-black text-sm">
+                  A
                 </div>
-              ) : (
-                <form onSubmit={handleNewsletter} className="flex gap-2 max-w-sm">
-                  <input
-                    type="email"
-                    required
-                    value={newsletterEmail}
-                    onChange={(e) => setNewsletterEmail(e.target.value)}
-                    placeholder="Enter your email address"
-                    className="flex-1 bg-[#141419] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#D4AF37]"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded-xl gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity"
-                  >
-                    Join
-                  </button>
-                </form>
-              )}
+                <div>
+                  <span className="text-sm font-black tracking-widest text-white uppercase block leading-none">
+                    {settings.storeName}
+                  </span>
+                  <span className="text-[9px] tracking-widest text-[#D4AF37] font-mono block mt-0.5">
+                    LUXE SMARTPHONES
+                  </span>
+                </div>
+              </Link>
+              <p className="text-[11px] text-zinc-400 leading-relaxed">
+                {settings.tagline}
+              </p>
+            </div>
+
+            <div className="pt-2 flex items-center gap-1.5 text-[11px] text-emerald-400/90 font-medium">
+              <ShieldCheck className="w-4 h-4 text-[#D4AF37] shrink-0" />
+              <span>100% Genuine Sealed Flagships</span>
             </div>
           </div>
 
-          {/* Boutiques in Cameroon */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
-              Boutiques & Lounges
+          {/* Table Cell 2: Physical Boutiques */}
+          <div className="p-6 sm:p-7 space-y-3 bg-[#0C0C10]/20">
+            <h4 className="text-[11px] font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>Boutique Lounges</span>
             </h4>
-            <div className="space-y-4 text-xs">
+            <div className="space-y-3 text-[11px]">
               <div>
-                <p className="font-semibold text-zinc-200 flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-[#D4AF37]" /> Douala Flagship
-                </p>
-                <p className="text-zinc-500 mt-0.5">Rue Tokoto, Bonapriso</p>
-                <p className="text-zinc-400 mt-0.5 font-mono text-[11px]">+237 699 44 21 00</p>
-                <p className="text-amber-300/70 text-[10px] mt-0.5">Mon - Sat: 08:30 – 19:30</p>
+                <strong className="text-zinc-200 block">Douala Flagship:</strong>
+                <span className="text-zinc-400 block mt-0.5">{settings.doualaAddress}</span>
               </div>
               <div>
-                <p className="font-semibold text-zinc-200 flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-[#D4AF37]" /> Yaoundé Bastos Lounge
-                </p>
-                <p className="text-zinc-500 mt-0.5">Avenue Bastos, Face Ambassade</p>
-                <p className="text-zinc-400 mt-0.5 font-mono text-[11px]">+237 677 88 99 00</p>
-                <p className="text-amber-300/70 text-[10px] mt-0.5">Mon - Sat: 09:00 – 19:00</p>
+                <strong className="text-zinc-200 block">Yaoundé Bastos:</strong>
+                <span className="text-zinc-400 block mt-0.5">{settings.yaoundeAddress}</span>
+              </div>
+              <div className="flex items-center gap-1 text-[10px] text-[#D4AF37] font-mono pt-1">
+                <Clock className="w-3 h-3" />
+                <span>{settings.openingHours}</span>
               </div>
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
-              Collection
+          {/* Table Cell 3: Direct Concierge Contacts */}
+          <div className="p-6 sm:p-7 space-y-3 bg-[#0C0C10]/40">
+            <h4 className="text-[11px] font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <Phone className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>Concierge Desk</span>
             </h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link href="/phones?brand=Apple" className="hover:text-[#D4AF37] transition-colors">
-                  Apple iPhone Series
-                </Link>
-              </li>
-              <li>
-                <Link href="/phones?brand=Samsung" className="hover:text-[#D4AF37] transition-colors">
-                  Samsung Galaxy Flagships
-                </Link>
-              </li>
-              <li>
-                <Link href="/phones?category=camera" className="hover:text-[#D4AF37] transition-colors">
-                  Studio Optics & Zoom
-                </Link>
-              </li>
-              <li>
-                <Link href="/phones?category=refurbished" className="hover:text-[#D4AF37] transition-colors">
-                  Certified Pre-Owned (Pre-tested)
-                </Link>
-              </li>
-              <li>
-                <Link href="/trade-in" className="hover:text-[#D4AF37] transition-colors">
-                  Instant Phone Swap Estimator
-                </Link>
-              </li>
-              <li>
-                <Link href="/compare" className="hover:text-[#D4AF37] transition-colors">
-                  Side-by-Side Comparison
-                </Link>
-              </li>
-            </ul>
+            <div className="space-y-2 text-[11px]">
+              <a
+                href={`https://wa.me/${settings.whatsappCleanNumber}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 text-zinc-300 hover:text-[#25D366] transition-colors"
+              >
+                <MessageCircle className="w-3.5 h-3.5 text-[#25D366] shrink-0" />
+                <span>WhatsApp: {settings.whatsappPhone}</span>
+              </a>
+
+              <a
+                href={`tel:${settings.secondaryPhone.replace(/[^0-9+]/g, "")}`}
+                className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors"
+              >
+                <Phone className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                <span>Direct Line: {settings.secondaryPhone}</span>
+              </a>
+
+              <a
+                href={`mailto:${settings.supportEmail}`}
+                className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors"
+              >
+                <Mail className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                <span>Email: {settings.supportEmail}</span>
+              </a>
+            </div>
           </div>
 
-          {/* Customer Care */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
-              Concierge Care
+          {/* Table Cell 4: Curated Navigation */}
+          <div className="p-6 sm:p-7 space-y-3 bg-[#0C0C10]/20">
+            <h4 className="text-[11px] font-bold text-white uppercase tracking-wider font-mono">
+              Quick Directory
             </h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link href="/orders" className="hover:text-[#D4AF37] transition-colors">
-                  Live Order Tracking
-                </Link>
-              </li>
-              <li>
-                <Link href="/account" className="hover:text-[#D4AF37] transition-colors">
-                  Customer Account
-                </Link>
-              </li>
-              <li>
-                <Link href="/wishlist" className="hover:text-[#D4AF37] transition-colors">
-                  My Saved Wishlist
-                </Link>
-              </li>
-              <li>
-                <Link href="/support" className="hover:text-[#D4AF37] transition-colors">
-                  WhatsApp VIP Direct Support
-                </Link>
-              </li>
-              <li>
-                <Link href="/support#faq" className="hover:text-[#D4AF37] transition-colors">
-                  Warranty & Return Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin" className="text-zinc-500 hover:text-[#D4AF37] transition-colors flex items-center gap-1 font-mono text-[11px]">
-                  <span>Boutique Admin Portal</span>
-                  <ArrowUpRight className="w-3 h-3" />
-                </Link>
-              </li>
-            </ul>
+            <div className="grid grid-cols-2 gap-2 text-[11px]">
+              <Link href="/phones" className="text-zinc-400 hover:text-[#D4AF37] transition-colors">
+                • All Smartphones
+              </Link>
+              <Link href="/trade-in" className="text-zinc-400 hover:text-[#D4AF37] transition-colors">
+                • Phone Swap
+              </Link>
+              <Link href="/orders" className="text-zinc-400 hover:text-[#D4AF37] transition-colors">
+                • Track Order
+              </Link>
+              <Link href="/wishlist" className="text-zinc-400 hover:text-[#D4AF37] transition-colors">
+                • Saved Wishlist
+              </Link>
+              <Link href="/support" className="text-zinc-400 hover:text-[#D4AF37] transition-colors">
+                • Concierge Care
+              </Link>
+              <Link href="/admin" className="text-zinc-500 hover:text-[#D4AF37] transition-colors flex items-center gap-1 font-mono">
+                <Lock className="w-3 h-3" />
+                <span>Admin</span>
+              </Link>
+            </div>
           </div>
+
         </div>
 
-        {/* Bottom payment bar & copyright */}
-        <div className="mt-12 pt-6 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
-          <p>© {new Date().getFullYear()} AURA Luxe Mobile Boutique Ltd. All rights reserved.</p>
+        {/* BOTTOM TABLE ROW: COPYRIGHT & LOCAL PAYMENTS */}
+        <div className="border-t border-white/10 px-6 py-4 bg-[#08080A] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-zinc-500">
+          <div>
+            © {new Date().getFullYear()} {settings.storeName} Ltd. Certified Cameroon Luxury Boutique.
+          </div>
 
-          {/* Local Payment Badges */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] text-zinc-400 mr-1">Secured payments:</span>
-            <span className="px-2 py-0.5 rounded bg-zinc-900 border border-white/10 text-amber-400 font-mono text-[10px] font-bold">
+          {/* Compact Table Payment Cells */}
+          <div className="flex flex-wrap items-center gap-1.5 font-mono text-[10px]">
+            <span className="px-2 py-0.5 rounded bg-zinc-900 border border-white/10 text-amber-300">
               MTN MoMo
             </span>
-            <span className="px-2 py-0.5 rounded bg-zinc-900 border border-white/10 text-orange-400 font-mono text-[10px] font-bold">
+            <span className="px-2 py-0.5 rounded bg-zinc-900 border border-white/10 text-orange-300">
               Orange Money
             </span>
-            <span className="px-2 py-0.5 rounded bg-zinc-900 border border-white/10 text-zinc-200 font-mono text-[10px]">
+            <span className="px-2 py-0.5 rounded bg-zinc-900 border border-white/10 text-zinc-300">
               Cash on Delivery
             </span>
-            <span className="px-2 py-0.5 rounded bg-zinc-900 border border-white/10 text-blue-400 font-mono text-[10px] font-bold">
+            <span className="px-2 py-0.5 rounded bg-zinc-900 border border-white/10 text-blue-300">
               VISA / Mastercard
             </span>
           </div>
+
+          <Link
+            href="/admin"
+            className="text-zinc-500 hover:text-[#D4AF37] transition-colors flex items-center gap-1 text-[10px] font-mono"
+          >
+            <span>Boutique Portal</span>
+            <ArrowUpRight className="w-3 h-3" />
+          </Link>
         </div>
       </div>
     </footer>

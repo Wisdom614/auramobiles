@@ -105,17 +105,27 @@ INSERT INTO public.admin_users (email, role, full_name, created_by)
 VALUES ('wisdombesong123@gmail.com', 'super_admin', 'Wisdom Besong', 'system')
 ON CONFLICT (email) DO NOTHING;
 
+-- 5. SITE SETTINGS TABLE (DYNAMIC BOUTIQUE CONFIGURATION)
+CREATE TABLE IF NOT EXISTS public.site_settings (
+    id TEXT PRIMARY KEY DEFAULT 'default_settings',
+    settings JSONB NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_by TEXT DEFAULT 'admin'
+);
+
 -- GRANT PRIVILEGES ON SPECIFIC TABLES
 GRANT ALL ON TABLE public.phones TO postgres, anon, authenticated, service_role;
 GRANT ALL ON TABLE public.orders TO postgres, anon, authenticated, service_role;
 GRANT ALL ON TABLE public.trade_ins TO postgres, anon, authenticated, service_role;
 GRANT ALL ON TABLE public.admin_users TO postgres, anon, authenticated, service_role;
+GRANT ALL ON TABLE public.site_settings TO postgres, anon, authenticated, service_role;
 
 -- ENABLE ROW LEVEL SECURITY (RLS)
 ALTER TABLE public.phones ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.trade_ins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
 
 -- POLICIES:
 DROP POLICY IF EXISTS "Allow all on phones" ON public.phones;
@@ -129,4 +139,8 @@ CREATE POLICY "Allow all on trade_ins" ON public.trade_ins FOR ALL USING (true) 
 
 DROP POLICY IF EXISTS "Allow all on admin_users" ON public.admin_users;
 CREATE POLICY "Allow all on admin_users" ON public.admin_users FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all on site_settings" ON public.site_settings;
+CREATE POLICY "Allow all on site_settings" ON public.site_settings FOR ALL USING (true) WITH CHECK (true);
+
 

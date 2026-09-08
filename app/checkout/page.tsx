@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/lib/store/cart-context";
 import { useOrders } from "@/lib/store/orders-context";
+import { useSettings } from "@/lib/store/settings-context";
 import { OrderItem, CustomerDetails } from "@/lib/data/mock-orders";
 import { formatCFA } from "@/lib/formatters";
 
@@ -25,6 +26,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal, clearCart } = useCart();
   const { createOrder } = useOrders();
+  const { settings } = useSettings();
 
   // Low-effort, minimum typing form state
   const [fullName, setFullName] = useState("");
@@ -34,13 +36,15 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "mtn" | "orange">("cod");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Delivery fee calculation
+  // Delivery fee calculation from admin site settings
   const deliveryFee =
     deliveryOption === "pickup"
       ? 0
+      : subtotal >= settings.freeDeliveryThreshold
+      ? 0
       : deliveryOption === "nationwide"
-      ? 5000
-      : 2500; // Flat 2,500 FCFA for Douala/Yaoundé express
+      ? settings.deliveryFeeNationwide
+      : settings.deliveryFeeDoualaYaounde;
 
   const total = subtotal + deliveryFee;
 
@@ -80,11 +84,12 @@ export default function CheckoutPage() {
         ? "Showroom Pickup (Bonapriso/Bastos)"
         : `${deliveryOption.toUpperCase()} - ${address || "Address to specify"}`;
 
-    const text = `Hello AURA Mobile, I want to confirm my order:\n\n*Customer:* ${fullName || "Customer"}\n*Phone:* ${phoneNum || "Via WhatsApp"}\n*Delivery:* ${deliveryText}\n*Payment:* ${
+    const text = `Hello ${settings.storeName}, I want to confirm my order:\n\n*Customer:* ${fullName || "Customer"}\n*Phone:* ${phoneNum || "Via WhatsApp"}\n*Delivery:* ${deliveryText}\n*Payment:* ${
       paymentMethod === "cod" ? "Cash on Delivery" : paymentMethod === "mtn" ? "MTN MoMo" : "Orange Money"
     }\n\n*Items:*\n${itemList}\n\n*Total:* ${formatCFA(total)}\n\nPlease proceed with order dispatch.`;
 
-    window.open(`https://wa.me/237699442100?text=${encodeURIComponent(text)}`, "_blank");
+    const waNum = settings.whatsappCleanNumber || "237699442100";
+    window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   const handlePlaceOrder = (e: React.FormEvent) => {
@@ -295,12 +300,12 @@ export default function CheckoutPage() {
                   {
                     id: "mtn",
                     title: "MTN MoMo",
-                    desc: "Dial *126# upon order arrival",
+                    desc: settings.mtnMomoNumber || "Dial *126# upon order arrival",
                   },
                   {
                     id: "orange",
                     title: "Orange Money",
-                    desc: "Dial *150# upon order arrival",
+                    desc: settings.orangeMoneyNumber || "Dial #150# upon order arrival",
                   },
                 ].map((pay) => (
                   <button

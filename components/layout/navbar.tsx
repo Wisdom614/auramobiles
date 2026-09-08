@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/lib/store/cart-context";
 import { useWishlist } from "@/lib/store/wishlist-context";
+import { useSettings } from "@/lib/store/settings-context";
 import { PHONES } from "@/lib/data/phones";
 import { formatCFA } from "@/lib/formatters";
 
@@ -25,6 +26,7 @@ export function Navbar() {
   const router = useRouter();
   const { itemCount, setIsCartOpen } = useCart();
   const { wishlistCount } = useWishlist();
+  const { settings } = useSettings();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -112,7 +114,9 @@ export function Navbar() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-zinc-300">
             <Truck className="w-3.5 h-3.5 text-[#D4AF37]" />
-            <span className="text-[11px] sm:text-xs">Free delivery on orders over FCFA 500,000</span>
+            <span className="text-[11px] sm:text-xs">
+              Free delivery on orders over FCFA {settings.freeDeliveryThreshold.toLocaleString()}
+            </span>
           </div>
 
           <div className="hidden sm:flex items-center gap-2 text-zinc-300">
@@ -124,7 +128,7 @@ export function Navbar() {
 
           <div className="hidden md:flex items-center gap-1.5 text-zinc-300">
             <Tag className="w-3.5 h-3.5 text-[#D4AF37]" />
-            <span className="text-[11px] sm:text-xs">Special deals this week – Don&apos;t miss out!</span>
+            <span className="text-[11px] sm:text-xs">{settings.announcementText}</span>
           </div>
         </div>
       </div>

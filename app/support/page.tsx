@@ -16,6 +16,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import { useAi } from "@/lib/store/ai-context";
+import { useSettings } from "@/lib/store/settings-context";
 
 interface FaqItem {
   q: string;
@@ -47,6 +48,7 @@ const FAQS: FaqItem[] = [
 
 export default function SupportPage() {
   const { setIsAiOpen } = useAi();
+  const { settings } = useSettings();
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   return (
@@ -58,14 +60,14 @@ export default function SupportPage() {
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-[#D4AF37]/30 text-amber-300 text-xs font-semibold mb-3">
             <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
             <span className="uppercase tracking-widest font-mono text-[10px]">
-              VIP Client Services
+              Concierge Care
             </span>
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
-            Customer Support & Lounges
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            How May Our Concierge Assist You?
           </h1>
-          <p className="text-sm sm:text-base text-zinc-400 mt-2">
-            Experience white-glove smartphone concierge service across Cameroon.
+          <p className="text-xs sm:text-sm text-zinc-400 mt-3 leading-relaxed">
+            Direct access to genuine device verification, express delivery dispatch, and personal technical advisory across Cameroon.
           </p>
         </div>
 
@@ -90,27 +92,27 @@ export default function SupportPage() {
 
               <div>
                 <h3 className="text-lg font-bold text-white">
-                  AURA Bonapriso Boutique
+                  {settings.storeName} Bonapriso
                 </h3>
                 <p className="text-xs text-zinc-400 mt-1 flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-[#D4AF37] shrink-0" />
-                  <span>Rue Tokoto, Bonapriso, Douala, Cameroon</span>
+                  <span>{settings.doualaAddress}</span>
                 </p>
               </div>
 
               <div className="space-y-2 text-xs text-zinc-300 pt-2 border-t border-white/5">
                 <p className="flex items-center gap-2">
                   <Phone className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span className="font-mono">+237 699 44 21 00</span>
+                  <span className="font-mono">{settings.whatsappPhone}</span>
                 </p>
                 <p className="flex items-center gap-2">
                   <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Monday – Saturday: 08:30 – 19:30</span>
+                  <span>{settings.openingHours}</span>
                 </p>
               </div>
 
               <a
-                href="https://wa.me/237699442100"
+                href={`https://wa.me/${settings.whatsappCleanNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-3 rounded-xl bg-[#181820] hover:bg-[#202028] border border-white/10 text-xs font-bold text-white flex items-center justify-center gap-2 transition-colors"
@@ -134,27 +136,27 @@ export default function SupportPage() {
 
               <div>
                 <h3 className="text-lg font-bold text-white">
-                  AURA Bastos Executive Lounge
+                  {settings.storeName} Bastos
                 </h3>
                 <p className="text-xs text-zinc-400 mt-1 flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-[#D4AF37] shrink-0" />
-                  <span>Avenue Bastos (Face Ambassade), Yaoundé, Cameroon</span>
+                  <span>{settings.yaoundeAddress}</span>
                 </p>
               </div>
 
               <div className="space-y-2 text-xs text-zinc-300 pt-2 border-t border-white/5">
                 <p className="flex items-center gap-2">
                   <Phone className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span className="font-mono">+237 677 88 99 00</span>
+                  <span className="font-mono">{settings.secondaryPhone}</span>
                 </p>
                 <p className="flex items-center gap-2">
                   <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Monday – Saturday: 09:00 – 19:00</span>
+                  <span>{settings.openingHours}</span>
                 </p>
               </div>
 
               <a
-                href="https://wa.me/237677889900"
+                href={`https://wa.me/${settings.secondaryPhone.replace(/[^0-9]/g, "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-3 rounded-xl bg-[#181820] hover:bg-[#202028] border border-white/10 text-xs font-bold text-white flex items-center justify-center gap-2 transition-colors"
