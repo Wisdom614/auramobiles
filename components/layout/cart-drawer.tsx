@@ -199,6 +199,14 @@ export function CartDrawer() {
                 <span>ORDER VIA WHATSAPP (1-TAP)</span>
               </a>
 
+              {/* Continue Shopping button */}
+              <button
+                onClick={() => setIsCartOpen(false)}
+                className="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/15 text-zinc-300 hover:text-white font-mono text-[11px] tracking-wider uppercase flex items-center justify-center gap-1.5 transition cursor-pointer"
+              >
+                <span>← Continue Shopping</span>
+              </button>
+
               <p className="text-[10px] font-mono text-zinc-500 text-center uppercase">
                 [ 100% SEALED HARDWARE • INSPECT BEFORE PAYING ]
               </p>

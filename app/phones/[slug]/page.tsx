@@ -196,13 +196,13 @@ export default function PhoneDetailPage({ params }: PageProps) {
   const inWish = isInWishlist(phone.id);
 
   const handleAddToCart = () => {
-    addItem(phone, activeStorage, currentColor, 1);
+    addItem(phone, activeStorage, currentColor, 1, false);
     setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
+    setTimeout(() => setIsAdded(false), 2500);
   };
 
   const handleBuyNow = () => {
-    addItem(phone, activeStorage, currentColor, 1);
+    addItem(phone, activeStorage, currentColor, 1, false);
     router.push("/checkout");
   };
 
@@ -538,12 +538,12 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 {isAdded ? (
                   <>
                     <Check className="w-4 h-4 stroke-[3] text-black" />
-                    <span>ACQUIRED & ADDED TO BAG</span>
+                    <span>ADDED TO CART</span>
                   </>
                 ) : (
                   <>
                     <ShoppingBag className="w-4 h-4 text-black" />
-                    <span>ACQUIRE SEALED UNIT / ADD TO BAG</span>
+                    <span>ADD TO CART</span>
                   </>
                 )}
               </button>
@@ -551,7 +551,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
               {/* 1-Tap WhatsApp Fast Order */}
               <a
                 href={`https://wa.me/${settings.whatsappCleanNumber || "237699442100"}?text=${encodeURIComponent(
-                  `Hello ${settings.storeName}, I want to acquire the ${phone.name} (${activeStorage.size}, ${currentColor.name}) for ${formatCFA(
+                  `Hello ${settings.storeName}, I want to order the ${phone.name} (${activeStorage.size}, ${currentColor.name}) for ${formatCFA(
                     currentPrice
                   )}. Please confirm availability and delivery dispatch in Douala/Yaoundé.`
                 )}`}
@@ -563,13 +563,14 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 <span>ORDER DIRECT VIA WHATSAPP (1-TAP)</span>
               </a>
 
-              {/* Secondary Row: Direct Checkout + Wishlist */}
+              {/* Secondary Row: Buy Now / Direct Checkout + Wishlist */}
               <div className="flex gap-2">
                 <button
                   onClick={handleBuyNow}
-                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-mono font-semibold text-xs uppercase tracking-wider rounded-none transition-all"
+                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-mono font-semibold text-xs uppercase tracking-wider rounded-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  DIRECT CHECKOUT →
+                  <span>BUY NOW (CHECKOUT)</span>
+                  <span>→</span>
                 </button>
 
                 <button

@@ -7,6 +7,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { CartDrawer } from "@/components/layout/cart-drawer";
+import { CartToast } from "@/components/layout/cart-toast";
 import { AiModal } from "@/components/ai-assistant/ai-modal";
 import { FloatingConcierge } from "@/components/ai-assistant/floating-concierge";
 import { FloatingWhatsApp } from "@/components/layout/floating-whatsapp";
@@ -64,6 +65,7 @@ export default function RootLayout({
             <Footer />
             <MobileNav />
             <CartDrawer />
+            <CartToast />
             <AiModal />
             <FloatingConcierge />
             <FloatingWhatsApp />

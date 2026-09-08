@@ -62,14 +62,30 @@ export const DELIVERY_OPTIONS: DeliveryMethodInfo[] = [
   },
 ];
 
+export interface CartNotification {
+  id: string;
+  phone: Phone;
+  storage: StorageVariant;
+  color: ColorVariant;
+  quantity: number;
+}
+
 interface CartContextType {
   items: CartItem[];
-  addItem: (phone: Phone, storage: StorageVariant, color: ColorVariant, quantity?: number) => void;
+  addItem: (
+    phone: Phone,
+    storage: StorageVariant,
+    color: ColorVariant,
+    quantity?: number,
+    openDrawer?: boolean
+  ) => void;
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
+  notification: CartNotification | null;
+  dismissNotification: () => void;
   coupon: { code: string; discountPercent?: number; discountAmount?: number } | null;
   applyCoupon: (code: string) => { success: boolean; message: string };
   removeCoupon: () => void;
@@ -87,9 +103,14 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [notification, setNotification] = useState<CartNotification | null>(null);
   const [coupon, setCoupon] = useState<{ code: string; discountPercent?: number; discountAmount?: number } | null>(null);
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryOption>("express_douala");
   const [isLoaded, setIsLoaded] = useState(false);
+
+  const dismissNotification = () => {
+    setNotification(null);
+  };
 
   // Load from localStorage
   useEffect(() => {
@@ -114,7 +135,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isLoaded]);
 
-  const addItem = (phone: Phone, storage: StorageVariant, color: ColorVariant, quantity: number = 1) => {
+  const addItem = (
+    phone: Phone,
+    storage: StorageVariant,
+    color: ColorVariant,
+    quantity: number = 1,
+    openDrawer: boolean = false
+  ) => {
     const id = `${phone.id}-${storage.id}-${color.id}`;
     setItems((prev) => {
       const existing = prev.find((item) => item.id === id);
@@ -125,7 +152,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, { id, phone, selectedStorage: storage, selectedColor: color, quantity }];
     });
-    setIsCartOpen(true);
+
+    // Trigger non-intrusive floating toast
+    setNotification({
+      id: `${id}-${Date.now()}`,
+      phone,
+      storage,
+      color,
+      quantity,
+    });
+
+    if (openDrawer) {
+      setIsCartOpen(true);
+    }
   };
 
   const removeItem = (itemId: string) => {
@@ -195,6 +234,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         isCartOpen,
         setIsCartOpen,
+        notification,
+        dismissNotification,
         coupon,
         applyCoupon,
         removeCoupon,
