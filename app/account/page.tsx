@@ -23,8 +23,10 @@ import {
   AlertCircle,
   Save,
   Crown,
-  Printer,
   Download,
+  Lock,
+  ArrowRight,
+  Check,
 } from "lucide-react";
 import { useAuth } from "@/lib/store/auth-context";
 import { useOrders } from "@/lib/store/orders-context";
@@ -97,7 +99,6 @@ export default function CustomerAccountPage() {
           });
 
           if (isMounted) {
-            // If matched orders exist, show them; otherwise if demo user, show the latest recent order for preview
             setUserOrders(matched.length > 0 ? matched : allOrders.slice(0, 2));
           }
         } else {
@@ -135,7 +136,7 @@ export default function CustomerAccountPage() {
       if (error) {
         setProfileErrorMessage(error);
       } else {
-        setProfileSuccessMessage("Your VIP profile & delivery address have been updated successfully.");
+        setProfileSuccessMessage("Your delivery address and profile details have been saved.");
         setTimeout(() => setProfileSuccessMessage(""), 5000);
       }
     } catch {
@@ -176,7 +177,6 @@ export default function CustomerAccountPage() {
           setConfirmPassword("");
         }
       } else {
-        // Offline / fallback mode
         setPasswordSuccessMessage("Password updated in local VIP session.");
         setNewPassword("");
         setConfirmPassword("");
@@ -197,11 +197,17 @@ export default function CustomerAccountPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center text-center px-4">
-        <div className="w-16 h-16 rounded-2xl bg-[#141419] border border-[#D4AF37]/30 flex items-center justify-center mb-4 animate-pulse">
-          <Crown className="w-8 h-8 text-[#D4AF37]" />
+      <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center text-center px-4 font-sans">
+        <div className="w-14 h-14 bg-[#0E0E12] border border-[#D4AF37]/50 flex items-center justify-center mb-4 relative rounded-none">
+          <span className="absolute -top-1 -left-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+          <span className="absolute -top-1 -right-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+          <span className="absolute -bottom-1 -left-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+          <span className="absolute -bottom-1 -right-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+          <Crown className="w-6 h-6 text-[#D4AF37] animate-pulse" />
         </div>
-        <p className="text-sm font-medium text-zinc-400">Loading VIP Member Account...</p>
+        <p className="text-xs font-mono text-zinc-400 uppercase tracking-widest">
+          [ ACCESSING CLIENT PROFILE... ]
+        </p>
       </div>
     );
   }
@@ -209,25 +215,37 @@ export default function CustomerAccountPage() {
   // Not logged in prompt
   if (!user && !profile) {
     return (
-      <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center text-center px-4 py-20">
-        <div className="max-w-md w-full bg-[#121216] border border-white/10 rounded-2xl p-8 shadow-2xl">
-          <div className="w-16 h-16 rounded-2xl bg-[#1A1A22] border border-[#D4AF37]/30 flex items-center justify-center mx-auto mb-4">
-            <User className="w-8 h-8 text-[#D4AF37]" />
+      <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center text-center px-4 py-20 font-sans">
+        <div className="max-w-md w-full bg-[#0E0E12] border border-white/10 p-8 sm:p-10 shadow-2xl relative rounded-none">
+          <span className="absolute -top-1 -left-1 text-[#D4AF37] font-mono text-[10px]">+</span>
+          <span className="absolute -top-1 -right-1 text-[#D4AF37] font-mono text-[10px]">+</span>
+          <span className="absolute -bottom-1 -left-1 text-[#D4AF37] font-mono text-[10px]">+</span>
+          <span className="absolute -bottom-1 -right-1 text-[#D4AF37] font-mono text-[10px]">+</span>
+
+          <div className="w-12 h-12 bg-black border border-[#D4AF37]/40 flex items-center justify-center mx-auto mb-4">
+            <User className="w-5 h-5 text-[#D4AF37]" />
           </div>
-          <h1 className="text-xl font-bold text-white mb-2">AURA VIP Account Required</h1>
+
+          <div className="text-[10px] font-mono text-[#D4AF37] uppercase tracking-widest mb-1">
+            [ AUTHENTICATION REQUIRED ]
+          </div>
+          <h1 className="text-lg sm:text-xl font-bold text-white mb-2 uppercase tracking-wide">
+            Sign In to Your Account
+          </h1>
           <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-            Please sign in to access your order tracking, trade-in valuations, and saved delivery addresses.
+            Please sign in to track your phone orders, manage your saved delivery addresses, and view trade-in vouchers.
           </p>
-          <div className="flex flex-col gap-3">
+
+          <div className="flex flex-col gap-3 font-mono text-xs">
             <Link
               href="/account/login"
-              className="w-full py-3.5 rounded-xl gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/10 hover:opacity-95 transition-all text-center"
+              className="w-full py-3.5 gold-gradient-bg text-black font-extrabold tracking-wider uppercase shadow-lg shadow-amber-500/10 hover:opacity-95 transition-all text-center rounded-none"
             >
               Sign In to Your Account
             </Link>
             <Link
               href="/"
-              className="w-full py-3 rounded-xl bg-zinc-900 border border-white/10 text-zinc-300 font-semibold text-xs hover:bg-zinc-800 transition-colors text-center"
+              className="w-full py-3 bg-white/5 border border-white/10 text-zinc-300 font-semibold tracking-wider uppercase hover:bg-white/10 transition-colors text-center rounded-none"
             >
               Return to Storefront
             </Link>
@@ -243,6 +261,8 @@ export default function CustomerAccountPage() {
     .join("")
     .slice(0, 2)
     .toUpperCase();
+
+  const totalSpent = userOrders.reduce((sum, ord) => sum + (ord.total || 0), 0);
 
   const getStatusBadge = (status: OrderStatus) => {
     switch (status) {
@@ -286,52 +306,69 @@ export default function CustomerAccountPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-white pt-24 pb-24 sm:pb-16 px-4 sm:px-6">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="min-h-screen bg-[#09090B] text-white pt-24 pb-24 sm:pb-16 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="max-w-6xl mx-auto space-y-6">
 
-        {/* 1. VIP CUSTOMER HEADER CARD */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#16161D] to-[#0F0F14] border border-white/10 p-6 sm:p-8 shadow-2xl">
-          {/* Subtle gold ambient glow */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-[#D4AF37]/5 rounded-full blur-3xl pointer-events-none" />
+        {/* 1. ARCHITECTURAL SYSTEM TELEMETRY BAR */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/10 text-[10px] font-mono text-zinc-400 gap-2">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-emerald-400 animate-pulse"></span>
+            <span className="text-[#D4AF37] font-bold">[ SYSTEM // CUSTOMER_PORTAL ]</span>
+            <span>•</span>
+            <span className="text-zinc-300">HUB: {profile?.city || "DOUALA"}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span>AURA BLACK CARD TIER</span>
+            <span>•</span>
+            <span className="text-zinc-500">OFFICIAL CAMEROON CLIENT</span>
+          </div>
+        </div>
 
-          <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+        {/* 2. CLIENT IDENTITY & TELEMETRY HERO CARD */}
+        <div className="relative bg-[#0E0E12] border border-white/10 p-5 sm:p-7 shadow-2xl rounded-none">
+          {/* Viewfinder crosshairs */}
+          <span className="absolute -top-1 -left-1 text-[#D4AF37] font-mono text-[10px] leading-none select-none">+</span>
+          <span className="absolute -top-1 -right-1 text-[#D4AF37] font-mono text-[10px] leading-none select-none">+</span>
+          <span className="absolute -bottom-1 -left-1 text-[#D4AF37] font-mono text-[10px] leading-none select-none">+</span>
+          <span className="absolute -bottom-1 -right-1 text-[#D4AF37] font-mono text-[10px] leading-none select-none">+</span>
+
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             
-            {/* User Identity Info */}
+            {/* Identity Details */}
             <div className="flex items-center gap-4 sm:gap-5">
-              {/* Monogram Avatar */}
-              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-amber-600 via-amber-400 to-[#D4AF37] p-[2px] shadow-xl flex-shrink-0">
-                <div className="w-full h-full bg-[#121217] rounded-2xl flex items-center justify-center">
-                  <span className="text-xl sm:text-2xl font-black text-amber-300 tracking-wider">
-                    {userInitials}
-                  </span>
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#D4AF37] text-black flex items-center justify-center shadow">
-                  <Crown className="w-3 h-3 fill-black" />
-                </div>
+              {/* Geometric Monogram Avatar */}
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 bg-black border border-[#D4AF37] p-1 shrink-0 flex items-center justify-center rounded-none shadow-lg shadow-black">
+                <span className="text-xl sm:text-2xl font-mono font-black text-[#D4AF37] tracking-widest">
+                  {userInitials}
+                </span>
+                <span className="absolute -bottom-1 -right-1 px-1 py-0.2 bg-[#D4AF37] text-black font-mono text-[8px] font-bold">
+                  VIP
+                </span>
               </div>
 
-              {/* Names and Status */}
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h1 className="text-lg sm:text-2xl font-bold text-white">
-                    {profile?.fullName || "AURA VIP Client"}
+              {/* Names and Telemetry */}
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <h1 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight truncate">
+                    {profile?.fullName || "AURA Client"}
                   </h1>
-                  <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] font-bold uppercase tracking-wider">
-                    <Sparkles className="w-3 h-3" /> VIP Member
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] font-mono font-bold uppercase tracking-wider">
+                    <Sparkles className="w-3 h-3" />
+                    <span>Black Card</span>
                   </span>
                 </div>
                 
-                <p className="text-xs text-zinc-400 flex items-center gap-2">
+                <p className="text-xs text-zinc-400 font-mono flex items-center gap-2 flex-wrap">
                   <span>{profile?.email || user?.email}</span>
                   {profile?.phone && (
                     <>
-                      <span>•</span>
+                      <span className="text-zinc-600">•</span>
                       <span>{profile.phone}</span>
                     </>
                   )}
                 </p>
 
-                <p className="text-[11px] text-zinc-500 mt-1 flex items-center gap-1.5">
+                <p className="text-[11px] text-zinc-400 mt-1.5 flex items-center gap-1.5 font-mono">
                   <MapPin className="w-3 h-3 text-[#D4AF37]" />
                   <span>Preferred Hub: {profile?.city || "Douala / Yaoundé"}, Cameroon</span>
                 </p>
@@ -339,52 +376,95 @@ export default function CustomerAccountPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Admin Portal Shortcut if user is authorized admin */}
+            <div className="flex flex-wrap items-center gap-2.5 font-mono text-xs pt-3 lg:pt-0 border-t lg:border-t-0 border-white/10">
               {isAdmin && (
                 <Link
                   href="/admin"
-                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-amber-500/20 hover:opacity-95 transition-all"
+                  className="px-4 py-2.5 bg-[#D4AF37] text-black font-bold tracking-wider uppercase flex items-center gap-2 hover:opacity-90 transition-all rounded-none"
                 >
                   <Shield className="w-4 h-4" />
-                  <span>Admin Portal</span>
+                  <span>Admin Console</span>
                 </Link>
               )}
 
+              <a
+                href={`https://wa.me/${settings.whatsappCleanNumber || "237699442100"}?text=${encodeURIComponent(
+                  `Hello ${settings.storeName}, I am contacting you from my VIP account (${profile?.fullName || user?.email}).`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2.5 bg-white/5 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 font-medium tracking-wider uppercase flex items-center gap-2 transition-all rounded-none"
+              >
+                <PhoneCall className="w-3.5 h-3.5" />
+                <span>Concierge Call</span>
+              </a>
+
               <button
                 onClick={handleSignOut}
-                className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400 text-zinc-300 font-semibold text-xs flex items-center gap-2 transition-all"
+                className="px-4 py-2.5 bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400 text-zinc-300 font-semibold tracking-wider uppercase flex items-center gap-2 transition-all rounded-none cursor-pointer"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5" />
                 <span>Sign Out</span>
               </button>
             </div>
 
           </div>
 
-          {/* Mobile VIP Tag */}
-          <div className="sm:hidden mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] font-bold uppercase tracking-wider">
-              <Sparkles className="w-3 h-3" /> AURA Black Card Tier
-            </span>
-            <span className="text-[10px] text-zinc-400">Cameroon Official Client</span>
+          {/* 4-Column Metric Telemetry Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6 pt-5 border-t border-white/10 font-mono text-xs">
+            <div className="p-3 bg-[#121217] border border-white/5">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
+                [ TOTAL ORDERS ]
+              </span>
+              <span className="text-base sm:text-lg font-bold text-white">
+                {userOrders.length}
+              </span>
+            </div>
+
+            <div className="p-3 bg-[#121217] border border-white/5">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
+                [ ORDER VALUE ]
+              </span>
+              <span className="text-base sm:text-lg font-bold text-[#D4AF37]">
+                {formatCFA(totalSpent)}
+              </span>
+            </div>
+
+            <div className="p-3 bg-[#121217] border border-white/5">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
+                [ ACTIVE HUB ]
+              </span>
+              <span className="text-base sm:text-lg font-bold text-white truncate block">
+                {profile?.city || "Douala"}
+              </span>
+            </div>
+
+            <div className="p-3 bg-[#121217] border border-white/5">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
+                [ VIP WARRANTY ]
+              </span>
+              <span className="text-base sm:text-lg font-bold text-emerald-400 flex items-center gap-1.5">
+                <Check className="w-4 h-4 stroke-[2.5]" />
+                <span>12M COVER</span>
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* 2. TAB CONTROLS */}
-        <div className="flex border-b border-white/10 overflow-x-auto no-scrollbar gap-2 sm:gap-4">
+        {/* 3. TECHNICAL TAB CONTROLS */}
+        <div className="flex border-b border-white/10 overflow-x-auto no-scrollbar gap-1 sm:gap-2 font-mono text-xs">
           <button
             onClick={() => setActiveTab("orders")}
-            className={`pb-3 pt-1 px-3 text-xs sm:text-sm font-semibold tracking-wide transition-all border-b-2 whitespace-nowrap flex items-center gap-2 ${
+            className={`py-3 px-4 font-bold tracking-wider uppercase transition-all border-b-2 whitespace-nowrap flex items-center gap-2 cursor-pointer ${
               activeTab === "orders"
-                ? "border-[#D4AF37] text-[#D4AF37]"
-                : "border-transparent text-zinc-400 hover:text-white"
+                ? "border-[#D4AF37] text-[#D4AF37] bg-white/5"
+                : "border-transparent text-zinc-400 hover:text-white hover:bg-white/5"
             }`}
           >
-            <ShoppingBag className="w-4 h-4" />
-            <span>My Orders & Tracking</span>
+            <ShoppingBag className="w-3.5 h-3.5" />
+            <span>01 // Orders & Tracking</span>
             {userOrders.length > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full bg-white/10 text-[10px] text-zinc-300">
+              <span className="px-1.5 py-0.2 bg-white/10 border border-white/10 text-[10px] text-[#D4AF37] font-bold">
                 {userOrders.length}
               </span>
             )}
@@ -392,63 +472,73 @@ export default function CustomerAccountPage() {
 
           <button
             onClick={() => setActiveTab("profile")}
-            className={`pb-3 pt-1 px-3 text-xs sm:text-sm font-semibold tracking-wide transition-all border-b-2 whitespace-nowrap flex items-center gap-2 ${
+            className={`py-3 px-4 font-bold tracking-wider uppercase transition-all border-b-2 whitespace-nowrap flex items-center gap-2 cursor-pointer ${
               activeTab === "profile"
-                ? "border-[#D4AF37] text-[#D4AF37]"
-                : "border-transparent text-zinc-400 hover:text-white"
+                ? "border-[#D4AF37] text-[#D4AF37] bg-white/5"
+                : "border-transparent text-zinc-400 hover:text-white hover:bg-white/5"
             }`}
           >
-            <MapPin className="w-4 h-4" />
-            <span>Delivery & Profile</span>
+            <MapPin className="w-3.5 h-3.5" />
+            <span>02 // Delivery & Profile</span>
           </button>
 
           <button
             onClick={() => setActiveTab("trade-in")}
-            className={`pb-3 pt-1 px-3 text-xs sm:text-sm font-semibold tracking-wide transition-all border-b-2 whitespace-nowrap flex items-center gap-2 ${
+            className={`py-3 px-4 font-bold tracking-wider uppercase transition-all border-b-2 whitespace-nowrap flex items-center gap-2 cursor-pointer ${
               activeTab === "trade-in"
-                ? "border-[#D4AF37] text-[#D4AF37]"
-                : "border-transparent text-zinc-400 hover:text-white"
+                ? "border-[#D4AF37] text-[#D4AF37] bg-white/5"
+                : "border-transparent text-zinc-400 hover:text-white hover:bg-white/5"
             }`}
           >
-            <RefreshCw className="w-4 h-4" />
-            <span>Trade-In Swaps</span>
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>03 // Trade-In Swaps</span>
           </button>
 
           <button
             onClick={() => setActiveTab("security")}
-            className={`pb-3 pt-1 px-3 text-xs sm:text-sm font-semibold tracking-wide transition-all border-b-2 whitespace-nowrap flex items-center gap-2 ${
+            className={`py-3 px-4 font-bold tracking-wider uppercase transition-all border-b-2 whitespace-nowrap flex items-center gap-2 cursor-pointer ${
               activeTab === "security"
-                ? "border-[#D4AF37] text-[#D4AF37]"
-                : "border-transparent text-zinc-400 hover:text-white"
+                ? "border-[#D4AF37] text-[#D4AF37] bg-white/5"
+                : "border-transparent text-zinc-400 hover:text-white hover:bg-white/5"
             }`}
           >
-            <KeyRound className="w-4 h-4" />
-            <span>Security & Password</span>
+            <KeyRound className="w-3.5 h-3.5" />
+            <span>04 // Security</span>
           </button>
         </div>
 
-        {/* 3. TAB CONTENT */}
+        {/* 4. TAB PANELS */}
 
         {/* TAB 1: ORDERS & TRACKING */}
         {activeTab === "orders" && (
           <div className="space-y-4">
             {isLoadingOrders ? (
-              <div className="py-16 text-center text-zinc-400">
-                <div className="w-10 h-10 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                <p className="text-xs font-medium">Fetching your order history...</p>
+              <div className="py-16 text-center text-zinc-400 bg-[#0E0E12] border border-white/10 font-mono text-xs">
+                <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-none animate-spin mx-auto mb-3" />
+                <p className="uppercase tracking-wider">[ FETCHING ORDER MANIFESTS... ]</p>
               </div>
             ) : userOrders.length === 0 ? (
-              <div className="rounded-2xl bg-[#121216] border border-white/10 p-10 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center mx-auto mb-3">
-                  <ShoppingBag className="w-6 h-6 text-[#D4AF37]" />
+              <div className="bg-[#0E0E12] border border-white/10 p-10 text-center relative rounded-none">
+                <span className="absolute -top-1 -left-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+                <span className="absolute -top-1 -right-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+                <span className="absolute -bottom-1 -left-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+                <span className="absolute -bottom-1 -right-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+
+                <div className="w-12 h-12 bg-black border border-white/10 flex items-center justify-center mx-auto mb-3">
+                  <ShoppingBag className="w-5 h-5 text-[#D4AF37]" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-1">No Orders Found Yet</h3>
-                <p className="text-xs text-zinc-400 mb-6 max-w-sm mx-auto">
-                  You haven&apos;t placed any smartphone orders under this account yet. Ready to experience flagship luxury?
+                <div className="text-[10px] font-mono text-[#D4AF37] uppercase tracking-widest mb-1">
+                  [ ARCHIVE EMPTY ]
+                </div>
+                <h3 className="text-base font-bold text-white mb-2 uppercase tracking-wide">
+                  No Orders on Record
+                </h3>
+                <p className="text-xs text-zinc-400 mb-6 max-w-md mx-auto leading-relaxed">
+                  You haven&apos;t placed any smartphone orders yet. Explore our sealed flagship smartphones with 1-year warranty and express delivery across Cameroon.
                 </p>
                 <Link
                   href="/phones"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/10 hover:opacity-95 transition-all"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 gold-gradient-bg text-black font-mono font-extrabold text-xs uppercase tracking-widest hover:opacity-95 transition-all rounded-none"
                 >
                   <span>Explore Flagship Smartphones</span>
                   <ChevronRight className="w-4 h-4" />
@@ -460,24 +550,30 @@ export default function CustomerAccountPage() {
                   const badge = getStatusBadge(order.status);
                   const BadgeIcon = badge.icon;
                   const waClean = settings.whatsappCleanNumber || "237699442100";
-                  const waSupportText = `Hello ${settings.storeName}, I am inquiring about my Order #${order.id} (${order.trackingNumber}).`;
+                  const waSupportText = `Hello ${settings.storeName}, I am inquiring about my Order #${order.id} (Tracking: ${order.trackingNumber}).`;
 
                   return (
                     <div
                       key={order.id}
-                      className="rounded-2xl bg-[#121216] border border-white/10 hover:border-white/20 transition-all p-5 sm:p-6 shadow-xl"
+                      className="bg-[#0E0E12] border border-white/10 hover:border-[#D4AF37]/50 transition-all p-5 sm:p-6 shadow-xl relative rounded-none"
                     >
-                      {/* Top Order Metadata */}
+                      {/* Viewfinder crosshairs */}
+                      <span className="absolute -top-1 -left-1 text-[#D4AF37] font-mono text-[8px]">+</span>
+                      <span className="absolute -top-1 -right-1 text-[#D4AF37] font-mono text-[8px]">+</span>
+                      <span className="absolute -bottom-1 -left-1 text-[#D4AF37] font-mono text-[8px]">+</span>
+                      <span className="absolute -bottom-1 -right-1 text-[#D4AF37] font-mono text-[8px]">+</span>
+
+                      {/* Top Order Telemetry Header */}
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
                         <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-zinc-400">Order</span>
-                            <span className="text-sm font-bold text-white">#{order.id}</span>
-                            <span className="text-xs text-[#D4AF37] font-mono font-medium">
-                              ({order.trackingNumber})
+                          <div className="flex items-center gap-2 flex-wrap font-mono">
+                            <span className="text-[10px] text-zinc-400 uppercase">[ ORDER ]</span>
+                            <span className="text-sm font-black text-white">#{order.id}</span>
+                            <span className="text-xs text-[#D4AF37] font-bold">
+                              • TRACKING: {order.trackingNumber}
                             </span>
                           </div>
-                          <p className="text-[11px] text-zinc-500 mt-0.5">
+                          <p className="text-[11px] text-zinc-400 mt-1 font-mono">
                             Placed on{" "}
                             {new Date(order.createdAt).toLocaleDateString("en-GB", {
                               day: "numeric",
@@ -489,10 +585,10 @@ export default function CustomerAccountPage() {
                           </p>
                         </div>
 
-                        {/* Status Pill */}
+                        {/* Status Badge */}
                         <div className="flex items-center gap-2">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${badge.color}`}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-mono font-bold uppercase tracking-wider border rounded-none ${badge.color}`}
                           >
                             <BadgeIcon className="w-3.5 h-3.5" />
                             <span>{badge.label}</span>
@@ -505,22 +601,24 @@ export default function CustomerAccountPage() {
                         {order.items.map((item, idx) => (
                           <div key={idx} className="flex items-center justify-between pt-3 first:pt-0 gap-4">
                             <div className="flex items-center gap-3">
-                              <img
-                                src={item.image || "/placeholder.png"}
-                                alt={item.name}
-                                className="w-12 h-12 rounded-xl object-contain bg-zinc-900 border border-white/5 p-1 flex-shrink-0"
-                              />
+                              <div className="w-12 h-14 bg-black border border-white/10 p-1 flex items-center justify-center shrink-0">
+                                <img
+                                  src={item.image || "/placeholder.png"}
+                                  alt={item.name}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
                               <div>
-                                <h4 className="text-xs sm:text-sm font-bold text-white line-clamp-1">
+                                <h4 className="text-xs sm:text-sm font-bold text-white uppercase tracking-tight line-clamp-1">
                                   {item.name}
                                 </h4>
-                                <p className="text-[11px] text-zinc-400">
+                                <p className="text-[11px] text-zinc-400 font-mono mt-0.5">
                                   {item.storage} • {item.color} • Qty: {item.quantity}
                                 </p>
                               </div>
                             </div>
-                            <div className="text-right flex-shrink-0">
-                              <span className="text-xs sm:text-sm font-bold text-white">
+                            <div className="text-right shrink-0">
+                              <span className="text-xs sm:text-sm font-mono font-bold text-[#D4AF37]">
                                 {formatCFA(item.price * item.quantity)}
                               </span>
                             </div>
@@ -529,47 +627,47 @@ export default function CustomerAccountPage() {
                       </div>
 
                       {/* Order Footer & Action CTAs */}
-                      <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex items-center gap-3 text-xs text-zinc-400">
-                          <span>Total Amount:</span>
-                          <span className="text-base font-black text-[#D4AF37]">
+                      <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-mono text-xs">
+                        <div className="flex items-center gap-3 text-zinc-400 flex-wrap">
+                          <span className="uppercase text-[11px]">[ TOTAL ]</span>
+                          <span className="text-base font-black text-white">
                             {formatCFA(order.total)}
                           </span>
-                          <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-zinc-400">
+                          <span className="text-[10px] px-2 py-0.5 border border-white/10 bg-white/5 text-zinc-300 uppercase">
                             {order.customer?.paymentMethod === "cash_on_delivery"
                               ? "Cash on Delivery"
                               : "Mobile Money"}
                           </span>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-2.5">
-                          {/* Receipt Action */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          {/* Printable Receipt */}
                           <button
                             onClick={() => setSelectedReceiptOrder(order)}
-                            className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#D4AF37]/40 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors"
+                            className="px-3.5 py-2 bg-white/5 border border-white/10 hover:border-[#D4AF37]/50 hover:bg-white/10 text-white font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer rounded-none"
                           >
                             <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
-                            <span>Download PDF</span>
+                            <span>Download Receipt</span>
                           </button>
 
-                          {/* WhatsApp Inquiry */}
+                          {/* WhatsApp Concierge */}
                           <a
                             href={`https://wa.me/${waClean}?text=${encodeURIComponent(waSupportText)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-3.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 text-emerald-400 font-semibold text-xs flex items-center gap-1.5 transition-colors"
+                            className="px-3.5 py-2 bg-emerald-950/40 border border-emerald-500/30 hover:bg-emerald-900/50 text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors rounded-none"
                           >
                             <MessageSquare className="w-3.5 h-3.5" />
-                            <span>WhatsApp Concierge</span>
+                            <span>WhatsApp Support</span>
                           </a>
 
                           {/* Live Track Link */}
                           <Link
                             href={`/orders?id=${order.id}`}
-                            className="px-4 py-2 rounded-xl bg-[#D4AF37]/15 border border-[#D4AF37]/30 hover:bg-[#D4AF37]/25 text-[#D4AF37] font-bold text-xs flex items-center gap-1.5 transition-colors"
+                            className="px-4 py-2 gold-gradient-bg text-black font-extrabold uppercase tracking-wider flex items-center gap-1.5 hover:opacity-95 transition-all rounded-none"
                           >
-                            <span>Live Tracking</span>
-                            <ExternalLink className="w-3.5 h-3.5" />
+                            <span>Track Order</span>
+                            <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
                           </Link>
                         </div>
                       </div>
@@ -583,37 +681,45 @@ export default function CustomerAccountPage() {
 
         {/* TAB 2: SAVED DELIVERY ADDRESS & PROFILE */}
         {activeTab === "profile" && (
-          <div className="rounded-2xl bg-[#121216] border border-white/10 p-6 sm:p-8 shadow-xl">
-            <div className="mb-6">
-              <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-[#D4AF37]" />
-                <span>Saved VIP Delivery Address & Profile</span>
+          <div className="bg-[#0E0E12] border border-white/10 p-6 sm:p-8 shadow-xl relative rounded-none">
+            <span className="absolute -top-1 -left-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+            <span className="absolute -top-1 -right-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+            <span className="absolute -bottom-1 -left-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+            <span className="absolute -bottom-1 -right-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+
+            <div className="mb-6 pb-4 border-b border-white/10">
+              <div className="text-[10px] font-mono text-[#D4AF37] uppercase tracking-widest mb-1">
+                [ CONFIGURATION // CLIENT_ADDRESS ]
+              </div>
+              <h2 className="text-base sm:text-lg font-bold text-white uppercase tracking-tight flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-[#D4AF37]" />
+                <span>Saved Delivery Address & Profile</span>
               </h2>
-              <p className="text-xs text-zinc-400 mt-1">
-                Your saved details automatically auto-fill at checkout for fast, 1-tap ordering.
+              <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                Your saved recipient details will automatically auto-fill at checkout for instant order dispatch.
               </p>
             </div>
 
             {profileSuccessMessage && (
-              <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2 animate-in fade-in">
-                <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+              <div className="mb-6 p-3.5 bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs font-mono flex items-center gap-2 animate-in fade-in rounded-none">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>{profileSuccessMessage}</span>
               </div>
             )}
 
             {profileErrorMessage && (
-              <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2 animate-in fade-in">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <div className="mb-6 p-3.5 bg-rose-950/40 border border-rose-500/40 text-rose-300 text-xs font-mono flex items-center gap-2 animate-in fade-in rounded-none">
+                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
                 <span>{profileErrorMessage}</span>
               </div>
             )}
 
-            <form onSubmit={handleSaveProfile} className="space-y-5">
+            <form onSubmit={handleSaveProfile} className="space-y-5 font-sans">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {/* Full Name */}
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-2">
-                    Full Name (Recipient)
+                  <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-2">
+                    [ RECIPIENT FULL NAME ]
                   </label>
                   <input
                     type="text"
@@ -621,14 +727,14 @@ export default function CustomerAccountPage() {
                     onChange={(e) => setFullName(e.target.value)}
                     required
                     placeholder="e.g. Marc Aurele"
-                    className="w-full bg-[#181820] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full bg-[#121217] border border-white/15 px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-colors rounded-none"
                   />
                 </div>
 
                 {/* WhatsApp Phone */}
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-2">
-                    WhatsApp Phone (For Delivery Concierge)
+                  <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-2">
+                    [ WHATSAPP PHONE NUMBER ]
                   </label>
                   <input
                     type="tel"
@@ -636,23 +742,26 @@ export default function CustomerAccountPage() {
                     onChange={(e) => setPhone(e.target.value)}
                     required
                     placeholder="e.g. 699442100 or +237 670000000"
-                    className="w-full bg-[#181820] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full bg-[#121217] border border-white/15 px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-colors rounded-none"
                   />
                 </div>
               </div>
 
-              {/* Email (Readonly) */}
+              {/* Email (Readonly Session) */}
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 mb-2">
-                  Account Email (Registered)
+                <label className="block text-xs font-mono uppercase tracking-wider text-zinc-400 mb-2">
+                  [ REGISTERED ACCOUNT EMAIL ]
                 </label>
-                <input
-                  type="email"
-                  value={profile?.email || user?.email || ""}
-                  disabled
-                  className="w-full bg-zinc-900/60 border border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-400 cursor-not-allowed"
-                />
-                <p className="text-[10px] text-zinc-500 mt-1">
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={profile?.email || user?.email || ""}
+                    disabled
+                    className="w-full bg-black/60 border border-white/10 px-4 py-3 text-sm text-zinc-400 cursor-not-allowed rounded-none font-mono"
+                  />
+                  <Lock className="w-4 h-4 text-zinc-600 absolute right-4 top-1/2 -translate-y-1/2" />
+                </div>
+                <p className="text-[10px] font-mono text-zinc-500 mt-1">
                   Email is locked to your authenticated session.
                 </p>
               </div>
@@ -660,110 +769,127 @@ export default function CustomerAccountPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {/* Preferred City */}
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-2">
-                    Delivery City (Cameroon)
+                  <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-2">
+                    [ DELIVERY CITY (CAMEROON) ]
                   </label>
                   <select
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full bg-[#181820] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full bg-[#121217] border border-white/15 px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-colors rounded-none font-sans"
                   >
-                    <option value="Douala">Douala (Same-Day Express)</option>
-                    <option value="Yaoundé">Yaoundé (Same-Day Express)</option>
-                    <option value="Bafoussam">Bafoussam (24h Delivery)</option>
-                    <option value="Kribi">Kribi (24h Delivery)</option>
-                    <option value="Limbe">Limbe (24h Delivery)</option>
-                    <option value="Buea">Buea (24h Delivery)</option>
+                    <option value="Douala">Douala (VIP Same-Day Express)</option>
+                    <option value="Yaoundé">Yaoundé (VIP Next-Day Express)</option>
+                    <option value="Bafoussam">Bafoussam (24h Express)</option>
+                    <option value="Kribi">Kribi (24h Express)</option>
+                    <option value="Limbe">Limbe (24h Express)</option>
+                    <option value="Buea">Buea (24h Express)</option>
                     <option value="Bamenda">Bamenda (24-48h Delivery)</option>
                     <option value="Garoua">Garoua (Air Cargo / 48h)</option>
                     <option value="Maroua">Maroua (Air Cargo / 48h)</option>
-                    <option value="Other">Other Cameroon Location</option>
+                    <option value="Other">Other Cameroon Destination</option>
                   </select>
                 </div>
 
                 {/* Street / Landmark Address */}
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-2">
-                    Quarters / Street Address / Landmark
+                  <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-2">
+                    [ QUARTER / STREET / LANDMARK ]
                   </label>
                   <input
                     type="text"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="e.g. Bonapriso, Rue Tokoto near Hotel Serena"
-                    className="w-full bg-[#181820] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full bg-[#121217] border border-white/15 px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-colors rounded-none"
                   />
                 </div>
               </div>
 
-              <div className="pt-3">
+              <div className="pt-2">
                 <button
                   type="submit"
                   disabled={isSavingProfile}
-                  className="px-6 py-3.5 rounded-xl gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/10 hover:opacity-95 transition-all flex items-center gap-2 disabled:opacity-50"
+                  className="px-6 py-3.5 gold-gradient-bg text-black font-mono font-extrabold text-xs uppercase tracking-widest shadow-lg shadow-amber-500/10 hover:opacity-95 transition-all flex items-center gap-2 disabled:opacity-50 rounded-none cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
-                  <span>{isSavingProfile ? "Saving Details..." : "Save Delivery Address"}</span>
+                  <span>{isSavingProfile ? "SAVING..." : "SAVE DELIVERY ADDRESS"}</span>
                 </button>
               </div>
             </form>
           </div>
         )}
 
-        {/* TAB 3: TRADE-IN SWAPS & VALUATIONS */}
+        {/* TAB 3: TRADE-IN SWAPS & HARDWARE UPGRADES */}
         {activeTab === "trade-in" && (
-          <div className="rounded-2xl bg-[#121216] border border-white/10 p-6 sm:p-8 shadow-xl space-y-6">
+          <div className="bg-[#0E0E12] border border-white/10 p-6 sm:p-8 shadow-xl space-y-6 relative rounded-none">
+            <span className="absolute -top-1 -left-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+            <span className="absolute -top-1 -right-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+            <span className="absolute -bottom-1 -left-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+            <span className="absolute -bottom-1 -right-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
               <div>
-                <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                  <RefreshCw className="w-5 h-5 text-[#D4AF37]" />
-                  <span>AURA Trade-In Privilege</span>
+                <div className="text-[10px] font-mono text-[#D4AF37] uppercase tracking-widest mb-1">
+                  [ SYSTEM // TRADE_IN_GATEWAY ]
+                </div>
+                <h2 className="text-base sm:text-lg font-bold text-white uppercase tracking-tight flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 text-[#D4AF37]" />
+                  <span>AURA Trade-In & Phone Swap Privilege</span>
                 </h2>
-                <p className="text-xs text-zinc-400 mt-1">
-                  Exchange your current smartphone for instant credit towards any new flagship.
+                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                  Swap your iPhone to Samsung or vice-versa. Enter your phone&apos;s condition and receive instant appraisal credit towards your new device.
                 </p>
               </div>
 
               <Link
                 href="/trade-in"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/10 hover:opacity-95 transition-all text-center self-start sm:self-auto"
+                className="inline-flex items-center gap-2 px-5 py-3 gold-gradient-bg text-black font-mono font-extrabold text-xs uppercase tracking-wider hover:opacity-95 transition-all rounded-none self-start sm:self-auto shrink-0"
               >
-                <span>Value a Device</span>
+                <span>Launch Swap Calculator</span>
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
 
-            {/* How VIP Trade-in Works */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl bg-zinc-900/60 border border-white/5 space-y-2">
-                <span className="text-xs font-bold text-[#D4AF37]">1. Automated Appraisal</span>
-                <p className="text-xs text-zinc-300 leading-relaxed">
-                  Select your device brand, model, storage, and battery condition to lock an instant valuation.
+            {/* 3-Step Swap Workflow */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+              <div className="p-4 bg-[#121217] border border-white/5 space-y-2">
+                <span className="text-[10px] text-[#D4AF37] uppercase tracking-wider block font-bold">
+                  [ 01 // PROPOSED WORTH ]
+                </span>
+                <h4 className="text-white font-bold uppercase">Automated Appraisal</h4>
+                <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
+                  Select your current model, storage capacity, and enter your proposed worth to lock your appraisal voucher.
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-zinc-900/60 border border-white/5 space-y-2">
-                <span className="text-xs font-bold text-[#D4AF37]">2. 5-Min Showroom Check</span>
-                <p className="text-xs text-zinc-300 leading-relaxed">
-                  Bring your phone to our Akwa/Bonapriso or Bastos lounges for a 65-point certified check.
+              <div className="p-4 bg-[#121217] border border-white/5 space-y-2">
+                <span className="text-[10px] text-[#D4AF37] uppercase tracking-wider block font-bold">
+                  [ 02 // 65-POINT CHECK ]
+                </span>
+                <h4 className="text-white font-bold uppercase">Showroom Inspection</h4>
+                <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
+                  Hand over your phone at our Douala Bonapriso or Yaoundé Bastos lounges for a certified 5-minute hardware check.
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-zinc-900/60 border border-white/5 space-y-2">
-                <span className="text-xs font-bold text-[#D4AF37]">3. Instant Price Deduction</span>
-                <p className="text-xs text-zinc-300 leading-relaxed">
-                  Pay only the difference on your brand-new flagship sealed in box with 1-year warranty.
+              <div className="p-4 bg-[#121217] border border-white/5 space-y-2">
+                <span className="text-[10px] text-[#D4AF37] uppercase tracking-wider block font-bold">
+                  [ 03 // DELTA PAYMENT ]
+                </span>
+                <h4 className="text-white font-bold uppercase">Price Deduction</h4>
+                <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
+                  Your trade-in credit is deducted on the spot. Pay only the difference and walk away with your brand-new sealed unit.
                 </p>
               </div>
             </div>
 
-            {/* Concierge Assistance */}
-            <div className="p-4 rounded-xl bg-[#161620] border border-[#D4AF37]/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Concierge Assistance Box */}
+            <div className="p-4 bg-[#121217] border border-[#D4AF37]/30 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
               <div className="flex items-center gap-3">
-                <PhoneCall className="w-5 h-5 text-[#D4AF37]" />
+                <PhoneCall className="w-5 h-5 text-[#D4AF37] shrink-0" />
                 <div>
-                  <h4 className="text-xs font-bold text-white">Need a custom corporate or bulk trade-in?</h4>
-                  <p className="text-[11px] text-zinc-400">Our VIP advisors appraise executive fleets across Cameroon.</p>
+                  <h4 className="text-xs font-bold text-white uppercase">Need corporate or bulk smartphone swaps?</h4>
+                  <p className="text-[11px] text-zinc-400 font-sans">Our VIP concierge handles executive fleet upgrades across Central Africa.</p>
                 </div>
               </div>
               <a
@@ -772,9 +898,9 @@ export default function CustomerAccountPage() {
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold whitespace-nowrap hover:bg-emerald-500/25 transition-all"
+                className="px-4 py-2.5 bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider whitespace-nowrap hover:bg-emerald-900/50 transition-all rounded-none"
               >
-                Chat with Concierge
+                Chat with Trade-In Concierge
               </a>
             </div>
           </div>
@@ -782,35 +908,43 @@ export default function CustomerAccountPage() {
 
         {/* TAB 4: SECURITY & PASSWORD */}
         {activeTab === "security" && (
-          <div className="rounded-2xl bg-[#121216] border border-white/10 p-6 sm:p-8 shadow-xl max-w-xl">
-            <div className="mb-6">
-              <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                <KeyRound className="w-5 h-5 text-[#D4AF37]" />
-                <span>Security & Account Credentials</span>
+          <div className="bg-[#0E0E12] border border-white/10 p-6 sm:p-8 shadow-xl max-w-xl relative rounded-none">
+            <span className="absolute -top-1 -left-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+            <span className="absolute -top-1 -right-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+            <span className="absolute -bottom-1 -left-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+            <span className="absolute -bottom-1 -right-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+
+            <div className="mb-6 pb-4 border-b border-white/10">
+              <div className="text-[10px] font-mono text-[#D4AF37] uppercase tracking-widest mb-1">
+                [ SECURITY // CREDENTIALS ]
+              </div>
+              <h2 className="text-base sm:text-lg font-bold text-white uppercase tracking-tight flex items-center gap-2">
+                <KeyRound className="w-4 h-4 text-[#D4AF37]" />
+                <span>Security & Password Credentials</span>
               </h2>
-              <p className="text-xs text-zinc-400 mt-1">
-                Update your VIP customer login password and security settings.
+              <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                Update your account password. Use at least 6 characters with a combination of letters and numbers.
               </p>
             </div>
 
             {passwordSuccessMessage && (
-              <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2 animate-in fade-in">
-                <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+              <div className="mb-6 p-3.5 bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs font-mono flex items-center gap-2 animate-in fade-in rounded-none">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>{passwordSuccessMessage}</span>
               </div>
             )}
 
             {passwordErrorMessage && (
-              <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2 animate-in fade-in">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <div className="mb-6 p-3.5 bg-rose-950/40 border border-rose-500/40 text-rose-300 text-xs font-mono flex items-center gap-2 animate-in fade-in rounded-none">
+                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
                 <span>{passwordErrorMessage}</span>
               </div>
             )}
 
-            <form onSubmit={handleUpdatePassword} className="space-y-4">
+            <form onSubmit={handleUpdatePassword} className="space-y-4 font-sans">
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-2">
-                  New Password
+                <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-2">
+                  [ NEW PASSWORD ]
                 </label>
                 <input
                   type="password"
@@ -819,13 +953,13 @@ export default function CustomerAccountPage() {
                   placeholder="••••••••"
                   required
                   minLength={6}
-                  className="w-full bg-[#181820] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-colors"
+                  className="w-full bg-[#121217] border border-white/15 px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-colors rounded-none font-mono"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-2">
-                  Confirm New Password
+                <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-2">
+                  [ CONFIRM NEW PASSWORD ]
                 </label>
                 <input
                   type="password"
@@ -834,7 +968,7 @@ export default function CustomerAccountPage() {
                   placeholder="••••••••"
                   required
                   minLength={6}
-                  className="w-full bg-[#181820] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-colors"
+                  className="w-full bg-[#121217] border border-white/15 px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-colors rounded-none font-mono"
                 />
               </div>
 
@@ -842,10 +976,10 @@ export default function CustomerAccountPage() {
                 <button
                   type="submit"
                   disabled={isUpdatingPassword}
-                  className="px-6 py-3.5 rounded-xl gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/10 hover:opacity-95 transition-all flex items-center gap-2 disabled:opacity-50"
+                  className="px-6 py-3.5 gold-gradient-bg text-black font-mono font-extrabold text-xs uppercase tracking-widest shadow-lg shadow-amber-500/10 hover:opacity-95 transition-all flex items-center gap-2 disabled:opacity-50 rounded-none cursor-pointer"
                 >
                   <Shield className="w-4 h-4" />
-                  <span>{isUpdatingPassword ? "Updating Password..." : "Update Security Password"}</span>
+                  <span>{isUpdatingPassword ? "UPDATING..." : "UPDATE SECURITY PASSWORD"}</span>
                 </button>
               </div>
             </form>

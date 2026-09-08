@@ -68,10 +68,7 @@ function AccountLoginContent() {
     if (res.error) {
       setErrorMessage(res.error);
     } else {
-      setSuccessMessage("Signed in successfully! Opening your account...");
-      setTimeout(() => {
-        router.replace(redirectTarget);
-      }, 500);
+      router.push(redirectTarget);
     }
   };
 
@@ -81,13 +78,13 @@ function AccountLoginContent() {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    if (signUpPassword !== signUpConfirmPassword) {
-      setErrorMessage("Passwords do not match. Please re-enter.");
+    if (signUpPassword.length < 6) {
+      setErrorMessage("Password must contain at least 6 characters.");
       return;
     }
 
-    if (signUpPassword.length < 6) {
-      setErrorMessage("Password must be at least 6 characters long.");
+    if (signUpPassword !== signUpConfirmPassword) {
+      setErrorMessage("Passwords do not match.");
       return;
     }
 
@@ -96,38 +93,31 @@ function AccountLoginContent() {
     const res = await signUp(
       signUpEmail,
       signUpPassword,
-      signUpName,
-      signUpPhone,
+      signUpName.trim(),
+      signUpPhone.trim(),
       signUpCity
     );
+
     setIsLoading(false);
 
     if (res.error) {
       setErrorMessage(res.error);
-    } else if (res.requiresConfirmation) {
-      setSuccessMessage(
-        "Account created! Please check your email inbox to confirm your registration, then sign in."
-      );
-      setTab("signin");
-      setSignInEmail(signUpEmail);
     } else {
-      setSuccessMessage("Account created successfully! Welcome to AURA Luxe.");
+      setSuccessMessage(
+        "Account created successfully. Logging you into your boutique session..."
+      );
       setTimeout(() => {
-        router.replace(redirectTarget);
-      }, 600);
+        router.push(redirectTarget);
+      }, 1200);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#09090B] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Subtle Luxury Glow Orbs */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-[#D4AF37]/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-72 h-72 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="min-h-screen bg-[#09090B] flex flex-col justify-center py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden font-sans">
       {/* Brand Header */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center mb-8 relative z-10">
         <Link href="/" className="inline-flex flex-col items-center gap-2 group">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#1A1A24] to-[#0F0F14] border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] font-black text-xl shadow-xl shadow-amber-500/10 group-hover:scale-105 transition-transform">
+          <div className="w-12 h-12 rounded-none bg-black border border-[#D4AF37]/50 flex items-center justify-center text-[#D4AF37] font-mono font-black text-xl shadow-xl">
             A
           </div>
           <div>
@@ -139,24 +129,30 @@ function AccountLoginContent() {
             </span>
           </div>
         </Link>
-        <p className="mt-2 text-xs text-zinc-400">
-          Access your orders, concierge live tracking, and VIP member guarantees.
+        <p className="mt-2 text-xs text-zinc-400 font-mono">
+          [ ACCESS ORDERS • LIVE TRACKING • VIP GUARANTEES ]
         </p>
       </div>
 
       {/* Auth Card */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        <div className="bg-[#121217] border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+        <div className="bg-[#0E0E12] border border-white/10 p-6 sm:p-8 shadow-2xl relative rounded-none">
+          {/* Corner crosshairs */}
+          <span className="absolute -top-1 -left-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+          <span className="absolute -top-1 -right-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+          <span className="absolute -bottom-1 -left-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+          <span className="absolute -bottom-1 -right-1 text-[#D4AF37] font-mono text-[9px]">+</span>
+
           {/* Tab Switcher */}
-          <div className="grid grid-cols-2 gap-1 p-1 bg-black/50 border border-white/5 rounded-xl mb-6">
+          <div className="grid grid-cols-2 gap-1 p-1 bg-black border border-white/10 mb-6 font-mono text-xs">
             <button
               onClick={() => {
                 setTab("signin");
                 setErrorMessage(null);
               }}
-              className={`py-2 text-xs font-bold rounded-lg transition-all ${
+              className={`py-2 text-xs font-bold uppercase tracking-wider transition-all rounded-none cursor-pointer ${
                 tab === "signin"
-                  ? "bg-[#D4AF37] text-black shadow-md shadow-amber-500/15"
+                  ? "bg-[#D4AF37] text-black"
                   : "text-zinc-400 hover:text-white"
               }`}
             >
@@ -167,9 +163,9 @@ function AccountLoginContent() {
                 setTab("signup");
                 setErrorMessage(null);
               }}
-              className={`py-2 text-xs font-bold rounded-lg transition-all ${
+              className={`py-2 text-xs font-bold uppercase tracking-wider transition-all rounded-none cursor-pointer ${
                 tab === "signup"
-                  ? "bg-[#D4AF37] text-black shadow-md shadow-amber-500/15"
+                  ? "bg-[#D4AF37] text-black"
                   : "text-zinc-400 hover:text-white"
               }`}
             >
@@ -179,14 +175,14 @@ function AccountLoginContent() {
 
           {/* Feedback Messages */}
           {errorMessage && (
-            <div className="mb-5 p-3.5 rounded-xl bg-red-950/60 border border-red-500/30 text-red-200 text-xs flex items-start gap-2.5 animate-in fade-in">
-              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+            <div className="mb-5 p-3.5 bg-rose-950/50 border border-rose-500/40 text-rose-300 text-xs font-mono flex items-start gap-2.5 animate-in fade-in rounded-none">
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
             </div>
           )}
 
           {successMessage && (
-            <div className="mb-5 p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-200 text-xs flex items-start gap-2.5 animate-in fade-in">
+            <div className="mb-5 p-3.5 bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-xs font-mono flex items-start gap-2.5 animate-in fade-in rounded-none">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
               <span>{successMessage}</span>
             </div>
@@ -196,8 +192,8 @@ function AccountLoginContent() {
           {tab === "signin" && (
             <form onSubmit={handleSignIn} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Email Address
+                <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-1.5">
+                  [ EMAIL ADDRESS ]
                 </label>
                 <div className="relative">
                   <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -207,14 +203,14 @@ function AccountLoginContent() {
                     placeholder="client@example.com"
                     value={signInEmail}
                     onChange={(e) => setSignInEmail(e.target.value)}
-                    className="w-full bg-[#181820] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white focus:border-[#D4AF37] focus:outline-none transition-colors"
+                    className="w-full bg-[#121217] border border-white/15 pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white focus:border-[#D4AF37] focus:outline-none transition-colors rounded-none font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Password
+                <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-1.5">
+                  [ PASSWORD ]
                 </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -224,12 +220,12 @@ function AccountLoginContent() {
                     placeholder="••••••••"
                     value={signInPassword}
                     onChange={(e) => setSignInPassword(e.target.value)}
-                    className="w-full bg-[#181820] border border-white/10 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-white focus:border-[#D4AF37] focus:outline-none transition-colors"
+                    className="w-full bg-[#121217] border border-white/15 pl-10 pr-10 py-2.5 text-xs sm:text-sm text-white focus:border-[#D4AF37] focus:outline-none transition-colors rounded-none font-mono"
                   />
                   <button
                     type="button"
                     onClick={() => setShowSignInPassword(!showSignInPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 p-1 cursor-pointer"
                   >
                     {showSignInPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -239,14 +235,14 @@ function AccountLoginContent() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full mt-2 py-3 px-4 rounded-xl gold-gradient-bg text-black font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-amber-500/15 hover:opacity-95 transition-all disabled:opacity-50"
+                className="w-full mt-2 py-3.5 px-4 gold-gradient-bg text-black font-mono font-extrabold text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-amber-500/15 hover:opacity-95 transition-all disabled:opacity-50 rounded-none cursor-pointer"
               >
                 {isLoading ? (
-                  <span>Authenticating...</span>
+                  <span>AUTHENTICATING...</span>
                 ) : (
                   <>
-                    <span>Sign In to Boutique</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>SIGN IN TO BOUTIQUE</span>
+                    <ArrowRight className="w-4 h-4 stroke-[2.5]" />
                   </>
                 )}
               </button>
@@ -257,8 +253,8 @@ function AccountLoginContent() {
           {tab === "signup" && (
             <form onSubmit={handleSignUp} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Full Name *
+                <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-1.5">
+                  [ FULL NAME * ]
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -268,15 +264,15 @@ function AccountLoginContent() {
                     placeholder="e.g. Roland Ebong"
                     value={signUpName}
                     onChange={(e) => setSignUpName(e.target.value)}
-                    className="w-full bg-[#181820] border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs sm:text-sm text-white focus:border-[#D4AF37] focus:outline-none transition-colors"
+                    className="w-full bg-[#121217] border border-white/15 pl-10 pr-4 py-2 text-xs sm:text-sm text-white focus:border-[#D4AF37] focus:outline-none transition-colors rounded-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                    Email Address *
+                  <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-1.5">
+                    [ EMAIL * ]
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -286,14 +282,14 @@ function AccountLoginContent() {
                       placeholder="client@mail.com"
                       value={signUpEmail}
                       onChange={(e) => setSignUpEmail(e.target.value)}
-                      className="w-full bg-[#181820] border border-white/10 rounded-xl pl-10 pr-3 py-2 text-xs sm:text-sm text-white focus:border-[#D4AF37] focus:outline-none transition-colors"
+                      className="w-full bg-[#121217] border border-white/15 pl-10 pr-3 py-2 text-xs sm:text-sm text-white focus:border-[#D4AF37] focus:outline-none transition-colors rounded-none font-mono"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                    Phone (WhatsApp) *
+                  <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-1.5">
+                    [ WHATSAPP * ]
                   </label>
                   <div className="relative">
                     <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -303,22 +299,22 @@ function AccountLoginContent() {
                       placeholder="+237 6..."
                       value={signUpPhone}
                       onChange={(e) => setSignUpPhone(e.target.value)}
-                      className="w-full bg-[#181820] border border-white/10 rounded-xl pl-10 pr-3 py-2 text-xs sm:text-sm text-white focus:border-[#D4AF37] focus:outline-none transition-colors font-mono"
+                      className="w-full bg-[#121217] border border-white/15 pl-10 pr-3 py-2 text-xs sm:text-sm text-white focus:border-[#D4AF37] focus:outline-none transition-colors font-mono rounded-none"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Primary Delivery City
+                <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-1.5">
+                  [ DELIVERY HUB ]
                 </label>
                 <div className="relative">
                   <MapPin className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
                   <select
                     value={signUpCity}
                     onChange={(e) => setSignUpCity(e.target.value)}
-                    className="w-full bg-[#181820] border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs sm:text-sm text-white focus:border-[#D4AF37] focus:outline-none transition-colors"
+                    className="w-full bg-[#121217] border border-white/15 pl-10 pr-4 py-2 text-xs sm:text-sm text-white focus:border-[#D4AF37] focus:outline-none transition-colors rounded-none font-sans"
                   >
                     <option value="Douala">Douala (Same-Day Handover)</option>
                     <option value="Yaoundé">Yaoundé (Same-Day Handover)</option>
@@ -333,8 +329,8 @@ function AccountLoginContent() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                    Password *
+                  <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-1.5">
+                    [ PASSWORD * ]
                   </label>
                   <div className="relative">
                     <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -344,50 +340,50 @@ function AccountLoginContent() {
                       placeholder="Min 6 chars"
                       value={signUpPassword}
                       onChange={(e) => setSignUpPassword(e.target.value)}
-                      className="w-full bg-[#181820] border border-white/10 rounded-xl pl-10 pr-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-[#121217] border border-white/15 pl-10 pr-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none rounded-none font-mono"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                    Confirm Password *
+                  <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-1.5">
+                    [ CONFIRM * ]
                   </label>
                   <div className="relative">
                     <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
                     <input
                       type={showSignUpPassword ? "text" : "password"}
                       required
-                      placeholder="Repeat password"
+                      placeholder="Repeat"
                       value={signUpConfirmPassword}
                       onChange={(e) => setSignUpConfirmPassword(e.target.value)}
-                      className="w-full bg-[#181820] border border-white/10 rounded-xl pl-10 pr-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-[#121217] border border-white/15 pl-10 pr-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none rounded-none font-mono"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-[11px] text-zinc-400 space-y-1">
-                <div className="flex items-center gap-1.5 text-amber-300 font-semibold">
+              <div className="p-3 bg-black border border-white/10 text-[11px] font-mono text-zinc-400 space-y-1 rounded-none">
+                <div className="flex items-center gap-1.5 text-[#D4AF37] font-bold uppercase">
                   <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>AURA Privilege Benefits</span>
+                  <span>AURA VIP Privilege Benefits</span>
                 </div>
-                <p>
-                  Automatic warranty logging, live order notifications, and preferential pricing on trade-in swaps.
+                <p className="font-sans text-zinc-400">
+                  Automatic 12-month warranty logging, order tracking updates, and preferential pricing on trade-in swaps.
                 </p>
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 px-4 rounded-xl gold-gradient-bg text-black font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-amber-500/15 hover:opacity-95 transition-all disabled:opacity-50"
+                className="w-full py-3.5 px-4 gold-gradient-bg text-black font-mono font-extrabold text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-amber-500/15 hover:opacity-95 transition-all disabled:opacity-50 rounded-none cursor-pointer"
               >
                 {isLoading ? (
-                  <span>Creating Account...</span>
+                  <span>CREATING ACCOUNT...</span>
                 ) : (
                   <>
-                    <span>Create My AURA Account</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>CREATE MY AURA ACCOUNT</span>
+                    <ArrowRight className="w-4 h-4 stroke-[2.5]" />
                   </>
                 )}
               </button>
@@ -395,10 +391,10 @@ function AccountLoginContent() {
           )}
 
           {/* Storefront return */}
-          <div className="mt-6 pt-4 border-t border-white/10 text-center">
+          <div className="mt-6 pt-4 border-t border-white/10 text-center font-mono text-xs">
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
+              className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors uppercase tracking-wider"
             >
               <Store className="w-3.5 h-3.5 text-[#D4AF37]" />
               <span>Return to Storefront</span>
@@ -414,8 +410,8 @@ export default function AccountLoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#09090B] flex items-center justify-center text-white">
-          <div className="w-8 h-8 rounded-full border-2 border-[#D4AF37] border-t-transparent animate-spin" />
+        <div className="min-h-screen bg-[#09090B] flex items-center justify-center text-white font-mono text-xs">
+          <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent animate-spin rounded-none" />
         </div>
       }
     >
