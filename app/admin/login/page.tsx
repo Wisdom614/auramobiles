@@ -73,10 +73,14 @@ export default function AdminLoginPage() {
       });
 
       if (error) {
-        // Helpful message if user doesn't exist yet in Supabase Auth
-        if (error.message.toLowerCase().includes("invalid login credentials")) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes("email not confirmed")) {
           setErrorMessage(
-            "Invalid credentials. If this is your first time logging in, please switch to the 'First-Time Setup' tab to register your password."
+            "Email not confirmed yet. Check your inbox for the Supabase confirmation link, or confirm the user in your Supabase Auth dashboard."
+          );
+        } else if (msg.includes("invalid login credentials")) {
+          setErrorMessage(
+            "Invalid credentials. If you just registered, your Supabase project may require clicking the email confirmation link sent to your inbox first, or re-check your password."
           );
         } else {
           setErrorMessage(error.message);
@@ -149,8 +153,16 @@ export default function AdminLoginPage() {
         return;
       }
 
+      if (data.session) {
+        setSuccessMessage("Account created and verified! Redirecting to dashboard...");
+        setTimeout(() => {
+          router.replace("/admin");
+        }, 800);
+        return;
+      }
+
       setSuccessMessage(
-        "Admin account created successfully! You may now sign in or check your email if confirmation is enabled in your Supabase project."
+        `Admin registered! A confirmation email was sent to ${cleanEmail}. Please click the link in your inbox (or confirm in Supabase Auth > Users) to log in.`
       );
       setMode("signin");
       setIsLoading(false);
