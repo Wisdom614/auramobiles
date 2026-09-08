@@ -53,14 +53,14 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#09090B] text-[#F4F4F5]">
+      <body className="min-h-full flex flex-col bg-[#09090B] text-[#F4F4F5] overflow-x-hidden w-full">
         <AppProviders>
           <Suspense fallback={null}>
             <NavigationProgressBar />
           </Suspense>
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen w-full overflow-x-hidden">
             <Navbar />
-            <main className="flex-1 pb-20 md:pb-0">{children}</main>
+            <main className="flex-1 pb-20 md:pb-0 w-full overflow-x-hidden">{children}</main>
             <Footer />
             <MobileNav />
             <CartDrawer />

@@ -14,7 +14,7 @@ export const metadata = {
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-[#09090B] text-[#F4F4F5]">
+    <div className="flex flex-col min-h-screen bg-[#09090B] text-[#F4F4F5] w-full max-w-full overflow-x-hidden">
       {/* 3. Hero Section (Matching Reference Design) */}
       <HeroSection />
 

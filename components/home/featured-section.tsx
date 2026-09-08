@@ -28,7 +28,7 @@ function BestSellerCard({ phone }: BestSellerCardProps) {
   };
 
   return (
-    <div className="bg-[#0E0E12] border border-white/10 hover:border-[#D4AF37]/60 p-4 transition-all flex flex-col justify-between shrink-0 w-[220px] sm:w-[240px] lg:w-auto h-full relative group">
+    <div className="bg-[#0E0E12] border border-white/10 hover:border-[#D4AF37]/60 p-3 sm:p-4 transition-all flex flex-col justify-between w-full h-full relative group">
       
       {/* Top Telemetry */}
       <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/5 font-mono text-[9px]">
@@ -134,7 +134,7 @@ export function FeaturedSection() {
       : phonesList.filter((p) => p.brand.toLowerCase() === activeBrand.toLowerCase()).slice(0, 5);
 
   return (
-    <section className="py-14 sm:py-16 bg-[#09090B] border-b border-white/10 font-sans">
+    <section className="py-14 sm:py-16 bg-[#09090B] border-b border-white/10 font-sans overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
@@ -149,7 +149,7 @@ export function FeaturedSection() {
           </div>
 
           {/* Segmented Filter Switches (Teenage Engineering Style) */}
-          <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none font-mono">
+          <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none font-mono max-w-full">
             {filterTabs.map((tab) => (
               <button
                 key={tab.value}

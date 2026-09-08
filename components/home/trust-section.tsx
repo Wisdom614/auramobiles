@@ -51,7 +51,7 @@ const TRUST_ITEMS: TrustItem[] = [
 
 export function TrustSection() {
   return (
-    <section className="bg-[#0B0B0E] border-b border-white/10 font-sans">
+    <section className="bg-[#0B0B0E] border-b border-white/10 font-sans overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-white/10">
           {TRUST_ITEMS.map((item, idx) => {

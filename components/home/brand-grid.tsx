@@ -78,7 +78,7 @@ const BRAND_ITEMS: BrandItem[] = [
 
 export function BrandGrid() {
   return (
-    <section className="py-12 bg-[#09090B] border-b border-white/10 font-sans">
+    <section className="py-12 bg-[#09090B] border-b border-white/10 font-sans overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}

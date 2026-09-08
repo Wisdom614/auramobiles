@@ -157,10 +157,10 @@ export function HeroSection() {
             </div>
 
             {/* Architectural Tactical Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-3">
               <Link
                 href={slide.primaryLink}
-                className="px-6 sm:px-7 py-3.5 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-widest flex items-center gap-2.5 hover:opacity-95 transition cursor-pointer"
+                className="w-full sm:w-auto px-6 sm:px-7 py-3.5 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-widest flex items-center justify-center gap-2.5 hover:opacity-95 transition cursor-pointer"
               >
                 <ShoppingBag className="w-4 h-4 text-black stroke-[2.5]" />
                 <span>ACQUIRE HARDWARE</span>
@@ -169,7 +169,7 @@ export function HeroSection() {
 
               <Link
                 href="/trade-in"
-                className="px-5 sm:px-6 py-3.5 bg-[#121217] hover:bg-[#16161D] text-white border border-white/15 hover:border-[#D4AF37]/60 font-bold text-xs uppercase tracking-widest flex items-center gap-2 transition font-mono"
+                className="w-full sm:w-auto px-5 sm:px-6 py-3.5 bg-[#121217] hover:bg-[#16161D] text-white border border-white/15 hover:border-[#D4AF37]/60 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition font-mono"
               >
                 <RefreshCw className="w-3.5 h-3.5 text-[#D4AF37]" />
                 <span>[ INITIATE PHONE SWAP ]</span>
@@ -179,7 +179,7 @@ export function HeroSection() {
           </div>
 
           {/* Right Product Visual Canvas (Cols 7-12) */}
-          <div className="lg:col-span-6 relative flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-5">
+          <div className="lg:col-span-6 relative flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-5 w-full">
             
             {/* Viewfinder Framed Phone Image Showcase */}
             <div className="relative w-full max-w-md lg:max-w-lg aspect-[16/11] sm:aspect-[4/3] bg-[#0E0E12] border border-white/15 overflow-hidden group">
@@ -203,7 +203,7 @@ export function HeroSection() {
             </div>
 
             {/* Right Side Floating Price Matrix */}
-            <div className="sm:absolute sm:right-2 sm:bottom-4 text-left bg-[#0E0E12]/95 border border-[#D4AF37]/50 p-4 sm:p-5 shadow-2xl shrink-0 font-mono relative">
+            <div className="w-full sm:w-auto sm:absolute sm:right-2 sm:bottom-4 text-left bg-[#0E0E12]/95 border border-[#D4AF37]/50 p-4 sm:p-5 shadow-2xl shrink-0 font-mono relative">
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#D4AF37]"></span>
               <span className="text-[10px] text-[#D4AF37] font-bold block uppercase tracking-wider">
                 [ FACTORY SEALED ]
@@ -224,9 +224,9 @@ export function HeroSection() {
         </div>
 
         {/* Carousel Navigation Bar (Teenage Engineering Style) */}
-        <div className="flex items-center justify-between pt-8 sm:pt-10 border-t border-white/10 mt-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-8 sm:pt-10 border-t border-white/10 mt-8">
           {/* Step buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {HERO_SLIDES.map((s, idx) => (
               <button
                 key={s.id}
