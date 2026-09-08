@@ -7,6 +7,7 @@ import { PHONES, Phone } from "@/lib/data/phones";
 import { formatCFA } from "@/lib/formatters";
 import { useWishlist } from "@/lib/store/wishlist-context";
 import { useCart } from "@/lib/store/cart-context";
+import { getPhonesFromDB } from "@/lib/supabase/client";
 
 interface BestSellerCardProps {
   phone: Phone;
@@ -89,6 +90,15 @@ function BestSellerCard({ phone }: BestSellerCardProps) {
 
 export function FeaturedSection() {
   const [activeBrand, setActiveBrand] = useState<string>("all");
+  const [phonesList, setPhonesList] = useState<Phone[]>(PHONES);
+
+  React.useEffect(() => {
+    getPhonesFromDB().then((dbList) => {
+      if (dbList && dbList.length > 0) {
+        setPhonesList(dbList);
+      }
+    });
+  }, []);
 
   const filterTabs = [
     { label: "All", value: "all" },
@@ -102,13 +112,13 @@ export function FeaturedSection() {
   const filteredPhones =
     activeBrand === "all"
       ? [
-          PHONES.find((p) => p.brand === "Apple") || PHONES[0],
-          PHONES.find((p) => p.brand === "Samsung") || PHONES[1],
-          PHONES.find((p) => p.brand === "Xiaomi") || PHONES[2],
-          PHONES.find((p) => p.brand === "Tecno") || PHONES[3],
-          PHONES.find((p) => p.brand === "Infinix") || PHONES[4],
-        ]
-      : PHONES.filter((p) => p.brand.toLowerCase() === activeBrand.toLowerCase()).slice(0, 5);
+          phonesList.find((p) => p.brand === "Apple") || phonesList[0],
+          phonesList.find((p) => p.brand === "Samsung") || phonesList[1],
+          phonesList.find((p) => p.brand === "Xiaomi") || phonesList[2],
+          phonesList.find((p) => p.brand === "Tecno") || phonesList[3],
+          phonesList.find((p) => p.brand === "Infinix") || phonesList[4],
+        ].filter(Boolean)
+      : phonesList.filter((p) => p.brand.toLowerCase() === activeBrand.toLowerCase()).slice(0, 5);
 
   return (
     <section className="py-14 sm:py-16 bg-[#09090B] border-b border-white/5 relative">

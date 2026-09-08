@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, use } from "react";
+import React, { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -17,12 +17,13 @@ import {
   Package,
   MessageCircle,
 } from "lucide-react";
-import { PHONES, getPhoneBySlug, getRelatedPhones, Phone } from "@/lib/data/phones";
+import { Phone } from "@/lib/data/phones";
 import { formatCFA } from "@/lib/formatters";
 import { useCart } from "@/lib/store/cart-context";
 import { useWishlist } from "@/lib/store/wishlist-context";
+import { useSettings } from "@/lib/store/settings-context";
 import { ProductCard } from "@/components/product/product-card";
-import { getPhonesFromDB } from "@/lib/supabase/client";
+import { getPhoneBySlugFromDB, getPhonesFromDB } from "@/lib/supabase/client";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -31,48 +32,137 @@ interface PageProps {
 export default function PhoneDetailPage({ params }: PageProps) {
   const resolvedParams = use(params);
   const router = useRouter();
-  const initialPhone = getPhoneBySlug(resolvedParams.slug);
-  const [phone, setPhone] = useState<Phone | undefined>(initialPhone);
-
-  React.useEffect(() => {
-    if (!initialPhone) {
-      getPhonesFromDB().then((list) => {
-        const found = list?.find((p) => p.slug === resolvedParams.slug);
-        if (found) setPhone(found);
-      });
-    }
-  }, [resolvedParams.slug, initialPhone]);
-
-  const { addItem, setIsCartOpen } = useCart();
+  const { settings } = useSettings();
+  const { addItem } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
+
+  const [phone, setPhone] = useState<Phone | null>(null);
+  const [relatedPhones, setRelatedPhones] = useState<Phone[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [selectedStorageIdx, setSelectedStorageIdx] = useState(0);
   const [selectedColorIdx, setSelectedColorIdx] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
+
+  // Load product and related items strictly from database
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadPhoneFromDB() {
+      setIsLoading(true);
+      try {
+        // 1. Fetch exact smartphone record from Supabase database
+        const dbPhone = await getPhoneBySlugFromDB(resolvedParams.slug);
+
+        if (isMounted && dbPhone) {
+          setPhone(dbPhone);
+
+          // 2. Fetch catalog from database to compute related models
+          const allDbPhones = await getPhonesFromDB();
+          if (isMounted && allDbPhones) {
+            const related = allDbPhones
+              .filter(
+                (p) =>
+                  p.id !== dbPhone.id &&
+                  (p.brand.toLowerCase() === dbPhone.brand.toLowerCase() ||
+                    p.category === dbPhone.category)
+              )
+              .slice(0, 4);
+            setRelatedPhones(related);
+          }
+        } else if (isMounted) {
+          // Fallback: search all DB records for matching slug or name
+          const allDbPhones = await getPhonesFromDB();
+          if (isMounted && allDbPhones) {
+            const match = allDbPhones.find(
+              (p) => p.slug === resolvedParams.slug || p.id === resolvedParams.slug
+            );
+            if (match) {
+              setPhone(match);
+              const related = allDbPhones
+                .filter(
+                  (p) =>
+                    p.id !== match.id &&
+                    (p.brand.toLowerCase() === match.brand.toLowerCase() ||
+                      p.category === match.category)
+                )
+                .slice(0, 4);
+              setRelatedPhones(related);
+            } else {
+              setPhone(null);
+            }
+          } else {
+            setPhone(null);
+          }
+        }
+      } catch {
+        if (isMounted) setPhone(null);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+
+    loadPhoneFromDB();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [resolvedParams.slug]);
+
+  // Loading Skeleton
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#09090B] text-zinc-100 py-8 sm:py-12 animate-pulse">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="h-4 w-44 bg-white/10 rounded-md" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
+            <div className="lg:col-span-6 aspect-square rounded-3xl bg-[#121217] border border-white/5" />
+            <div className="lg:col-span-6 space-y-6">
+              <div className="h-4 w-28 bg-[#D4AF37]/20 rounded" />
+              <div className="h-9 w-3/4 bg-white/10 rounded-xl" />
+              <div className="h-4 w-full bg-white/5 rounded" />
+              <div className="h-24 bg-[#121217] rounded-2xl border border-white/5" />
+              <div className="h-12 bg-white/5 rounded-xl" />
+              <div className="h-14 bg-white/10 rounded-xl" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!phone) {
     return (
       <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center text-center px-4 py-20">
         <h1 className="text-2xl font-bold text-white mb-2">Smartphone Not Found</h1>
         <p className="text-xs text-zinc-400 mb-6 max-w-sm">
-          The requested device may have been moved, renamed, or is temporarily out of inventory.
+          The requested device was not found in our database inventory.
         </p>
         <Link
           href="/phones"
           className="px-6 py-3 rounded-xl gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider"
         >
-          Return to All Phones
+          Browse All Phones
         </Link>
       </div>
     );
   }
 
-  const activeStorage = phone.storageVariants[selectedStorageIdx] || phone.storageVariants[0];
-  const activeColor = phone.colorVariants[selectedColorIdx] || phone.colorVariants[0];
-  const activeImage = activeColor?.image || phone.images[0];
-  const currentPrice = activeStorage.price;
+  const activeStorage = phone.storageVariants?.[selectedStorageIdx] || phone.storageVariants?.[0] || {
+    id: "default",
+    size: "Standard",
+    price: phone.basePrice,
+    stock: 5,
+  };
+  const activeColor = phone.colorVariants?.[selectedColorIdx] || phone.colorVariants?.[0] || {
+    id: "default",
+    name: "Standard",
+    hex: "#8A8A8E",
+    image: phone.images?.[0] || "",
+  };
+  const activeImage = activeColor?.image || phone.images?.[0] || "/placeholder.png";
+  const currentPrice = activeStorage.price || phone.basePrice;
   const inWish = isInWishlist(phone.id);
-  const related = getRelatedPhones(phone, 4);
 
   const handleAddToCart = () => {
     addItem(phone, activeStorage, activeColor, 1);
@@ -278,8 +368,8 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 </button>
 
                 <a
-                  href={`https://wa.me/237699442100?text=${encodeURIComponent(
-                    `Hello AURA Mobile, I want to order the ${phone.name} (${activeStorage.size}, ${activeColor.name}) for ${formatCFA(
+                  href={`https://wa.me/${settings.whatsappCleanNumber || "237699442100"}?text=${encodeURIComponent(
+                    `Hello ${settings.storeName}, I want to order the ${phone.name} (${activeStorage.size}, ${activeColor.name}) for ${formatCFA(
                       currentPrice
                     )}. Please confirm availability and delivery in Douala/Yaoundé.`
                   )}`}
@@ -326,6 +416,23 @@ export default function PhoneDetailPage({ params }: PageProps) {
               </Link>
             </div>
 
+            {/* Device Highlights */}
+            {phone.highlights && phone.highlights.length > 0 && (
+              <div className="pt-4 border-t border-white/8 space-y-2.5">
+                <span className="text-[10px] text-zinc-400 uppercase font-mono tracking-wider block font-semibold">
+                  Device Highlights
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-zinc-300">
+                  {phone.highlights.map((h, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                      <span>{h}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Guarantees Strip */}
             <div className="grid grid-cols-3 gap-3 pt-4 border-t border-white/8 text-[11px] text-zinc-400">
               <div className="flex items-center gap-2">
@@ -353,46 +460,49 @@ export default function PhoneDetailPage({ params }: PageProps) {
               Technical Specifications
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {Object.entries(phone.specs).map(([key, val]) => (
-                <div
-                  key={key}
-                  className="p-3.5 rounded-xl bg-[#121217] border border-white/5 flex items-start justify-between gap-4 text-xs"
-                >
-                  <span className="text-zinc-400 uppercase font-mono tracking-wider shrink-0">
-                    {key.replace(/([A-Z])/g, " $1")}
-                  </span>
-                  <span className="text-white font-medium text-right">
-                    {val}
-                  </span>
-                </div>
-              ))}
+              {phone.specs &&
+                Object.entries(phone.specs).map(([key, val]) => (
+                  <div
+                    key={key}
+                    className="p-3.5 rounded-xl bg-[#121217] border border-white/5 flex items-start justify-between gap-4 text-xs"
+                  >
+                    <span className="text-zinc-400 uppercase font-mono tracking-wider shrink-0">
+                      {key.replace(/([A-Z])/g, " $1")}
+                    </span>
+                    <span className="text-white font-medium text-right">
+                      {val}
+                    </span>
+                  </div>
+                ))}
             </div>
           </div>
 
           {/* Box Contents */}
-          <div className="p-6 rounded-2xl bg-[#121217] border border-white/8">
-            <div className="flex items-center gap-2 text-white font-bold text-sm mb-3">
-              <Package className="w-4 h-4 text-[#D4AF37]" />
-              <span>In The Box (Official Sealed Packaging)</span>
+          {phone.boxContents && phone.boxContents.length > 0 && (
+            <div className="p-6 rounded-2xl bg-[#121217] border border-white/8">
+              <div className="flex items-center gap-2 text-white font-bold text-sm mb-3">
+                <Package className="w-4 h-4 text-[#D4AF37]" />
+                <span>In The Box (Official Sealed Packaging)</span>
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs text-zinc-300">
+                {phone.boxContents.map((item, i) => (
+                  <span key={i} className="px-3 py-1.5 rounded-lg bg-[#181820] border border-white/5">
+                    {item}
+                  </span>
+                ))}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-2 text-xs text-zinc-300">
-              {phone.boxContents.map((item, i) => (
-                <span key={i} className="px-3 py-1.5 rounded-lg bg-[#181820] border border-white/5">
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Related Phones */}
-        {related.length > 0 && (
+        {/* Related Phones from Database */}
+        {relatedPhones.length > 0 && (
           <div className="mt-16 pt-12 border-t border-white/10">
             <h2 className="text-xl sm:text-2xl font-bold text-white mb-6">
               You May Also Consider
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {related.map((relPhone) => (
+              {relatedPhones.map((relPhone) => (
                 <ProductCard key={relPhone.id} phone={relPhone} layout="grid" />
               ))}
             </div>

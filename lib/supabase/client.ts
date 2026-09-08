@@ -28,9 +28,10 @@ export interface TradeInRecord {
 
 // Map database row to Phone model
 function mapDbPhoneToModel(row: any): Phone {
+  const generatedSlug = row.slug || (row.name ? row.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") : row.id);
   return {
     id: row.id,
-    slug: row.slug,
+    slug: generatedSlug,
     name: row.name || row.model || "Smartphone",
     brand: row.brand as Phone["brand"],
     tagline: row.tagline || `${row.name} - Luxury Flagship Edition`,
@@ -114,6 +115,32 @@ export async function getPhonesFromDB(): Promise<Phone[] | null> {
       return null;
     }
     return data.map(mapDbPhoneToModel);
+  } catch {
+    return null;
+  }
+}
+
+export async function getPhoneBySlugFromDB(slug: string): Promise<Phone | null> {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase
+      .from("phones")
+      .select("*")
+      .or(`slug.eq.${slug},id.eq.${slug}`)
+      .maybeSingle();
+
+    if (!error && data) {
+      return mapDbPhoneToModel(data);
+    }
+
+    // Fallback: search all DB records for matching slug or name
+    const all = await getPhonesFromDB();
+    if (all && all.length > 0) {
+      const match = all.find((p) => p.slug === slug || p.id === slug);
+      if (match) return match;
+    }
+
+    return null;
   } catch {
     return null;
   }
