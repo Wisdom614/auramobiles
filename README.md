@@ -30,7 +30,9 @@ AURA Luxe Mobile is built with a sophisticated **Luxury Dark & Warm Gold** aesth
 - **Certified Phone Swap Banner**: Direct trade-in entry point with appraisal callouts.
 
 ### 2. Full Smartphone Catalog (`/phones`)
-- **Multi-Faceted Sidebar & Mobile Drawer**: Filter by Brand, Condition (Brand New, Certified Pre-Owned), Category (Flagship, Camera, Battery, Gaming), and Price Range.
+- **Fast 1-Tap Brand Filtering**: Instant horizontal brand selector (*Apple, Samsung, Xiaomi, Tecno, Infinix, Google Pixel*).
+- **Condition Chips**: Toggle between All, Brand New, and Certified Pre-Owned.
+- **Clean Phone Cards**: High-res imagery, model title, clear FCFA pricing, condition badge, and direct "Add to Cart" action with tactile feedback.
 - **Search & Sort**: Instant search filtering, sort by Price (Low to High, High to Low), and Rating.
 - **Real-Time Stock Badges**: Instant inventory indicators for Douala Bonapriso & Yaoundé Bastos hubs.
 
