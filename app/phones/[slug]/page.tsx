@@ -16,6 +16,10 @@ import {
   ArrowRight,
   Package,
   MessageCircle,
+  Cpu,
+  Camera,
+  BatteryCharging,
+  Smartphone,
 } from "lucide-react";
 import { Phone } from "@/lib/data/phones";
 import { formatCFA } from "@/lib/formatters";
@@ -41,7 +45,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [selectedStorageIdx, setSelectedStorageIdx] = useState(0);
-  const [selectedColorIdx, setSelectedColorIdx] = useState(0);
+  const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
 
   // Load product and related items strictly from database
@@ -154,24 +158,31 @@ export default function PhoneDetailPage({ params }: PageProps) {
     price: phone.basePrice,
     stock: 5,
   };
-  const activeColor = phone.colorVariants?.[selectedColorIdx] || phone.colorVariants?.[0] || {
-    id: "default",
-    name: "Standard",
+
+  const imagesList =
+    Array.isArray(phone.images) && phone.images.length > 0
+      ? phone.images
+      : ["/placeholder.png"];
+  const activeImage = imagesList[selectedImageIdx] || imagesList[0] || "/placeholder.png";
+
+  const defaultColor = phone.colorVariants?.[0] || {
+    id: "standard",
+    name: "Standard Edition",
     hex: "#8A8A8E",
-    image: phone.images?.[0] || "",
+    image: activeImage,
   };
-  const activeImage = activeColor?.image || phone.images?.[0] || "/placeholder.png";
+
   const currentPrice = activeStorage.price || phone.basePrice;
   const inWish = isInWishlist(phone.id);
 
   const handleAddToCart = () => {
-    addItem(phone, activeStorage, activeColor, 1);
+    addItem(phone, activeStorage, defaultColor, 1);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1500);
   };
 
   const handleBuyNow = () => {
-    addItem(phone, activeStorage, activeColor, 1);
+    addItem(phone, activeStorage, defaultColor, 1);
     router.push("/checkout");
   };
 
@@ -195,7 +206,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
         {/* Product Hero Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
           
-          {/* Left: Interactive Product Gallery */}
+          {/* Left: Device Photos Gallery */}
           <div className="lg:col-span-6 space-y-4 sticky top-24">
             <div className="relative aspect-square rounded-3xl bg-gradient-to-b from-[#141419] to-[#0A0A0D] border border-white/10 p-8 flex items-center justify-center overflow-hidden shadow-2xl group">
               <img
@@ -204,43 +215,53 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 className="max-h-full max-w-full object-contain filter drop-shadow-[0_25px_35px_rgba(0,0,0,0.85)] group-hover:scale-105 transition-transform duration-500"
               />
               
-              {/* Badges */}
+              {/* Status Badges */}
               <div className="absolute top-4 left-4 flex flex-col gap-1.5">
                 {phone.isNew && (
                   <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    Official New Release
+                    Official Release
                   </span>
                 )}
-                {phone.condition === "Certified Refurbished" && (
+                {phone.condition === "Certified Refurbished" ? (
                   <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-emerald-950/90 text-emerald-300 border border-emerald-500/30">
                     Certified Pre-Owned
                   </span>
+                ) : (
+                  <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-zinc-900/90 text-zinc-300 border border-white/15">
+                    100% Genuine Sealed
+                  </span>
                 )}
               </div>
+
+              {imagesList.length > 1 && (
+                <div className="absolute bottom-4 right-4 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-mono text-zinc-400">
+                  {selectedImageIdx + 1} / {imagesList.length} Photos
+                </div>
+              )}
             </div>
 
-            {/* Thumbnail color preview strip */}
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
-              {phone.colorVariants.map((col, idx) => (
-                <button
-                  key={col.id}
-                  onClick={() => setSelectedColorIdx(idx)}
-                  className={`relative w-18 h-18 rounded-2xl bg-[#121217] border p-2 flex flex-col items-center justify-center gap-1 transition-all shrink-0 ${
-                    selectedColorIdx === idx
-                      ? "border-[#D4AF37] ring-1 ring-[#D4AF37]"
-                      : "border-white/10 hover:border-white/25"
-                  }`}
-                >
-                  <span
-                    className="w-4 h-4 rounded-full border border-white/20"
-                    style={{ backgroundColor: col.hex }}
-                  />
-                  <span className="text-[10px] text-zinc-300 font-mono truncate max-w-full">
-                    {col.name.split(" ")[0]}
-                  </span>
-                </button>
-              ))}
-            </div>
+            {/* Real Device Image Gallery Thumbnails */}
+            {imagesList.length > 1 && (
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
+                {imagesList.map((imgUrl, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedImageIdx(idx)}
+                    className={`relative w-20 h-20 rounded-2xl bg-[#121217] border p-2 flex items-center justify-center transition-all shrink-0 cursor-pointer overflow-hidden ${
+                      selectedImageIdx === idx
+                        ? "border-[#D4AF37] ring-2 ring-[#D4AF37]/50 shadow-md shadow-[#D4AF37]/10"
+                        : "border-white/10 hover:border-white/30 opacity-70 hover:opacity-100"
+                    }`}
+                  >
+                    <img
+                      src={imgUrl}
+                      alt={`${phone.name} view ${idx + 1}`}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right: Product Details & Buying Actions */}
@@ -250,12 +271,12 @@ export default function PhoneDetailPage({ params }: PageProps) {
             <div>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono uppercase tracking-widest text-[#D4AF37] font-semibold">
-                  {phone.brand} Flagship
+                  {phone.brand} Official Flagship
                 </span>
                 <div className="flex items-center gap-1 text-xs text-amber-300">
                   <Star className="w-4 h-4 fill-amber-300" />
                   <span className="font-bold">{phone.rating}</span>
-                  <span className="text-zinc-500">({phone.reviewCount} reviews)</span>
+                  <span className="text-zinc-500">({phone.reviewCount} verified reviews)</span>
                 </div>
               </div>
 
@@ -271,76 +292,107 @@ export default function PhoneDetailPage({ params }: PageProps) {
             <div className="p-4 rounded-2xl bg-[#121217] border border-white/8 flex items-baseline justify-between">
               <div>
                 <span className="text-[10px] text-zinc-400 uppercase font-mono tracking-wider block">
-                  Official Retail Price
+                  Official Boutique Price
                 </span>
-                <span className="text-2xl sm:text-3xl font-black text-[#D4AF37]">
-                  {formatCFA(currentPrice)}
-                </span>
-                {phone.originalPrice && phone.originalPrice > currentPrice && (
-                  <span className="text-xs text-zinc-500 line-through ml-2">
-                    {formatCFA(phone.originalPrice)}
+                <div className="flex items-baseline gap-2 mt-0.5">
+                  <span className="text-2xl sm:text-3xl font-black text-[#D4AF37] font-mono">
+                    {formatCFA(currentPrice)}
                   </span>
-                )}
+                  {phone.originalPrice && phone.originalPrice > currentPrice && (
+                    <span className="text-xs text-zinc-500 line-through font-mono">
+                      {formatCFA(phone.originalPrice)}
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="text-right">
                 <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-semibold">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>In Stock ({activeStorage.stock} units)</span>
+                  <span>{activeStorage.stock > 0 ? `In Stock (${activeStorage.stock} units)` : "Sold Out"}</span>
                 </span>
                 <span className="text-[10px] text-zinc-400 block mt-0.5">
-                  Douala & Yaoundé Express
+                  Douala & Yaoundé Express VIP
                 </span>
               </div>
             </div>
 
-            {/* Color Swatches */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-zinc-300 flex items-center justify-between">
-                <span>Color Finish:</span>
-                <span className="text-[#D4AF37] font-mono">{activeColor.name}</span>
-              </label>
-              <div className="flex gap-2.5">
-                {phone.colorVariants.map((col, idx) => (
-                  <button
-                    key={col.id}
-                    onClick={() => setSelectedColorIdx(idx)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs transition-all ${
-                      selectedColorIdx === idx
-                        ? "bg-[#D4AF37]/15 border-[#D4AF37] text-white"
-                        : "bg-[#141419] border-white/10 text-zinc-400 hover:text-white"
-                    }`}
-                  >
-                    <span
-                      className="w-3.5 h-3.5 rounded-full border border-white/20 shrink-0"
-                      style={{ backgroundColor: col.hex }}
-                    />
-                    <span>{col.name}</span>
-                  </button>
-                ))}
+            {/* Instant Hardware Specs Matrix (4 Pillars) */}
+            {phone.specs && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {phone.specs.processor && (
+                  <div className="p-3 rounded-xl bg-[#121217] border border-white/5 space-y-1">
+                    <div className="flex items-center gap-1.5 text-[#D4AF37]">
+                      <Cpu className="w-3.5 h-3.5" />
+                      <span className="text-[9px] uppercase font-mono tracking-wider font-semibold">Processor</span>
+                    </div>
+                    <p className="text-[11px] font-bold text-white truncate">{phone.specs.processor}</p>
+                  </div>
+                )}
+                {phone.specs.rearCamera && (
+                  <div className="p-3 rounded-xl bg-[#121217] border border-white/5 space-y-1">
+                    <div className="flex items-center gap-1.5 text-[#D4AF37]">
+                      <Camera className="w-3.5 h-3.5" />
+                      <span className="text-[9px] uppercase font-mono tracking-wider font-semibold">Camera</span>
+                    </div>
+                    <p className="text-[11px] font-bold text-white truncate">{phone.specs.rearCamera.split("+")[0]}</p>
+                  </div>
+                )}
+                {phone.specs.battery && (
+                  <div className="p-3 rounded-xl bg-[#121217] border border-white/5 space-y-1">
+                    <div className="flex items-center gap-1.5 text-[#D4AF37]">
+                      <BatteryCharging className="w-3.5 h-3.5" />
+                      <span className="text-[9px] uppercase font-mono tracking-wider font-semibold">Battery</span>
+                    </div>
+                    <p className="text-[11px] font-bold text-white truncate">{phone.specs.battery}</p>
+                  </div>
+                )}
+                {phone.specs.screen && (
+                  <div className="p-3 rounded-xl bg-[#121217] border border-white/5 space-y-1">
+                    <div className="flex items-center gap-1.5 text-[#D4AF37]">
+                      <Smartphone className="w-3.5 h-3.5" />
+                      <span className="text-[9px] uppercase font-mono tracking-wider font-semibold">Display</span>
+                    </div>
+                    <p className="text-[11px] font-bold text-white truncate">{phone.specs.screen.split(" ")[0]} OLED</p>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
 
-            {/* Storage Variants */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-zinc-300">
-                Storage Capacity:
-              </label>
-              <div className="grid grid-cols-3 gap-2.5">
+            {/* Storage Capacity Selector (Core focus for customer choice) */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                  Select Storage Capacity:
+                </label>
+                <span className="text-xs text-[#D4AF37] font-mono font-bold">
+                  {activeStorage.size}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 {phone.storageVariants.map((variant, idx) => (
                   <button
                     key={variant.id}
                     onClick={() => setSelectedStorageIdx(idx)}
-                    className={`p-3 rounded-xl border text-left transition-all ${
+                    className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
                       selectedStorageIdx === idx
-                        ? "bg-[#D4AF37]/15 border-[#D4AF37]"
-                        : "bg-[#141419] border-white/10 hover:border-white/20"
+                        ? "bg-[#D4AF37]/15 border-[#D4AF37] ring-1 ring-[#D4AF37]"
+                        : "bg-[#141419] border-white/10 hover:border-white/25 text-zinc-300"
                     }`}
                   >
-                    <span className="text-sm font-bold text-white block">
-                      {variant.size}
-                    </span>
-                    <span className="text-xs text-[#D4AF37] font-semibold block mt-0.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-black text-white block">
+                        {variant.size}
+                      </span>
+                      {selectedStorageIdx === idx && (
+                        <Check className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      )}
+                    </div>
+                    <span className="text-xs text-[#D4AF37] font-mono font-bold block mt-1">
                       {formatCFA(variant.price)}
+                    </span>
+                    <span className="text-[9px] text-zinc-500 block mt-0.5">
+                      {variant.stock > 0 ? `${variant.stock} units ready` : "Out of stock"}
                     </span>
                   </button>
                 ))}
@@ -369,7 +421,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
 
                 <a
                   href={`https://wa.me/${settings.whatsappCleanNumber || "237699442100"}?text=${encodeURIComponent(
-                    `Hello ${settings.storeName}, I want to order the ${phone.name} (${activeStorage.size}, ${activeColor.name}) for ${formatCFA(
+                    `Hello ${settings.storeName}, I want to order the ${phone.name} (${activeStorage.size}) for ${formatCFA(
                       currentPrice
                     )}. Please confirm availability and delivery in Douala/Yaoundé.`
                   )}`}
