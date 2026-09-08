@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { SettingsProvider } from "@/lib/store/settings-context";
+import { AuthProvider } from "@/lib/store/auth-context";
 import { CartProvider } from "@/lib/store/cart-context";
 import { WishlistProvider } from "@/lib/store/wishlist-context";
 import { CompareProvider } from "@/lib/store/compare-context";
@@ -10,15 +11,17 @@ import { AiProvider } from "@/lib/store/ai-context";
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <SettingsProvider>
-      <OrdersProvider>
-        <WishlistProvider>
-          <CompareProvider>
-            <CartProvider>
-              <AiProvider>{children}</AiProvider>
-            </CartProvider>
-          </CompareProvider>
-        </WishlistProvider>
-      </OrdersProvider>
+      <AuthProvider>
+        <OrdersProvider>
+          <WishlistProvider>
+            <CompareProvider>
+              <CartProvider>
+                <AiProvider>{children}</AiProvider>
+              </CartProvider>
+            </CompareProvider>
+          </WishlistProvider>
+        </OrdersProvider>
+      </AuthProvider>
     </SettingsProvider>
   );
 }

@@ -14,10 +14,13 @@ import {
   Truck,
   ShieldCheck,
   Tag,
+  Shield,
+  Crown,
 } from "lucide-react";
 import { useCart } from "@/lib/store/cart-context";
 import { useWishlist } from "@/lib/store/wishlist-context";
 import { useSettings } from "@/lib/store/settings-context";
+import { useAuth } from "@/lib/store/auth-context";
 import { PHONES, Phone } from "@/lib/data/phones";
 import { formatCFA } from "@/lib/formatters";
 import { getPhonesFromDB } from "@/lib/supabase/client";
@@ -28,6 +31,7 @@ export function Navbar() {
   const { itemCount, setIsCartOpen } = useCart();
   const { wishlistCount } = useWishlist();
   const { settings } = useSettings();
+  const { user, profile, isAdmin } = useAuth();
 
   const [phonesList, setPhonesList] = useState<Phone[]>(PHONES);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -227,13 +231,28 @@ export function Navbar() {
               )}
             </Link>
 
-            {/* Account Icon (Desktop only) */}
+            {/* Account Icon / VIP Badge (Desktop only) */}
             <Link
-              href="/account"
-              aria-label="My Account"
-              className="p-2.5 text-zinc-300 hover:text-[#D4AF37] rounded-xl hover:bg-white/5 transition-colors hidden sm:inline-flex"
+              href={user || profile ? "/account" : "/account/login"}
+              aria-label={user || profile ? "My VIP Account" : "Sign In"}
+              className="p-1.5 sm:px-2.5 sm:py-1.5 text-zinc-300 hover:text-[#D4AF37] rounded-xl hover:bg-white/5 transition-colors hidden sm:inline-flex items-center gap-2"
             >
-              <User className="w-5 h-5" />
+              {user || profile ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-amber-500 to-[#D4AF37] p-[1.5px] shadow-sm">
+                    <div className="w-full h-full bg-[#121217] rounded-[6px] flex items-center justify-center">
+                      <span className="text-[10px] font-black text-amber-300">
+                        {(profile?.fullName || user?.email || "U").charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold text-zinc-200 hover:text-white max-w-[80px] truncate hidden md:inline">
+                    {profile?.fullName ? profile.fullName.split(" ")[0] : "VIP"}
+                  </span>
+                </div>
+              ) : (
+                <User className="w-5 h-5" />
+              )}
             </Link>
 
             {/* Cart Button */}
@@ -315,13 +334,40 @@ export function Navbar() {
                 <span>Wishlist ({wishlistCount})</span>
               </Link>
               <Link
-                href="/account"
+                href={user || profile ? "/account" : "/account/login"}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="flex items-center gap-3 py-2.5 px-3 rounded-xl bg-zinc-900/60 text-zinc-300 text-sm font-medium"
               >
-                <User className="w-4 h-4 text-[#D4AF37]" />
-                <span>My Account</span>
+                {user || profile ? (
+                  <>
+                    <div className="w-5 h-5 rounded-md bg-[#D4AF37] text-black font-black text-[10px] flex items-center justify-center">
+                      {(profile?.fullName || user?.email || "U").charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-white font-semibold text-xs">
+                        {profile?.fullName || "AURA VIP Member"}
+                      </span>
+                      <span className="text-[10px] text-[#D4AF37]">View Account & Orders</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <User className="w-4 h-4 text-[#D4AF37]" />
+                    <span>Sign In / VIP Account</span>
+                  </>
+                )}
               </Link>
+
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 py-2.5 px-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-sm font-medium"
+                >
+                  <Shield className="w-4 h-4 text-[#D4AF37]" />
+                  <span>Admin Portal</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>

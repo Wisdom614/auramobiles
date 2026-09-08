@@ -15,10 +15,13 @@ import {
   Banknote,
   Smartphone,
   Store,
+  Sparkles,
+  Lock,
 } from "lucide-react";
 import { useCart } from "@/lib/store/cart-context";
 import { useOrders } from "@/lib/store/orders-context";
 import { useSettings } from "@/lib/store/settings-context";
+import { useAuth } from "@/lib/store/auth-context";
 import { OrderItem, CustomerDetails } from "@/lib/data/mock-orders";
 import { formatCFA } from "@/lib/formatters";
 
@@ -27,6 +30,7 @@ export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart();
   const { createOrder } = useOrders();
   const { settings } = useSettings();
+  const { user, profile } = useAuth();
 
   // Low-effort, minimum typing form state
   const [fullName, setFullName] = useState("");
@@ -35,6 +39,25 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "mtn" | "orange">("cod");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Auto-fill from authenticated VIP Profile
+  React.useEffect(() => {
+    if (profile) {
+      if (profile.fullName) setFullName(profile.fullName);
+      if (profile.phone) {
+        // Strip country code if present for local input box
+        const clean = profile.phone.replace(/^\+?237\s?/, "").trim();
+        setPhoneNum(clean);
+      }
+      if (profile.address) setAddress(profile.address);
+      if (profile.city) {
+        const c = profile.city.toLowerCase();
+        if (c.includes("douala")) setDeliveryOption("douala");
+        else if (c.includes("yaound")) setDeliveryOption("yaounde");
+        else if (c.includes("other") || c.includes("bafoussam") || c.includes("kribi")) setDeliveryOption("nationwide");
+      }
+    }
+  }, [profile]);
 
   // Delivery fee calculation from admin site settings
   const deliveryFee =
@@ -132,7 +155,7 @@ export default function CheckoutPage() {
       items: orderItems,
       customer: {
         fullName: fullName.trim(),
-        email: "client@auraluxe.cm",
+        email: profile?.email || user?.email || "client@auraluxe.cm",
         phone: phoneNum.trim(),
         address: address.trim() || (deliveryOption === "pickup" ? "Showroom Pick-Up" : "Address to confirm via call"),
         city: deliveryOption === "douala" ? "Douala" : deliveryOption === "yaounde" ? "Yaoundé" : "Cameroon",
@@ -170,6 +193,36 @@ export default function CheckoutPage() {
             ← Continue Shopping
           </Link>
         </div>
+
+        {/* VIP Account Banner */}
+        {profile ? (
+          <div className="mb-4 p-3 rounded-xl bg-gradient-to-r from-[#D4AF37]/15 to-transparent border border-[#D4AF37]/30 flex items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 text-zinc-200">
+              <Sparkles className="w-4 h-4 text-[#D4AF37] flex-shrink-0" />
+              <span>
+                Auto-filled from your VIP Account: <strong className="text-white">{profile.fullName || profile.email}</strong>
+              </span>
+            </div>
+            <Link
+              href="/account"
+              className="text-[#D4AF37] hover:underline font-semibold whitespace-nowrap text-[11px]"
+            >
+              Manage Saved Address →
+            </Link>
+          </div>
+        ) : (
+          <div className="mb-4 p-3 rounded-xl bg-zinc-900/60 border border-white/5 flex items-center justify-between gap-3 text-xs">
+            <span className="text-zinc-400">
+              Have an AURA VIP account? Sign in for 1-tap checkout and order history.
+            </span>
+            <Link
+              href="/account/login?redirect=/checkout"
+              className="text-[#D4AF37] hover:underline font-semibold whitespace-nowrap text-[11px]"
+            >
+              Sign In →
+            </Link>
+          </div>
+        )}
 
         <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
