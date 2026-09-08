@@ -22,6 +22,7 @@ import {
   Calendar,
   CreditCard,
   Printer,
+  Download,
   FileCheck,
 } from "lucide-react";
 import { INITIAL_ORDERS, Order, OrderStatus } from "@/lib/data/mock-orders";
@@ -381,8 +382,8 @@ function OrderTrackingContent() {
                     onClick={() => setIsReceiptOpen(true)}
                     className="px-3.5 py-2 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#D4AF37]/40 text-white font-semibold text-xs flex items-center gap-1.5 transition-all shadow-sm"
                   >
-                    <Printer className="w-3.5 h-3.5 text-[#D4AF37]" />
-                    <span>Official Receipt</span>
+                    <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <span>Download Invoice (PDF)</span>
                   </button>
 
                   <div className="px-4 py-2 rounded-2xl bg-amber-500/10 border border-[#D4AF37]/30 flex items-center gap-2">
@@ -591,8 +592,8 @@ function OrderTrackingContent() {
                       onClick={() => setIsReceiptOpen(true)}
                       className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold flex items-center justify-center gap-1.5 border border-[#D4AF37]/30 transition-colors col-span-1 sm:col-span-2"
                     >
-                      <Printer className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      <span>Print VIP Receipt / Save PDF</span>
+                      <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>Download Order Invoice (PDF)</span>
                     </button>
 
                     <a

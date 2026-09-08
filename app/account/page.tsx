@@ -24,6 +24,7 @@ import {
   Save,
   Crown,
   Printer,
+  Download,
 } from "lucide-react";
 import { useAuth } from "@/lib/store/auth-context";
 import { useOrders } from "@/lib/store/orders-context";
@@ -547,8 +548,8 @@ export default function CustomerAccountPage() {
                             onClick={() => setSelectedReceiptOrder(order)}
                             className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#D4AF37]/40 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors"
                           >
-                            <Printer className="w-3.5 h-3.5 text-[#D4AF37]" />
-                            <span>Receipt</span>
+                            <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
+                            <span>Download PDF</span>
                           </button>
 
                           {/* WhatsApp Inquiry */}
