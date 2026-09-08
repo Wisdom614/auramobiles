@@ -369,7 +369,7 @@ function AccountLoginContent() {
                   <span>AURA VIP Privilege Benefits</span>
                 </div>
                 <p className="font-sans text-zinc-400">
-                  Automatic 12-month warranty logging, order tracking updates, and preferential pricing on trade-in swaps.
+                  Automatic boutique warranty logging, order tracking updates, and preferential pricing on trade-in swaps.
                 </p>
               </div>
 

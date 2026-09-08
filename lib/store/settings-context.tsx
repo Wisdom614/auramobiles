@@ -11,8 +11,10 @@ export interface SiteSettings {
   whatsappCleanNumber: string;
   secondaryPhone: string;
   supportEmail: string;
+  bueaAddress: string;
   doualaAddress: string;
   yaoundeAddress: string;
+  deliveryFeeBuea: number;
   deliveryFeeDoualaYaounde: number;
   deliveryFeeNationwide: number;
   freeDeliveryThreshold: number;
@@ -23,16 +25,18 @@ export interface SiteSettings {
 
 export const DEFAULT_SETTINGS: SiteSettings = {
   storeName: "AURA LUXE MOBILE",
-  tagline: "Central Africa's Premier Luxury Smartphone Boutique",
-  announcementText: "Free VIP delivery on orders over FCFA 500,000 • 100% Genuine Sealed Devices",
+  tagline: "Premier Luxury Smartphone Boutique — Buea, Molyko (Delivers Nationwide)",
+  announcementText: "Showroom in Buea, Molyko • Delivers Nationwide Across Cameroon • 100% Sealed Hardware",
   whatsappPhone: "+237 699 44 21 00",
   whatsappCleanNumber: "237699442100",
   secondaryPhone: "+237 677 88 99 00",
   supportEmail: "concierge@auraluxe.cm",
-  doualaAddress: "Rue Tokoto, Bonapriso, Douala",
-  yaoundeAddress: "Avenue Bastos, Face Ambassade, Yaoundé",
-  deliveryFeeDoualaYaounde: 2500,
-  deliveryFeeNationwide: 5000,
+  bueaAddress: "Check Point, Molyko, Buea",
+  doualaAddress: "Check Point, Molyko, Buea (Delivers Nationwide)",
+  yaoundeAddress: "Express Nationwide Courier (24h Transit)",
+  deliveryFeeBuea: 1500,
+  deliveryFeeDoualaYaounde: 3500,
+  deliveryFeeNationwide: 3500,
   freeDeliveryThreshold: 500000,
   openingHours: "Mon - Sat: 08:30 – 19:30",
   mtnMomoNumber: "*126# / 677 88 99 00",

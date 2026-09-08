@@ -26,7 +26,7 @@ const TRUST_ITEMS: TrustItem[] = [
   {
     icon: Award,
     code: "02",
-    title: "12M Official Warranty",
+    title: "Boutique Warranty",
     subtitle: "Official guarantee enclosed.",
   },
   {
@@ -38,8 +38,8 @@ const TRUST_ITEMS: TrustItem[] = [
   {
     icon: Truck,
     code: "04",
-    title: "Same-Day Express",
-    subtitle: "Douala & Yaoundé hubs.",
+    title: "Delivers Nationwide",
+    subtitle: "Buea, Molyko & nationwide.",
   },
   {
     icon: RotateCcw,

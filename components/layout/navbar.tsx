@@ -137,7 +137,7 @@ export function Navbar() {
           <div className="hidden sm:flex items-center gap-2 text-zinc-300">
             <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
             <span className="text-[10.5px] sm:text-xs uppercase">
-              100% Sealed Hardware <span className="text-zinc-600">|</span> 1-Year Official Warranty
+              100% Sealed Hardware <span className="text-zinc-600">|</span> Official Boutique Warranty
             </span>
           </div>
 
@@ -451,7 +451,7 @@ export function Navbar() {
                 <span>WhatsApp Concierge (1-Tap)</span>
               </a>
               <p className="text-[9px] text-zinc-500 text-center uppercase">
-                [ BONAPRISO DOUALA • BASTOS YAOUNDÉ ]
+                [ BUEA, MOLYKO • DELIVERS NATIONWIDE ]
               </p>
             </div>
 

@@ -70,7 +70,7 @@ export const PHONES: Phone[] = [
     isDeal: true,
     dealEndsInHours: 18,
     condition: "Brand New",
-    warranty: "12 Months Official Apple Warranty",
+    warranty: "Official Apple Warranty",
     storageVariants: [
       { id: "256gb", size: "256GB", price: 980000, stock: 9 },
       { id: "512gb", size: "512GB", price: 1150000, stock: 4 },
@@ -138,7 +138,7 @@ export const PHONES: Phone[] = [
     isFeatured: true,
     isDeal: false,
     condition: "Brand New",
-    warranty: "24 Months Official Samsung Warranty",
+    warranty: "Official Samsung Warranty",
     storageVariants: [
       { id: "256gb", size: "256GB", price: 850000, stock: 12 },
       { id: "512gb", size: "512GB", price: 980000, stock: 6 },
@@ -205,7 +205,7 @@ export const PHONES: Phone[] = [
     isFeatured: true,
     isDeal: false,
     condition: "Brand New",
-    warranty: "12 Months Official Apple Warranty",
+    warranty: "Official Apple Warranty",
     storageVariants: [
       { id: "128gb", size: "128GB", price: 650000, stock: 15 },
       { id: "256gb", size: "256GB", price: 730000, stock: 8 },
@@ -272,7 +272,7 @@ export const PHONES: Phone[] = [
     isDeal: true,
     dealEndsInHours: 24,
     condition: "Brand New",
-    warranty: "12 Months International Warranty",
+    warranty: "Official International Warranty",
     storageVariants: [
       { id: "128gb", size: "128GB", price: 720000, stock: 7 },
       { id: "256gb", size: "256GB", price: 810000, stock: 5 },
@@ -338,7 +338,7 @@ export const PHONES: Phone[] = [
     isDeal: true,
     dealEndsInHours: 12,
     condition: "Brand New",
-    warranty: "12 Months Official Apple Warranty",
+    warranty: "Official Apple Warranty",
     storageVariants: [
       { id: "128gb", size: "128GB", price: 720000, stock: 6 },
       { id: "256gb", size: "256GB", price: 790000, stock: 10 },
@@ -397,7 +397,7 @@ export const PHONES: Phone[] = [
     isFeatured: true,
     isDeal: false,
     condition: "Certified Refurbished",
-    warranty: "6 Months AURA Gold Certified Warranty",
+    warranty: "AURA Certified Hardware Guarantee",
     storageVariants: [
       { id: "128gb", size: "128GB", price: 320000, stock: 24 },
       { id: "256gb", size: "256GB", price: 370000, stock: 11 },
@@ -464,7 +464,7 @@ export const PHONES: Phone[] = [
     isDeal: true,
     dealEndsInHours: 36,
     condition: "Brand New",
-    warranty: "24 Months Official Samsung Warranty",
+    warranty: "Official Samsung Warranty",
     storageVariants: [
       { id: "256gb", size: "256GB", price: 950000, stock: 5 },
       { id: "512gb", size: "512GB", price: 1080000, stock: 3 },
@@ -522,7 +522,7 @@ export const PHONES: Phone[] = [
     isFeatured: true,
     isDeal: false,
     condition: "Brand New",
-    warranty: "12 Months Official Warranty",
+    warranty: "Official Google Warranty",
     storageVariants: [
       { id: "512gb", size: "512GB", price: 780000, stock: 7 },
       { id: "1tb", size: "1TB", price: 920000, stock: 2 },
@@ -580,7 +580,7 @@ export const PHONES: Phone[] = [
     isFeatured: true,
     isDeal: false,
     condition: "Brand New",
-    warranty: "12 Months Official Warranty",
+    warranty: "Official Xiaomi Warranty",
     storageVariants: [
       { id: "256gb", size: "256GB", price: 590000, stock: 10 },
       { id: "512gb", size: "512GB", price: 680000, stock: 5 },
@@ -638,7 +638,7 @@ export const PHONES: Phone[] = [
     isFeatured: false,
     isDeal: false,
     condition: "Brand New",
-    warranty: "24 Months Official Samsung Warranty",
+    warranty: "Official Samsung Warranty",
     storageVariants: [
       { id: "128gb", size: "128GB", price: 245000, stock: 20 },
       { id: "256gb", size: "256GB", price: 285000, stock: 14 },
@@ -696,7 +696,7 @@ export const PHONES: Phone[] = [
     isFeatured: true,
     isDeal: false,
     condition: "Brand New",
-    warranty: "13 Months Carlcare Official Warranty",
+    warranty: "Official Carlcare Warranty",
     storageVariants: [
       { id: "512gb", size: "512GB", price: 385000, stock: 11 },
     ],
@@ -755,7 +755,7 @@ export const PHONES: Phone[] = [
     isDeal: true,
     dealEndsInHours: 24,
     condition: "Brand New",
-    warranty: "12 Months Official Carlcare Warranty",
+    warranty: "Official Carlcare Warranty",
     storageVariants: [
       { id: "256gb", size: "256GB", price: 285000, stock: 15 },
     ],

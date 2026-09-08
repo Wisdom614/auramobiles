@@ -122,9 +122,9 @@ function OrderTrackingContent() {
           fullName: "Valued VIP Client",
           email: "vip@auraluxe.cm",
           phone: "+237 699 44 21 00",
-          address: "VIP Residence, Bonapriso / Bastos",
-          city: "Douala",
-          deliveryMethod: "express_douala",
+          address: "VIP Residence, Molyko",
+          city: "Buea",
+          deliveryMethod: "express_buea",
           paymentMethod: "mtn_momo",
         },
         items: [
@@ -157,7 +157,7 @@ function OrderTrackingContent() {
           {
             status: "preparing",
             title: "Quality Check & Sealing",
-            description: "Anti-tamper holographic sticker & 12M warranty document enclosed.",
+            description: "Anti-tamper holographic sticker & boutique warranty document enclosed.",
             timestamp: "In progress",
             completed: false,
           },
@@ -529,7 +529,7 @@ function OrderTrackingContent() {
                           {formatCFA(item.price * item.quantity)}
                         </span>
                         <span className="text-[10px] text-emerald-400 font-mono flex items-center justify-end gap-1 mt-0.5">
-                          <ShieldCheck className="w-3 h-3" /> 12M Warranty
+                          <ShieldCheck className="w-3 h-3" /> Boutique Warranty
                         </span>
                       </div>
                     </div>

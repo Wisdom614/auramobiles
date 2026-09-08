@@ -32,7 +32,7 @@ export function downloadOrderPdf(order: Order, settings?: SiteSettings) {
   doc.setFontSize(8.5);
   doc.setTextColor(200, 200, 200);
   doc.text("Official Boutique Invoice & Proof of Purchase", margin + 6, y + 15);
-  doc.text("Douala (Bonapriso) • Yaoundé (Bastos) • Republic of Cameroon", margin + 6, y + 19);
+  doc.text("Buea (Molyko) • Delivers Nationwide • Republic of Cameroon", margin + 6, y + 19);
 
   // Invoice Number Badge on top right
   const invoiceCode = `INV-${order.id.replace(/[^a-zA-Z0-9]/g, "").toUpperCase()}`;
@@ -76,7 +76,7 @@ export function downloadOrderPdf(order: Order, settings?: SiteSettings) {
   doc.setFontSize(8.5);
   doc.setTextColor(60, 60, 70);
   doc.text(`WhatsApp: ${order.customer?.phone || "Confirmed"}`, margin + 5, y + 19);
-  doc.text(`City: ${order.customer?.city || "Douala"}, Cameroon`, margin + 5, y + 24);
+  doc.text(`City: ${order.customer?.city || "Buea"}, Cameroon`, margin + 5, y + 24);
   const safeAddress = (order.customer?.address || "Showroom Collection").substring(0, 42);
   doc.text(`Address: ${safeAddress}`, margin + 5, y + 29);
 
@@ -185,18 +185,18 @@ export function downloadOrderPdf(order: Order, settings?: SiteSettings) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(140, 105, 20);
-  doc.text("12-MONTH BOUTIQUE WARRANTY & RETURN POLICY", margin + 4, y + 6);
+  doc.text("OFFICIAL BOUTIQUE WARRANTY & RETURN POLICY", margin + 4, y + 6);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(80, 80, 90);
   doc.text(
-    "All phones include a certified 12-month boutique hardware warranty.",
+    "All phones include certified boutique hardware verification.",
     margin + 4,
     y + 11
   );
   doc.text(
-    "Free 7-day technical defect replacement in our Bonapriso or Bastos lounges.",
+    "Free 7-day technical defect replacement in Buea or via nationwide return.",
     margin + 4,
     y + 16
   );

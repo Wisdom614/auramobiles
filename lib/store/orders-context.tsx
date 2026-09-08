@@ -75,9 +75,9 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
       createdAt: now.toISOString(),
       status: "placed",
       trackingNumber,
-      estimatedDelivery: customer.city.toLowerCase().includes("douala")
-        ? "Today (Same-Day Express)"
-        : "Tomorrow by 14:00",
+      estimatedDelivery: customer.city.toLowerCase().includes("buea")
+        ? "Today (Same-Day Express in Buea)"
+        : "Tomorrow (Nationwide Express Delivery)",
       subtotal,
       discount,
       deliveryFee,

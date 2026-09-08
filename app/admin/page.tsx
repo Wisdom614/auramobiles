@@ -118,7 +118,7 @@ export default function AdminDashboardPage() {
     brand: "Apple" as Phone["brand"],
     tagline: "",
     condition: "Brand New" as Phone["condition"],
-    warranty: "12 Months Official Boutique Warranty",
+    warranty: "Official Boutique Warranty",
     basePrice: 650000,
     originalPrice: 720000,
     thumbnail: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=800&q=80",
@@ -296,10 +296,7 @@ export default function AdminDashboardPage() {
       brand: preset.brand,
       tagline: preset.tagline,
       condition: preset.condition,
-      warranty:
-        preset.condition === "Brand New"
-          ? "12 Months Official Boutique Warranty"
-          : "6 Months Boutique Warranty",
+      warranty: "Official Boutique Warranty",
       basePrice: preset.basePrice,
       originalPrice: preset.originalPrice,
       thumbnail: preset.thumbnail,
@@ -1758,26 +1755,26 @@ export default function AdminDashboardPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
-                      Douala Flagship Showroom Address
+                      Buea Showroom Address (Molyko Hub)
                     </label>
                     <input
                       type="text"
-                      value={siteForm.doualaAddress}
-                      onChange={(e) => setSiteForm({ ...siteForm, doualaAddress: e.target.value })}
-                      placeholder="Rue Tokoto, Bonapriso, Douala"
+                      value={siteForm.bueaAddress || siteForm.doualaAddress}
+                      onChange={(e) => setSiteForm({ ...siteForm, bueaAddress: e.target.value, doualaAddress: e.target.value })}
+                      placeholder="Check Point, Molyko, Buea"
                       className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
 
                   <div>
                     <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
-                      Yaoundé Bastos Lounge Address
+                      Nationwide Delivery Dispatch Hub Note
                     </label>
                     <input
                       type="text"
                       value={siteForm.yaoundeAddress}
                       onChange={(e) => setSiteForm({ ...siteForm, yaoundeAddress: e.target.value })}
-                      placeholder="Avenue Bastos, Face Ambassade, Yaoundé"
+                      placeholder="Express Nationwide Courier (Douala, Yaoundé & All 10 Regions)"
                       className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>

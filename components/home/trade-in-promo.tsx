@@ -34,7 +34,7 @@ export function TradeInPromo() {
               </h3>
 
               <p className="text-xs sm:text-sm text-zinc-400 max-w-lg leading-relaxed">
-                Trade in your current iPhone or Samsung and deduct its value immediately toward any brand new phone in our store. Quick 5-minute check at our Douala and Yaoundé stores.
+                Trade in your current iPhone or Samsung and deduct its value immediately toward any brand new phone in our store. Quick 5-minute check at our Buea, Molyko showroom or via doorstep swap nationwide.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -47,7 +47,7 @@ export function TradeInPromo() {
                 </Link>
 
                 <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
-                  AKWA • BONAPRISO • BASTOS
+                  BUEA • MOLYKO • DELIVERS NATIONWIDE
                 </span>
               </div>
 

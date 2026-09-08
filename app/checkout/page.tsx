@@ -37,7 +37,7 @@ export default function CheckoutPage() {
   // Form state
   const [fullName, setFullName] = useState("");
   const [phoneNum, setPhoneNum] = useState("");
-  const [deliveryOption, setDeliveryOption] = useState<"douala" | "yaounde" | "nationwide" | "pickup">("douala");
+  const [deliveryOption, setDeliveryOption] = useState<"buea" | "douala" | "yaounde" | "nationwide" | "pickup">("buea");
   const [address, setAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "mtn" | "orange">("cod");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,7 +54,8 @@ export default function CheckoutPage() {
       if (profile.address) setAddress(profile.address);
       if (profile.city) {
         const c = profile.city.toLowerCase();
-        if (c.includes("douala")) setDeliveryOption("douala");
+        if (c.includes("buea") || c.includes("molyko")) setDeliveryOption("buea");
+        else if (c.includes("douala")) setDeliveryOption("douala");
         else if (c.includes("yaound")) setDeliveryOption("yaounde");
         else if (c.includes("other") || c.includes("bafoussam") || c.includes("kribi")) setDeliveryOption("nationwide");
       }
@@ -67,9 +68,9 @@ export default function CheckoutPage() {
       ? 0
       : subtotal >= settings.freeDeliveryThreshold
       ? 0
-      : deliveryOption === "nationwide"
-      ? settings.deliveryFeeNationwide
-      : settings.deliveryFeeDoualaYaounde;
+      : deliveryOption === "buea"
+      ? (settings.deliveryFeeBuea || 1500)
+      : settings.deliveryFeeNationwide;
 
   const total = subtotal + deliveryFee;
 
@@ -122,7 +123,7 @@ export default function CheckoutPage() {
 
     const deliveryText =
       deliveryOption === "pickup"
-        ? "Showroom Pickup (Bonapriso / Bastos)"
+        ? "Showroom Pickup — Buea, Molyko Hub"
         : `${deliveryOption.toUpperCase()} - ${address || "Address to confirm via call"}`;
 
     const text = `Hello ${settings.storeName}, I want to confirm my order:\n\n*Customer:* ${fullName || "Client"}\n*Phone:* ${phoneNum || "Via WhatsApp"}\n*Delivery:* ${deliveryText}\n*Payment:* ${
@@ -155,12 +156,14 @@ export default function CheckoutPage() {
     }));
 
     const deliveryMethodMapped: CustomerDetails["deliveryMethod"] =
-      deliveryOption === "douala"
+      deliveryOption === "buea"
+        ? "express_buea"
+        : deliveryOption === "pickup"
+        ? "pickup_molyko"
+        : deliveryOption === "douala"
         ? "express_douala"
         : deliveryOption === "yaounde"
         ? "express_yaounde"
-        : deliveryOption === "pickup"
-        ? "pickup_bonapriso"
         : "nationwide";
 
     const paymentMethodMapped: CustomerDetails["paymentMethod"] =
@@ -177,7 +180,14 @@ export default function CheckoutPage() {
         email: profile?.email || user?.email || "client@auraluxe.cm",
         phone: phoneNum.trim(),
         address: address.trim() || (deliveryOption === "pickup" ? "Showroom Pick-Up" : "Address to confirm via call"),
-        city: deliveryOption === "douala" ? "Douala" : deliveryOption === "yaounde" ? "Yaoundé" : "Cameroon",
+        city:
+          deliveryOption === "buea" || deliveryOption === "pickup"
+            ? "Buea"
+            : deliveryOption === "douala"
+            ? "Douala"
+            : deliveryOption === "yaounde"
+            ? "Yaoundé"
+            : "Cameroon",
         deliveryMethod: deliveryMethodMapped,
         paymentMethod: paymentMethodMapped,
       },
@@ -328,13 +338,14 @@ export default function CheckoutPage() {
                 <span className="text-[10px] font-mono text-zinc-500 uppercase">CAMEROON</span>
               </div>
 
-              {/* Modular 4-Way Location Selector */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+              {/* Modular Location Selector */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-4">
                 {[
-                  { id: "douala", label: "DOUALA", sub: "SAME DAY EXPRESS", fee: "2,500 F" },
-                  { id: "yaounde", label: "YAOUNDÉ", sub: "SAME DAY EXPRESS", fee: "2,500 F" },
-                  { id: "nationwide", label: "OTHER TOWNS", sub: "24-48H DISPATCH", fee: "5,000 F" },
-                  { id: "pickup", label: "SHOWROOM", sub: "BONAPRISO/BASTOS", fee: "FREE" },
+                  { id: "buea", label: "BUEA", sub: "SAME DAY (1-2H)", fee: "1,500 F" },
+                  { id: "pickup", label: "MOLYKO HUB", sub: "SHOWROOM PICKUP", fee: "FREE" },
+                  { id: "douala", label: "DOUALA", sub: "NATIONWIDE (24H)", fee: "3,500 F" },
+                  { id: "yaounde", label: "YAOUNDÉ", sub: "NATIONWIDE (24H)", fee: "3,500 F" },
+                  { id: "nationwide", label: "OTHER TOWNS", sub: "NATIONWIDE 24-48H", fee: "3,500 F" },
                 ].map((opt) => (
                   <button
                     key={opt.id}
@@ -372,7 +383,7 @@ export default function CheckoutPage() {
                     type="text"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    placeholder="e.g. Bonapriso, Rue Tokoto or Bastos, face Ambassade"
+                    placeholder="e.g. Molyko, UB Junction, Buea, or Bonapriso, Douala"
                     className="w-full bg-black border border-white/15 px-3.5 py-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#D4AF37] transition font-sans"
                   />
                   <span className="text-[10px] font-mono text-zinc-500 mt-1 block">
@@ -386,7 +397,7 @@ export default function CheckoutPage() {
                     <span>SHOWROOM BOUTIQUE COLLECTION:</span>
                   </div>
                   <p className="text-[11px] text-zinc-300 leading-relaxed font-sans">
-                    AURA Bonapriso (Douala) or AURA Bastos (Yaoundé). Unit prepared and sealed within 30 minutes after placement.
+                    AURA Flagship Showroom: Check Point, Molyko, Buea. Unit prepared and sealed within 30 minutes after placement.
                   </p>
                 </div>
               )}
@@ -564,7 +575,7 @@ export default function CheckoutPage() {
               <div className="pt-4 border-t border-white/10 mt-4 text-[10px] font-mono text-zinc-400 space-y-1.5">
                 <div className="flex items-center gap-1.5 text-emerald-400">
                   <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                  <span className="font-semibold uppercase">[ 100% GENUINE HARDWARE • 12M WARRANTY ]</span>
+                  <span className="font-semibold uppercase">[ 100% GENUINE HARDWARE • BOUTIQUE WARRANTY ]</span>
                 </div>
                 <p className="text-zinc-500 text-[10px]">
                   Physical inspection permitted prior to payment upon hand delivery.

@@ -239,7 +239,7 @@ function PhonesCatalogContent() {
               Smartphones Catalog
             </h1>
             <p className="text-zinc-400 text-xs sm:text-sm mt-1">
-              Official 12-month warranty, sealed units, and pay-on-delivery in Douala and Yaoundé.
+              Official boutique warranty, sealed units, and express delivery nationwide across Cameroon.
             </p>
           </div>
 

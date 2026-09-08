@@ -445,7 +445,7 @@ export default function CustomerAccountPage() {
               </span>
               <span className="text-base sm:text-lg font-bold text-emerald-400 flex items-center gap-1.5">
                 <Check className="w-4 h-4 stroke-[2.5]" />
-                <span>12M COVER</span>
+                <span>BOUTIQUE COVER</span>
               </span>
             </div>
           </div>
@@ -534,7 +534,7 @@ export default function CustomerAccountPage() {
                   No Orders on Record
                 </h3>
                 <p className="text-xs text-zinc-400 mb-6 max-w-md mx-auto leading-relaxed">
-                  You haven&apos;t placed any smartphone orders yet. Explore our sealed flagship smartphones with 1-year warranty and express delivery across Cameroon.
+                  You haven&apos;t placed any smartphone orders yet. Explore our sealed flagship smartphones with official boutique warranty and express delivery nationwide.
                 </p>
                 <Link
                   href="/phones"
@@ -799,7 +799,7 @@ export default function CustomerAccountPage() {
                     type="text"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    placeholder="e.g. Bonapriso, Rue Tokoto near Hotel Serena"
+                    placeholder="e.g. Molyko (Check Point), Buea or Bonapriso, Douala"
                     className="w-full bg-[#121217] border border-white/15 px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-colors rounded-none"
                   />
                 </div>
@@ -868,7 +868,7 @@ export default function CustomerAccountPage() {
                 </span>
                 <h4 className="text-white font-bold uppercase">Showroom Inspection</h4>
                 <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
-                  Hand over your phone at our Douala Bonapriso or Yaoundé Bastos lounges for a certified 5-minute hardware check.
+                  Hand over your phone at our Buea Molyko showroom or via doorstep courier swap nationwide for a quick 5-minute check.
                 </p>
               </div>
 

@@ -50,20 +50,20 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Table Cell 2: Physical Boutiques */}
+          {/* Table Cell 2: Physical Showroom & Nationwide Delivery */}
           <div className="p-6 sm:p-7 space-y-3 bg-[#0C0C10]/20">
             <h4 className="text-[11px] font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span>Boutique Lounges</span>
+              <span>Showroom & Logistics Hub</span>
             </h4>
             <div className="space-y-3 text-[11px]">
               <div>
-                <strong className="text-zinc-200 block">Douala Flagship:</strong>
-                <span className="text-zinc-400 block mt-0.5">{settings.doualaAddress}</span>
+                <strong className="text-zinc-200 block">Buea Showroom:</strong>
+                <span className="text-zinc-400 block mt-0.5">{settings.bueaAddress || "Check Point, Molyko, Buea"}</span>
               </div>
               <div>
-                <strong className="text-zinc-200 block">Yaoundé Bastos:</strong>
-                <span className="text-zinc-400 block mt-0.5">{settings.yaoundeAddress}</span>
+                <strong className="text-zinc-200 block">Nationwide Express:</strong>
+                <span className="text-zinc-400 block mt-0.5">Delivers Nationwide (Douala, Yaoundé & All Cities)</span>
               </div>
               <div className="flex items-center gap-1 text-[10px] text-[#D4AF37] font-mono pt-1">
                 <Clock className="w-3 h-3" />

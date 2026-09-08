@@ -24,7 +24,7 @@ AURA Luxe Mobile is built with a sophisticated **Luxury Dark & Warm Gold** aesth
 
 ### 1. Luxury Homepage (`/`)
 - **Hero Showcase**: Desert Titanium iPhone 16 Pro Max hero with quick-action CTAs, feature pills, and price badges.
-- **Authenticity Pillars**: 100% Genuine Sealed Devices, Official 12-Month Manufacturer Warranty, 7-Day Replacement Guarantee, and Express VIP Fleet Delivery.
+- **Authenticity Pillars**: 100% Genuine Sealed Devices, Official Boutique Warranty, 7-Day Replacement Guarantee, and Express VIP Delivery.
 - **Curated Brand Matrix**: Instant category filtering for Apple, Samsung, Xiaomi, Tecno, Infinix, and Google.
 - **Best Sellers Row**: 5-card horizontal row showcasing flagship models with live rating stars, storage specs, and instant cart actions.
 - **Certified Phone Swap Banner**: Direct trade-in entry point with appraisal callouts.
@@ -34,7 +34,7 @@ AURA Luxe Mobile is built with a sophisticated **Luxury Dark & Warm Gold** aesth
 - **Condition Chips**: Toggle between All, Brand New, and Certified Pre-Owned.
 - **Clean Phone Cards**: High-res imagery, model title, clear FCFA pricing, condition badge, and direct "Add to Cart" action with tactile feedback.
 - **Search & Sort**: Instant search filtering, sort by Price (Low to High, High to Low), and Rating.
-- **Real-Time Stock Badges**: Instant inventory indicators for Douala Bonapriso & Yaoundé Bastos hubs.
+- **Real-Time Stock Badges**: Instant inventory indicators for Buea Molyko hub and nationwide delivery.
 
 ### 3. Product Detail Experience (`/phones/[slug]`)
 - **Interactive Variant Switchers**: Multi-color swatches with active ring highlights, interactive storage selector (`128GB`, `256GB`, `512GB`, `1TB`) with live FCFA price calculation.
@@ -48,10 +48,10 @@ AURA Luxe Mobile is built with a sophisticated **Luxury Dark & Warm Gold** aesth
   2. Model & Storage Selection.
   3. Condition Audit (Flawless, Good, Minor Scratches, Cracked).
   4. Instant Trade-In Valuation Certificate with voucher code.
-- **Fulfillment**: Doorstep courier inspection in Douala/Yaoundé or boutique drop-off.
+- **Fulfillment**: Doorstep courier inspection nationwide or Buea showroom drop-off.
 
 ### 5. Client Checkout (`/checkout`)
-- **Client & Delivery Logistics**: Contact phone (WhatsApp), delivery address, and selection between VIP Courier (Douala/Yaoundé) or Boutique Pickup.
+- **Client & Delivery Logistics**: Contact phone (WhatsApp), delivery address, and selection between Buea Same-Day Express, Nationwide Courier, or Showroom Pickup.
 - **Local Payment Channels**: MTN MoMo (`*126#`), Orange Money (`#150#`), Cash on Delivery, and Credit Card.
 - **Live Cart Summary**: Transparent breakdown of hardware subtotal, delivery fee, and total FCFA.
 
@@ -59,11 +59,11 @@ AURA Luxe Mobile is built with a sophisticated **Luxury Dark & Warm Gold** aesth
 - **Real-Time Milestone Timeline**:
   - `Order Placed` → `Confirmed & IMEI Allocated` → `Quality Check & Sealed` → `VIP Courier En Route` → `Handover & Signature`.
 - **Order Lookup**: Search by Order ID (`AUR-89412`, etc.) with demo order presets.
-- **VIP WhatsApp Direct Action**: One-tap connection to Douala & Yaoundé dispatch managers.
+- **VIP WhatsApp Direct Action**: One-tap connection to dispatch managers.
 
 ### 7. Wishlist & Customer Support (`/wishlist`, `/support`)
 - **Wishlist**: Saved flagship hardware with one-click "Move to Cart".
-- **Boutique Support**: Physical showroom locations (Rue Tokoto, Bonapriso & Avenue Bastos, Yaoundé), business hours, and interactive FAQ accordion.
+- **Boutique Support**: Physical showroom location (Molyko, Buea), nationwide delivery dispatch, business hours, and interactive FAQ accordion.
 
 ---
 

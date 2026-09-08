@@ -29,12 +29,12 @@ const FAQS: FaqItem[] = [
     a: "Every smartphone sold at AURA Luxe Mobile comes factory-sealed with an official manufacturer IMEI. You can verify the serial number live on the official Apple Coverage portal (checkcoverage.apple.com) or Samsung warranty verification database prior to unboxing.",
   },
   {
-    q: "What payment methods are supported in Douala and Yaoundé?",
+    q: "What payment methods are supported across Cameroon?",
     a: "We accept MTN Mobile Money, Orange Money, Visa, Mastercard, and Cash on Delivery upon physical inspection of your sealed phone.",
   },
   {
     q: "How fast is delivery?",
-    a: "For orders placed before 14:00 in Douala (Bonapriso, Akwa, Bonamoussadi) and Yaoundé (Bastos, Omnisports, Odza), our dedicated VIP courier delivers same-day. Regional deliveries across other Cameroon regions take 24–48 hours via secured transit.",
+    a: "For orders in Buea (Molyko, Mile 17, Clerks Quarters), our dedicated courier delivers same-day within 1–2 hours. For Douala, Yaoundé, Bafoussam, Bamenda, and all other regions of Cameroon, our secure express courier delivers within 24 hours.",
   },
   {
     q: "How does the Phone Swap / Trade-In service work?",
@@ -78,11 +78,11 @@ export default function SupportPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            {/* Douala */}
+            {/* Buea Showroom */}
             <div className="p-6 rounded-3xl bg-[#121217] border border-white/8 hover:border-[#D4AF37]/40 transition-all space-y-4">
               <div className="flex items-center justify-between">
                 <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-[#D4AF37]/15 text-amber-300 border border-[#D4AF37]/30">
-                  Douala Flagship
+                  Buea Showroom
                 </span>
                 <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -92,11 +92,11 @@ export default function SupportPage() {
 
               <div>
                 <h3 className="text-lg font-bold text-white">
-                  {settings.storeName} Bonapriso
+                  {settings.storeName} Molyko
                 </h3>
                 <p className="text-xs text-zinc-400 mt-1 flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-[#D4AF37] shrink-0" />
-                  <span>{settings.doualaAddress}</span>
+                  <span>{settings.bueaAddress || "Check Point, Molyko, Buea"}</span>
                 </p>
               </div>
 
@@ -118,29 +118,29 @@ export default function SupportPage() {
                 className="w-full py-3 rounded-xl bg-[#181820] hover:bg-[#202028] border border-white/10 text-xs font-bold text-white flex items-center justify-center gap-2 transition-colors"
               >
                 <MessageCircle className="w-4 h-4 text-emerald-400" />
-                <span>Chat with Douala Lounge on WhatsApp</span>
+                <span>Chat with Buea Showroom on WhatsApp</span>
               </a>
             </div>
 
-            {/* Yaoundé */}
+            {/* Nationwide Dispatch */}
             <div className="p-6 rounded-3xl bg-[#121217] border border-white/8 hover:border-[#D4AF37]/40 transition-all space-y-4">
               <div className="flex items-center justify-between">
                 <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-[#D4AF37]/15 text-amber-300 border border-[#D4AF37]/30">
-                  Yaoundé Lounge
+                  Delivers Nationwide
                 </span>
                 <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  Open Today
+                  24h Express Dispatch
                 </span>
               </div>
 
               <div>
                 <h3 className="text-lg font-bold text-white">
-                  {settings.storeName} Bastos
+                  Nationwide Delivery Hub
                 </h3>
                 <p className="text-xs text-zinc-400 mt-1 flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-[#D4AF37] shrink-0" />
-                  <span>{settings.yaoundeAddress}</span>
+                  <span>Direct Express Dispatch to Douala, Yaoundé & All Cities</span>
                 </p>
               </div>
 
@@ -162,7 +162,7 @@ export default function SupportPage() {
                 className="w-full py-3 rounded-xl bg-[#181820] hover:bg-[#202028] border border-white/10 text-xs font-bold text-white flex items-center justify-center gap-2 transition-colors"
               >
                 <MessageCircle className="w-4 h-4 text-emerald-400" />
-                <span>Chat with Yaoundé Lounge on WhatsApp</span>
+                <span>Connect with Nationwide Dispatch</span>
               </a>
             </div>
 

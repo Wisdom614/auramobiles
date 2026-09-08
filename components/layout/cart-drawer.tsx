@@ -41,7 +41,7 @@ export function CartDrawer() {
 
     const message = `Hello ${settings.storeName}, I want to order the following from your boutique:\n\n${itemList}\n\n*Total: ${formatCFA(
       subtotal
-    )}*\n\nPlease confirm availability and delivery to Douala/Yaoundé.`;
+    )}*\n\nPlease confirm availability and delivery to Buea or Nationwide.`;
 
     const waNum = settings.whatsappCleanNumber || "237699442100";
     return `https://wa.me/${waNum}?text=${encodeURIComponent(message)}`;
@@ -89,7 +89,7 @@ export function CartDrawer() {
                     [ BAG IS EMPTY ]
                   </h3>
                   <p className="text-xs text-zinc-400 mt-1 max-w-xs leading-relaxed">
-                    Explore our flagship devices with official 12M warranty and same-day express delivery.
+                    Explore our flagship devices with official boutique warranty and express delivery nationwide.
                   </p>
                 </div>
                 <button

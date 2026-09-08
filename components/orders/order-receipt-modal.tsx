@@ -125,7 +125,7 @@ export function OrderReceiptModal({ order, isOpen, onClose }: OrderReceiptModalP
                   {settings.storeName || "AURA LUXE MOBILE"}
                 </h3>
                 <p className="text-[10px] font-mono text-zinc-400">
-                  DOUALA (BONAPRISO) • YAOUNDÉ (BASTOS) • REPUBLIC OF CAMEROON
+                  BUEA (MOLYKO) • DELIVERS NATIONWIDE • REPUBLIC OF CAMEROON
                 </p>
               </div>
               <div className="text-left sm:text-right">
@@ -231,9 +231,9 @@ export function OrderReceiptModal({ order, isOpen, onClose }: OrderReceiptModalP
               <div className="text-[10px] font-mono text-zinc-400 space-y-1">
                 <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
                   <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>12-MONTH OFFICIAL BOUTIQUE WARRANTY ENCLOSED</span>
+                  <span>OFFICIAL BOUTIQUE WARRANTY ENCLOSED</span>
                 </div>
-                <p className="text-zinc-500">Free 7-day technical replacement at Bonapriso or Bastos lounges.</p>
+                <p className="text-zinc-500">Free 7-day technical replacement at Buea Molyko showroom or via nationwide return.</p>
               </div>
 
               <div className="w-full sm:w-60 space-y-1.5 text-xs font-mono">

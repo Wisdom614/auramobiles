@@ -37,7 +37,7 @@ export function formatDate(dateString: string | Date): string {
 /**
  * Estimated delivery timeframe
  */
-export function getEstimatedDelivery(city: string = "Douala"): string {
+export function getEstimatedDelivery(city: string = "Buea"): string {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const dayAfter = new Date();

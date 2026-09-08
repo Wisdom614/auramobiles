@@ -12,11 +12,13 @@ export interface CartItem {
 }
 
 export type DeliveryOption =
+  | "pickup_molyko"
+  | "express_buea"
+  | "nationwide"
   | "express_douala"
   | "express_yaounde"
   | "pickup_bonapriso"
-  | "pickup_bastos"
-  | "nationwide";
+  | "pickup_bastos";
 
 export interface DeliveryMethodInfo {
   id: DeliveryOption;
@@ -28,37 +30,25 @@ export interface DeliveryMethodInfo {
 
 export const DELIVERY_OPTIONS: DeliveryMethodInfo[] = [
   {
-    id: "express_douala",
-    name: "Douala VIP Express (Same-Day)",
-    price: 3000,
-    timeframe: "Delivered in 2-4 hours",
-    badge: "Popular",
-  },
-  {
-    id: "express_yaounde",
-    name: "Yaoundé VIP Express (Next-Day)",
-    price: 5000,
-    timeframe: "Delivered next morning",
-  },
-  {
-    id: "pickup_bonapriso",
-    name: "Store Pickup — Douala Bonapriso",
+    id: "pickup_molyko",
+    name: "Showroom Pickup — Buea, Molyko",
     price: 0,
     timeframe: "Ready in 30 mins",
     badge: "Free",
   },
   {
-    id: "pickup_bastos",
-    name: "Store Pickup — Yaoundé Bastos",
-    price: 0,
-    timeframe: "Ready in 30 mins",
-    badge: "Free",
+    id: "express_buea",
+    name: "Buea Same-Day Express Delivery",
+    price: 1500,
+    timeframe: "Delivered in 1-2 hours",
+    badge: "Fastest",
   },
   {
     id: "nationwide",
-    name: "Nationwide Secure Courier (Cameroon)",
-    price: 8000,
-    timeframe: "24-48 hours",
+    name: "Nationwide Express Courier (Douala, Yaoundé & All Cities)",
+    price: 3500,
+    timeframe: "24 hours express transit",
+    badge: "Popular",
   },
 ];
 
@@ -105,7 +95,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [notification, setNotification] = useState<CartNotification | null>(null);
   const [coupon, setCoupon] = useState<{ code: string; discountPercent?: number; discountAmount?: number } | null>(null);
-  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryOption>("express_douala");
+  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryOption>("express_buea");
   const [isLoaded, setIsLoaded] = useState(false);
 
   const dismissNotification = () => {

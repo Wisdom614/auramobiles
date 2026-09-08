@@ -72,7 +72,7 @@ export function AiProvider({ children }: { children: React.ReactNode }) {
         recs = ["oneplus-12", "samsung-galaxy-s24-ultra", "iphone-16-pro-max"];
       } else if (lower.includes("refurbished") || lower.includes("pre-owned") || lower.includes("swap")) {
         responseText =
-          "Our certified refurbished models undergo a rigorous 65-point lab inspection with 90%+ battery health guarantee and 6 months official AURA Gold warranty. The iPhone 13 (128GB) at 320,000 FCFA offers phenomenal reliability.";
+          "Our certified refurbished models undergo a rigorous 65-point lab inspection with 90%+ battery health guarantee and official AURA Gold certified warranty. The iPhone 13 (128GB) at 320,000 FCFA offers phenomenal reliability.";
         recs = ["iphone-13-128gb"];
       } else if (lower.includes("camera") || lower.includes("photo") || lower.includes("video")) {
         responseText =
@@ -80,7 +80,7 @@ export function AiProvider({ children }: { children: React.ReactNode }) {
         recs = ["xiaomi-14-ultra", "google-pixel-9-pro", "iphone-16-pro-max"];
       } else {
         responseText =
-          "Here are our flagship recommendations crafted for performance, durability, and luxury aesthetics in Central Africa. All models are available in our Douala Bonapriso and Yaoundé Bastos boutiques.";
+          "Here are our flagship recommendations crafted for performance, durability, and luxury aesthetics in Central Africa. All models are available at our Buea Molyko showroom with express delivery nationwide across Cameroon.";
         recs = ["iphone-16-pro-max", "samsung-galaxy-s24-ultra", "google-pixel-9-pro"];
       }
 

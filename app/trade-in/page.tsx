@@ -161,7 +161,7 @@ function TradeInContent() {
   // Client Details
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
-  const [inspectionProtocol, setInspectionProtocol] = useState<"douala_lounge" | "yaounde_lounge" | "doorstep_vip">("douala_lounge");
+  const [inspectionProtocol, setInspectionProtocol] = useState<"buea_showroom" | "doorstep_vip">("buea_showroom");
   const [submitted, setSubmitted] = useState(false);
   const [generatedVoucher, setGeneratedVoucher] = useState("");
   const [copiedVoucher, setCopiedVoucher] = useState(false);
@@ -303,7 +303,7 @@ function TradeInContent() {
         id: `TRD-${Math.floor(1000 + Math.random() * 9000)}`,
         client_name: customerName,
         phone: customerPhone,
-        city: inspectionProtocol.includes("yaounde") ? "Yaoundé" : "Douala",
+        city: inspectionProtocol === "buea_showroom" ? "Buea" : "Nationwide",
         brand: sourceBrand,
         model: `${sourceModel} (${sourceStorage})`,
         storage: sourceStorage,
@@ -965,28 +965,15 @@ Hello AURA, I just completed my phone swap request online. Please confirm stock 
                     <div className="grid grid-cols-1 gap-1.5 text-xs font-mono">
                       <button
                         type="button"
-                        onClick={() => setInspectionProtocol("douala_lounge")}
+                        onClick={() => setInspectionProtocol("buea_showroom")}
                         className={`p-2.5 rounded-none border text-left flex items-center justify-between transition-colors ${
-                          inspectionProtocol === "douala_lounge"
+                          inspectionProtocol === "buea_showroom"
                             ? "bg-[#D4AF37]/15 border-[#D4AF37] text-white"
                             : "bg-black border-white/10 text-zinc-400"
                         }`}
                       >
-                        <span>Douala Store (Bonapriso)</span>
-                        {inspectionProtocol === "douala_lounge" && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setInspectionProtocol("yaounde_lounge")}
-                        className={`p-2.5 rounded-none border text-left flex items-center justify-between transition-colors ${
-                          inspectionProtocol === "yaounde_lounge"
-                            ? "bg-[#D4AF37]/15 border-[#D4AF37] text-white"
-                            : "bg-black border-white/10 text-zinc-400"
-                        }`}
-                      >
-                        <span>Yaoundé Store (Bastos)</span>
-                        {inspectionProtocol === "yaounde_lounge" && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
+                        <span>Buea Showroom (Check Point, Molyko)</span>
+                        {inspectionProtocol === "buea_showroom" && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
                       </button>
 
                       <button
@@ -998,7 +985,7 @@ Hello AURA, I just completed my phone swap request online. Please confirm stock 
                             : "bg-black border-white/10 text-zinc-400"
                         }`}
                       >
-                        <span>Home or Office Delivery (Douala or Yaoundé)</span>
+                        <span>Doorstep Courier Swap (Buea, Douala, Yaoundé & Nationwide)</span>
                         {inspectionProtocol === "doorstep_vip" && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
                       </button>
                     </div>

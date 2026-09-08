@@ -44,7 +44,7 @@ function mapDbPhoneToModel(row: any): Phone {
     isBestSeller: row.is_bestseller ?? false,
     isFeatured: row.is_featured ?? false,
     condition: row.condition === "Certified Refurbished" ? "Certified Refurbished" : "Brand New",
-    warranty: row.warranty || "12 Months Official Boutique Warranty",
+    warranty: row.warranty || "Official Boutique Warranty",
     storageVariants: row.storage_variants || [
       { id: "s1", size: "256GB", price: Number(row.price_fcfa || 500000), stock: 8 },
     ],
@@ -65,7 +65,7 @@ function mapDbPhoneToModel(row: any): Phone {
       weight: "215g",
       waterResistance: "IP68 Certified",
     },
-    highlights: row.highlights || ["100% Genuine Sealed Unit", "12-Month Official Warranty"],
+    highlights: row.highlights || ["100% Genuine Sealed Unit", "Official Boutique Warranty"],
     boxContents: row.box_contents || ["Smartphone", "Charging Cable", "Warranty Certificate"],
   };
 }

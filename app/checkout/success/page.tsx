@@ -199,7 +199,7 @@ function OrderSuccessContent() {
                   [ IMEI & VAULT SEALING ]
                 </h3>
                 <p className="text-zinc-400 text-xs leading-relaxed">
-                  Device is drawn from the vault, serial number recorded, and bundled with the official 12-month warranty certificate.
+                  Device is drawn from the vault, serial number recorded, and bundled with the official boutique warranty certificate.
                 </p>
               </div>
 
@@ -282,7 +282,7 @@ function OrderSuccessContent() {
                       {formatCFA(item.price * item.quantity)}
                     </div>
                     <span className="text-[9px] font-mono text-emerald-400 uppercase block mt-0.5">
-                      12M OFFICIAL WARRANTY
+                      OFFICIAL BOUTIQUE WARRANTY
                     </span>
                   </div>
                 </div>
@@ -343,11 +343,11 @@ function OrderSuccessContent() {
           </div>
           <div className="p-3 bg-[#0E0E12] border border-white/10 flex items-center justify-center gap-1.5">
             <Truck className="w-3.5 h-3.5 text-[#D4AF37]" />
-            <span>SAME-DAY VIP DISPATCH (DLA / YDE)</span>
+            <span>SAME-DAY BUEA • 24H NATIONWIDE</span>
           </div>
           <div className="p-3 bg-[#0E0E12] border border-white/10 flex items-center justify-center gap-1.5">
             <Store className="w-3.5 h-3.5 text-[#D4AF37]" />
-            <span>SHOWROOM AT BONAPRISO & BASTOS</span>
+            <span>SHOWROOM IN BUEA, MOLYKO</span>
           </div>
         </div>
 

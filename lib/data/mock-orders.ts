@@ -17,7 +17,7 @@ export interface CustomerDetails {
   phone: string;
   address: string;
   city: string;
-  deliveryMethod: "express_douala" | "express_yaounde" | "pickup_bonapriso" | "pickup_bastos" | "nationwide";
+  deliveryMethod: "express_buea" | "pickup_molyko" | "express_douala" | "express_yaounde" | "pickup_bonapriso" | "pickup_bastos" | "nationwide";
   paymentMethod: "mtn_momo" | "orange_money" | "cash_on_delivery" | "card";
   paymentPhone?: string;
   orderNotes?: string;
@@ -50,18 +50,18 @@ export const INITIAL_ORDERS: Order[] = [
     createdAt: "2026-03-05T14:32:00Z",
     status: "delivering",
     trackingNumber: "AUR-CM-994182",
-    estimatedDelivery: "Today by 18:00 (Douala)",
+    estimatedDelivery: "Today by 18:00 (Buea)",
     subtotal: 980000,
     discount: 50000,
-    deliveryFee: 5000,
-    total: 935000,
+    deliveryFee: 1500,
+    total: 931500,
     customer: {
       fullName: "Michel Mbarga",
       email: "michel.mbarga@gmail.com",
       phone: "+237 699 44 21 00",
-      address: "Rue Tokoto, Bonapriso",
-      city: "Douala",
-      deliveryMethod: "express_douala",
+      address: "Check Point, Molyko",
+      city: "Buea",
+      deliveryMethod: "express_buea",
       paymentMethod: "mtn_momo",
       paymentPhone: "+237 675 11 22 33",
     },
@@ -88,7 +88,7 @@ export const INITIAL_ORDERS: Order[] = [
       {
         status: "confirmed",
         title: "Order Confirmed",
-        description: "Reserved in Bonapriso Flagship Boutique.",
+        description: "Reserved at Buea Molyko Boutique Hub.",
         timestamp: "05 Mar, 15:00",
         completed: true,
       },
@@ -109,7 +109,7 @@ export const INITIAL_ORDERS: Order[] = [
       {
         status: "completed",
         title: "Delivered & Signed",
-        description: "Handed over with 12 months warranty certificate.",
+        description: "Handed over with official boutique warranty certificate.",
         timestamp: "Estimated 18:00",
         completed: false,
       },
@@ -129,9 +129,9 @@ export const INITIAL_ORDERS: Order[] = [
       fullName: "Serge Ndongo",
       email: "serge.n@outlook.com",
       phone: "+237 677 88 99 00",
-      address: "Bastos, Rue 1.452",
-      city: "Yaoundé",
-      deliveryMethod: "pickup_bastos",
+      address: "Molyko Showroom Desk",
+      city: "Buea",
+      deliveryMethod: "pickup_molyko",
       paymentMethod: "orange_money",
     },
     items: [
@@ -157,7 +157,7 @@ export const INITIAL_ORDERS: Order[] = [
       {
         status: "confirmed",
         title: "Confirmed",
-        description: "Stock allocated at Bastos Boutique.",
+        description: "Stock allocated at Buea Molyko Boutique.",
         timestamp: "28 Feb, 10:30",
         completed: true,
       },
@@ -171,7 +171,7 @@ export const INITIAL_ORDERS: Order[] = [
       {
         status: "delivering",
         title: "Ready for Pickup",
-        description: "Stored at Bastos concierge desk.",
+        description: "Stored at Buea concierge desk.",
         timestamp: "28 Feb, 11:30",
         completed: true,
       },

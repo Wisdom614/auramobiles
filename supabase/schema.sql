@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS public.phones (
     is_bestseller BOOLEAN DEFAULT false,
     is_featured BOOLEAN DEFAULT false,
     condition TEXT NOT NULL DEFAULT 'Brand New',
-    warranty TEXT DEFAULT '12 Months Official Boutique Warranty',
+    warranty TEXT DEFAULT 'Official Boutique Warranty',
     storage_variants JSONB DEFAULT '[]'::JSONB,
     color_variants JSONB DEFAULT '[]'::JSONB,
     images TEXT[] DEFAULT ARRAY[]::TEXT[],
@@ -49,7 +49,7 @@ ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS tagline TEXT;
 ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'flagship';
 ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS is_new BOOLEAN DEFAULT true;
 ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS review_count INTEGER DEFAULT 1;
-ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS warranty TEXT DEFAULT '12 Months Official Boutique Warranty';
+ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS warranty TEXT DEFAULT 'Official Boutique Warranty';
 ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS storage_variants JSONB DEFAULT '[]'::JSONB;
 ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS color_variants JSONB DEFAULT '[]'::JSONB;
 ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS highlights TEXT[] DEFAULT ARRAY[]::TEXT[];

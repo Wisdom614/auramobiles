@@ -61,7 +61,7 @@ function BestSellerCard({ phone }: BestSellerCardProps) {
           </h3>
         </Link>
         <p className="text-[10px] font-mono text-zinc-500 truncate">
-          {phone.storageVariants[0]?.size} • {phone.warranty || "12M Warranty"}
+          {phone.storageVariants[0]?.size} • {phone.warranty || "Boutique Warranty"}
         </p>
 
         {/* Price */}

@@ -72,7 +72,7 @@ export const FLAGSHIP_PRESETS: FlagshipPreset[] = [
       "Grade 5 Titanium frame with refined micro-blasted finish",
       "New Camera Control tactile sapphire crystal button",
       "Apple Intelligence with on-device AI privacy",
-      "12-Month Official Boutique Concierge Warranty",
+      "Official Boutique Concierge Warranty",
     ],
     boxContents: [
       "iPhone 16 Pro Max",
@@ -120,7 +120,7 @@ export const FLAGSHIP_PRESETS: FlagshipPreset[] = [
       "Compact 6.3\" titanium form-factor with 5x optical zoom",
       "All-new Camera Control sapphire surface",
       "A18 Pro Next-gen Ray Tracing Gaming Chip",
-      "Official 12 Months Boutique Warranty",
+      "Official Boutique Hardware Warranty",
     ],
     boxContents: [
       "iPhone 16 Pro",
@@ -264,7 +264,7 @@ export const FLAGSHIP_PRESETS: FlagshipPreset[] = [
       "Symmetrical Dual-Rail FlexHinge for extreme durability",
       "Galaxy AI split-screen interpreter & note assist",
       "Armor Aluminum enhanced frame",
-      "12-Month Official Boutique Screen Warranty",
+      "Official Boutique Screen Protection Guarantee",
     ],
     boxContents: [
       "Galaxy Z Fold 6",
@@ -312,7 +312,7 @@ export const FLAGSHIP_PRESETS: FlagshipPreset[] = [
       "Built for Gemini Nano AI: Add Me, Pixel Studio & Magic Editor",
       "Pro Triple Camera with Super Res Zoom up to 30x",
       "Stunning 3,000 nits Super Actua sunlight display",
-      "1-Year Boutique Concierge Warranty",
+      "Official Boutique Concierge Warranty",
     ],
     boxContents: [
       "Pixel 9 Pro XL",
@@ -401,7 +401,7 @@ export const FLAGSHIP_PRESETS: FlagshipPreset[] = [
       "Massive 5,750 mAh battery — largest on any foldable phone",
       "70W fast charging power adapter included in box",
       "Aerospace-grade drop-shaped hinge with zero gap fold",
-      "12-Month Official Carlcare Boutique Guarantee",
+      "Official Carlcare Boutique Guarantee",
     ],
     boxContents: [
       "Phantom V Fold 2 5G",
@@ -447,7 +447,7 @@ export const FLAGSHIP_PRESETS: FlagshipPreset[] = [
       "World-first GoPro mode integration & 4K 60fps front & rear video",
       "Smooth 144Hz 3D curved borderless display",
       "Both 45W wired and 20W wireless charging supported",
-      "12-Month Official Warranty with VIP replacement",
+      "Official Warranty with VIP replacement",
     ],
     boxContents: [
       "Infinix Zero 40 5G",
