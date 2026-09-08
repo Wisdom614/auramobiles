@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 import { X, Trash2, Plus, Minus, ArrowRight, ShoppingBag, MessageCircle } from "lucide-react";
 import { useCart } from "@/lib/store/cart-context";
 import { formatCFA } from "@/lib/formatters";
+import { useSettings } from "@/lib/store/settings-context";
 
 export function CartDrawer() {
   const router = useRouter();
+  const { settings } = useSettings();
   const {
     items,
     removeItem,
@@ -37,11 +39,12 @@ export function CartDrawer() {
       )
       .join("\n");
 
-    const message = `Hello AURA Mobile, I want to order the following from your boutique:\n\n${itemList}\n\n*Total: ${formatCFA(
+    const message = `Hello ${settings.storeName}, I want to order the following from your boutique:\n\n${itemList}\n\n*Total: ${formatCFA(
       subtotal
     )}*\n\nPlease confirm availability and delivery to Douala/Yaoundé.`;
 
-    return `https://wa.me/237699442100?text=${encodeURIComponent(message)}`;
+    const waNum = settings.whatsappCleanNumber || "237699442100";
+    return `https://wa.me/${waNum}?text=${encodeURIComponent(message)}`;
   };
 
   return (

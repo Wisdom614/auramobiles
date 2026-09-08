@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { formatCFA } from "@/lib/formatters";
 import { useOrders } from "@/lib/store/orders-context";
+import { useSettings } from "@/lib/store/settings-context";
 import { Order } from "@/lib/data/mock-orders";
 import { getOrdersFromDB } from "@/lib/supabase/client";
 
@@ -30,6 +31,7 @@ function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("id");
   const { getOrder, orders } = useOrders();
+  const { settings } = useSettings();
 
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
   const [copied, setCopied] = useState(false);
@@ -78,8 +80,9 @@ function OrderSuccessContent() {
   const totalFCFA = activeOrder?.total || 980000;
 
   // Pre-filled WhatsApp direct link for expediting
-  const waMessage = `Hello AURA Luxe Mobile, I just placed order *${displayId}* for *${customerName}*. Please confirm my order and arrange delivery.`;
-  const waUrl = `https://wa.me/237699442100?text=${encodeURIComponent(waMessage)}`;
+  const waMessage = `Hello ${settings.storeName || "AURA Luxe Mobile"}, I just placed order *${displayId}* for *${customerName}*. Please confirm my order and arrange delivery.`;
+  const waNum = settings.whatsappCleanNumber || "237699442100";
+  const waUrl = `https://wa.me/${waNum}?text=${encodeURIComponent(waMessage)}`;
 
   return (
     <div className="min-h-screen bg-[#09090B] text-white py-10 sm:py-16">
@@ -206,7 +209,7 @@ function OrderSuccessContent() {
               </a>
 
               <a
-                href="tel:+237699442100"
+                href={`tel:${settings.secondaryPhone.replace(/[^0-9+]/g, "") || "+237699442100"}`}
                 className="w-full sm:w-auto py-4 px-6 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs uppercase tracking-wider border border-white/15 flex items-center justify-center gap-2 transition"
               >
                 <PhoneCall className="w-4 h-4 text-[#D4AF37]" />

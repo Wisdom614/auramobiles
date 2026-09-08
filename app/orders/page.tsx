@@ -24,15 +24,18 @@ import {
 } from "lucide-react";
 import { INITIAL_ORDERS, Order } from "@/lib/data/mock-orders";
 import { formatCFA } from "@/lib/formatters";
+import { useSettings } from "@/lib/store/settings-context";
 
 function OrderTrackingContent() {
   const searchParams = useSearchParams();
   const queryId = searchParams.get("id");
   const isJustPlaced = searchParams.get("placed") === "true";
+  const { settings } = useSettings();
 
   const [searchQuery, setSearchQuery] = useState(queryId || "AUR-89412");
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
   const [copied, setCopied] = useState(false);
+  const waNum = settings.whatsappCleanNumber || "237699442100";
 
   // Load order matching searchQuery or fallback to first order
   useEffect(() => {
@@ -234,8 +237,8 @@ function OrderTrackingContent() {
             </div>
 
             <a
-              href={`https://wa.me/237699442100?text=${encodeURIComponent(
-                `Hello AURA Concierge, I just placed order ${activeOrder?.id || queryId} on the boutique. Kindly update me on courier departure.`
+              href={`https://wa.me/${waNum}?text=${encodeURIComponent(
+                `Hello ${settings.storeName}, I just placed order ${activeOrder?.id || queryId} on the boutique. Kindly update me on courier departure.`
               )}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -547,8 +550,8 @@ function OrderTrackingContent() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                     <a
-                      href={`https://wa.me/237699442100?text=${encodeURIComponent(
-                        `Hello AURA Support, I'm checking on order ${activeOrder.id} (${activeOrder.customer.fullName}).`
+                      href={`https://wa.me/${waNum}?text=${encodeURIComponent(
+                        `Hello ${settings.storeName}, I'm checking on order ${activeOrder.id} (${activeOrder.customer.fullName}).`
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -559,7 +562,7 @@ function OrderTrackingContent() {
                     </a>
 
                     <a
-                      href="tel:+237699442100"
+                      href={`tel:${settings.secondaryPhone.replace(/[^0-9+]/g, "") || "+237699442100"}`}
                       className="py-2.5 px-3 rounded-xl bg-[#1E1E28] hover:bg-[#282838] text-white font-semibold flex items-center justify-center gap-1.5 border border-white/5 transition-colors"
                     >
                       <PhoneCall className="w-3.5 h-3.5 text-[#D4AF37]" />
