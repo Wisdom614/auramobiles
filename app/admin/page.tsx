@@ -103,6 +103,11 @@ export default function AdminDashboardPage() {
   const [phoneSearch, setPhoneSearch] = useState("");
   const [orderSearch, setOrderSearch] = useState("");
 
+  // Order & Trade-in Detailed View Modal State
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedTradeIn, setSelectedTradeIn] = useState<TradeInRecord | null>(null);
+  const [copiedVoucher, setCopiedVoucher] = useState(false);
+
   // Add Phone Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -625,6 +630,9 @@ export default function AdminDashboardPage() {
     });
 
     setOrders(updated);
+    if (selectedOrder && selectedOrder.id === orderId) {
+      setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
+    }
     try {
       localStorage.setItem("aura_orders_v1", JSON.stringify(updated));
     } catch {}
@@ -643,6 +651,9 @@ export default function AdminDashboardPage() {
     setTradeIns((prev) =>
       prev.map((t) => (t.id === id ? { ...t, status } : t))
     );
+    if (selectedTradeIn && selectedTradeIn.id === id) {
+      setSelectedTradeIn((prev) => (prev ? { ...prev, status } : null));
+    }
     if (supabase) {
       await updateTradeInStatusInDB(id, status);
     }
@@ -1130,8 +1141,13 @@ export default function AdminDashboardPage() {
                   </thead>
                   <tbody className="divide-y divide-white/5 font-mono text-xs">
                     {orders.slice(0, 5).map((order) => (
-                      <tr key={order.id} className="hover:bg-white/[0.02] transition">
-                        <td className="py-3 px-4 text-[#D4AF37] font-semibold">{order.id}</td>
+                      <tr
+                        key={order.id}
+                        onClick={() => setSelectedOrder(order)}
+                        className="hover:bg-white/[0.04] transition cursor-pointer group"
+                        title="Click to view complete order details"
+                      >
+                        <td className="py-3 px-4 text-[#D4AF37] font-semibold group-hover:underline">{order.id}</td>
                         <td className="py-3 px-4 text-white">{order.customer.fullName}</td>
                         <td className="py-3 px-4 text-white/60">{order.customer.city}</td>
                         <td className="py-3 px-4 text-white font-medium">{formatCFA(order.total)}</td>
@@ -1333,7 +1349,7 @@ export default function AdminDashboardPage() {
                       <th className="py-3.5 px-4 font-medium">ORDERED ITEMS</th>
                       <th className="py-3.5 px-4 font-medium">TOTAL (FCFA)</th>
                       <th className="py-3.5 px-4 font-medium">STATUS</th>
-                      <th className="py-3.5 px-4 font-medium text-right">DISPATCH</th>
+                      <th className="py-3.5 px-4 font-medium text-right">ACTIONS</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 font-mono text-xs">
@@ -1344,9 +1360,13 @@ export default function AdminDashboardPage() {
                       )},%20this%20is%20AURA%20Luxe%20Mobile%20regarding%20your%20Order%20${order.id}.`;
 
                       return (
-                        <tr key={order.id} className="hover:bg-white/[0.02] transition">
+                        <tr
+                          key={order.id}
+                          onClick={() => setSelectedOrder(order)}
+                          className="hover:bg-white/[0.03] transition cursor-pointer group"
+                        >
                           <td className="py-3.5 px-4">
-                            <div className="font-mono font-bold text-[#D4AF37]">{order.id}</div>
+                            <div className="font-mono font-bold text-[#D4AF37] group-hover:underline">{order.id}</div>
                             <div className="text-[11px] text-white/40">
                               {new Date(order.createdAt).toLocaleDateString("en-GB", {
                                 day: "numeric",
@@ -1380,7 +1400,7 @@ export default function AdminDashboardPage() {
                             </div>
                           </td>
 
-                          <td className="py-3.5 px-4">
+                          <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
                             <select
                               value={order.status}
                               onChange={(e) => handleOrderStatusChange(order.id, e.target.value as any)}
@@ -1394,16 +1414,27 @@ export default function AdminDashboardPage() {
                             </select>
                           </td>
 
-                          <td className="py-3.5 px-4 text-right">
-                            <a
-                              href={waLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#25D366] border border-[#25D366]/40 font-mono text-[11px] uppercase tracking-wider font-bold transition"
-                            >
-                              <MessageCircle className="w-3.5 h-3.5" />
-                              <span>WhatsApp</span>
-                            </a>
+                          <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedOrder(order)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-white/5 hover:bg-white/10 text-white border border-white/15 font-mono text-[11px] uppercase tracking-wider transition"
+                                title="View Complete Order Details"
+                              >
+                                <Eye className="w-3.5 h-3.5 text-[#D4AF37]" />
+                                <span>Details</span>
+                              </button>
+                              <a
+                                href={waLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#25D366] border border-[#25D366]/40 font-mono text-[11px] uppercase tracking-wider font-bold transition"
+                              >
+                                <MessageCircle className="w-3.5 h-3.5" />
+                                <span>WhatsApp</span>
+                              </a>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -1434,7 +1465,7 @@ export default function AdminDashboardPage() {
                       <th className="py-3.5 px-4 font-medium">CONDITION</th>
                       <th className="py-3.5 px-4 font-medium">VOUCHER VALUE</th>
                       <th className="py-3.5 px-4 font-medium">STATUS</th>
-                      <th className="py-3.5 px-4 font-medium text-right">ACTION</th>
+                      <th className="py-3.5 px-4 font-medium text-right">ACTIONS</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 font-mono text-xs">
@@ -1447,8 +1478,12 @@ export default function AdminDashboardPage() {
                       )}%20(Voucher:%20${item.voucher_code}).`;
 
                       return (
-                        <tr key={item.id} className="hover:bg-white/[0.02] transition">
-                          <td className="py-3.5 px-4 font-mono font-bold text-[#D4AF37]">{item.id}</td>
+                        <tr
+                          key={item.id}
+                          onClick={() => setSelectedTradeIn(item)}
+                          className="hover:bg-white/[0.03] transition cursor-pointer group"
+                        >
+                          <td className="py-3.5 px-4 font-mono font-bold text-[#D4AF37] group-hover:underline">{item.id}</td>
                           <td className="py-3.5 px-4">
                             <div className="font-medium text-white">{item.client_name}</div>
                             <div className="text-[11px] text-white/60">{item.phone}</div>
@@ -1461,7 +1496,7 @@ export default function AdminDashboardPage() {
                           <td className="py-3.5 px-4 font-bold text-emerald-400">
                             {formatCFA(item.valuation_fcfa)}
                           </td>
-                          <td className="py-3.5 px-4">
+                          <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
                             <select
                               value={item.status}
                               onChange={(e) => handleTradeInStatusChange(item.id, e.target.value as any)}
@@ -1473,16 +1508,27 @@ export default function AdminDashboardPage() {
                               <option value="rejected">Rejected</option>
                             </select>
                           </td>
-                          <td className="py-3.5 px-4 text-right">
-                            <a
-                              href={waLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-none bg-[#25D366]/15 text-[#25D366] border border-[#25D366]/40 font-mono text-[11px] uppercase tracking-wider font-bold hover:bg-[#25D366]/25 transition"
-                            >
-                              <MessageCircle className="w-3.5 h-3.5" />
-                              <span>Offer</span>
-                            </a>
+                          <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedTradeIn(item)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-white/5 hover:bg-white/10 text-white border border-white/15 font-mono text-[11px] uppercase tracking-wider transition"
+                                title="View Complete Swap Details"
+                              >
+                                <Eye className="w-3.5 h-3.5 text-[#D4AF37]" />
+                                <span>Details</span>
+                              </button>
+                              <a
+                                href={waLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-none bg-[#25D366]/15 text-[#25D366] border border-[#25D366]/40 font-mono text-[11px] uppercase tracking-wider font-bold hover:bg-[#25D366]/25 transition"
+                              >
+                                <MessageCircle className="w-3.5 h-3.5" />
+                                <span>Offer</span>
+                              </a>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -2916,6 +2962,497 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: COMPLETE ORDER DETAILS */}
+      {selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="relative bg-[#0A0A0D] border border-white/20 rounded-none w-full max-w-3xl p-6 sm:p-8 my-6 max-h-[90vh] overflow-y-auto shadow-2xl font-mono text-xs text-white">
+            <span className="absolute top-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+            <span className="absolute top-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+            <span className="absolute bottom-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+            <span className="absolute bottom-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+
+            <button
+              onClick={() => setSelectedOrder(null)}
+              className="absolute top-5 right-5 text-white/50 hover:text-white p-1.5 rounded-none border border-white/10 hover:border-white/30 transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-none bg-black border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+                  <ShoppingBag className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-bold uppercase text-white">
+                      [ ORDER // {selectedOrder.id} ]
+                    </h2>
+                    <span
+                      className={`px-2 py-0.5 text-[9px] uppercase font-bold border ${
+                        selectedOrder.status === "completed"
+                          ? "bg-emerald-950/60 text-emerald-400 border-emerald-500/30"
+                          : selectedOrder.status === "delivering"
+                          ? "bg-blue-950/60 text-blue-400 border-blue-500/30"
+                          : "bg-amber-950/60 text-amber-400 border-amber-500/30"
+                      }`}
+                    >
+                      {selectedOrder.status.toUpperCase()}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-white/40 mt-0.5">
+                    Placed on{" "}
+                    {new Date(selectedOrder.createdAt).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}{" "}
+                    • Tracking: {selectedOrder.trackingNumber}
+                  </p>
+                </div>
+              </div>
+
+              {/* Status Changer */}
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-white/50 uppercase">Update Status:</span>
+                <select
+                  value={selectedOrder.status}
+                  onChange={(e) => handleOrderStatusChange(selectedOrder.id, e.target.value as any)}
+                  className="bg-black border border-[#D4AF37]/50 text-white rounded-none px-3 py-1.5 text-xs uppercase focus:outline-none focus:border-[#D4AF37]"
+                >
+                  <option value="placed">Placed (Received)</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="preparing">Preparing Package</option>
+                  <option value="delivering">Out for Delivery</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 2-Column Info Deck */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              {/* Customer & Delivery */}
+              <div className="p-4 bg-black/60 border border-white/10 space-y-2.5">
+                <span className="text-[10px] text-[#D4AF37] uppercase tracking-widest block font-bold">
+                  01 // CLIENT & DELIVERY DETAILS
+                </span>
+                <div className="space-y-1.5 font-sans text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-white/50 font-mono text-[11px]">Customer Name:</span>
+                    <strong className="text-white font-medium">{selectedOrder.customer.fullName}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50 font-mono text-[11px]">Phone Number:</span>
+                    <div className="flex items-center gap-2 font-mono">
+                      <a href={`tel:${selectedOrder.customer.phone}`} className="text-white hover:text-[#D4AF37]">
+                        {selectedOrder.customer.phone}
+                      </a>
+                      <a
+                        href={`https://wa.me/${selectedOrder.customer.phone.replace(/[^0-9]/g, "")}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-emerald-400 hover:text-emerald-300"
+                        title="Chat on WhatsApp"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50 font-mono text-[11px]">Email:</span>
+                    <span className="text-white/80">{selectedOrder.customer.email || "Not specified"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50 font-mono text-[11px]">City / Region:</span>
+                    <span className="text-white font-mono uppercase">{selectedOrder.customer.city}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50 font-mono text-[11px]">Delivery Address:</span>
+                    <span className="text-white text-right max-w-[220px]">{selectedOrder.customer.address}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50 font-mono text-[11px]">Delivery Option:</span>
+                    <span className="text-[#D4AF37] font-mono uppercase text-[11px]">
+                      {selectedOrder.customer.deliveryMethod.replace("_", " ")}
+                    </span>
+                  </div>
+                  {selectedOrder.customer.orderNotes && (
+                    <div className="pt-2 border-t border-white/5">
+                      <span className="text-[10px] text-white/40 block font-mono">Customer Instructions:</span>
+                      <p className="text-[11px] text-white/90 italic mt-0.5">"{selectedOrder.customer.orderNotes}"</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Payment & Tracking */}
+              <div className="p-4 bg-black/60 border border-white/10 space-y-2.5">
+                <span className="text-[10px] text-[#D4AF37] uppercase tracking-widest block font-bold">
+                  02 // PAYMENT & DISPATCH TELEMETRY
+                </span>
+                <div className="space-y-1.5 font-sans text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-white/50 font-mono text-[11px]">Payment Method:</span>
+                    <span className="text-white font-mono uppercase font-bold">
+                      {selectedOrder.customer.paymentMethod.replace("_", " ")}
+                    </span>
+                  </div>
+                  {selectedOrder.customer.paymentPhone && (
+                    <div className="flex justify-between">
+                      <span className="text-white/50 font-mono text-[11px]">Payment Number:</span>
+                      <span className="text-white font-mono">{selectedOrder.customer.paymentPhone}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-white/50 font-mono text-[11px]">Tracking Number:</span>
+                    <span className="text-emerald-400 font-mono font-bold">{selectedOrder.trackingNumber}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50 font-mono text-[11px]">Estimated Window:</span>
+                    <span className="text-white/90">{selectedOrder.estimatedDelivery || "Same-day express"}</span>
+                  </div>
+
+                  {/* Timeline Steps */}
+                  <div className="pt-2 border-t border-white/5 space-y-1">
+                    <span className="text-[10px] text-white/40 block font-mono">Order Progress Steps:</span>
+                    <div className="space-y-1 font-mono text-[11px]">
+                      {selectedOrder.timeline.map((t, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-[10px]">
+                          <span
+                            className={`w-1.5 h-1.5 rounded-none ${
+                              t.completed ? "bg-emerald-400" : "bg-white/20"
+                            }`}
+                          />
+                          <span className={t.completed ? "text-white" : "text-white/40"}>{t.title}</span>
+                          <span className="text-white/30 text-[9px] ml-auto">{t.timestamp}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Itemized Order Table */}
+            <div className="space-y-2 mb-6">
+              <span className="text-[10px] font-mono text-[#D4AF37] uppercase tracking-widest block font-bold">
+                03 // ORDERED ITEMS IN MANIFEST
+              </span>
+
+              <div className="border border-white/10 overflow-x-auto">
+                <table className="w-full text-left font-mono text-xs">
+                  <thead>
+                    <tr className="bg-white/[0.03] border-b border-white/10 text-white/40 text-[10px] uppercase">
+                      <th className="py-2.5 px-3">ITEM</th>
+                      <th className="py-2.5 px-3">SPECS / COLOR</th>
+                      <th className="py-2.5 px-3 text-right">UNIT PRICE</th>
+                      <th className="py-2.5 px-3 text-center">QTY</th>
+                      <th className="py-2.5 px-3 text-right">TOTAL</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 font-sans text-xs">
+                    {selectedOrder.items.map((it, idx) => (
+                      <tr key={idx} className="hover:bg-white/[0.02]">
+                        <td className="py-3 px-3">
+                          <div className="flex items-center gap-2.5">
+                            <img
+                              src={it.image}
+                              alt={it.name}
+                              className="w-9 h-9 object-cover rounded-none bg-black border border-white/10 shrink-0"
+                            />
+                            <div>
+                              <div className="font-bold text-white text-xs">{it.name}</div>
+                              <div className="text-[10px] text-white/40 font-mono uppercase">{it.brand}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 font-mono text-[11px] text-white/80">
+                          <div>{it.storage}</div>
+                          <div className="text-white/40 text-[10px]">{it.color}</div>
+                        </td>
+                        <td className="py-3 px-3 text-right font-mono text-white/80">{formatCFA(it.price)}</td>
+                        <td className="py-3 px-3 text-center font-mono font-bold text-white">{it.quantity}</td>
+                        <td className="py-3 px-3 text-right font-mono font-bold text-[#D4AF37]">
+                          {formatCFA(it.price * it.quantity)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Financial Ledger Summary */}
+            <div className="p-4 bg-black border border-white/15 space-y-2 mb-6 font-mono">
+              <div className="flex justify-between text-white/60 text-xs">
+                <span>Items Subtotal:</span>
+                <span>{formatCFA(selectedOrder.subtotal)}</span>
+              </div>
+              <div className="flex justify-between text-white/60 text-xs">
+                <span>Delivery Fee:</span>
+                <span>{formatCFA(selectedOrder.deliveryFee)}</span>
+              </div>
+              {selectedOrder.discount > 0 && (
+                <div className="flex justify-between text-emerald-400 text-xs">
+                  <span>Special VIP Discount:</span>
+                  <span>- {formatCFA(selectedOrder.discount)}</span>
+                </div>
+              )}
+              <div className="pt-2 border-t border-white/15 flex justify-between items-baseline">
+                <span className="text-xs uppercase font-bold text-white">Grand Total (FCFA):</span>
+                <span className="text-xl font-black text-[#D4AF37]">{formatCFA(selectedOrder.total)}</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setSelectedOrder(null)}
+                className="px-4 py-2.5 rounded-none text-white/60 hover:text-white border border-white/10 hover:border-white/30 text-xs uppercase"
+              >
+                [ CLOSE MANIFEST ]
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="px-4 py-2.5 rounded-none bg-white/5 hover:bg-white/10 text-white border border-white/15 text-xs uppercase transition"
+                >
+                  [ PRINT RECEIPT ]
+                </button>
+                <a
+                  href={`https://wa.me/${selectedOrder.customer.phone.replace(/[^0-9]/g, "")}?text=Hello%20${encodeURIComponent(
+                    selectedOrder.customer.fullName
+                  )},%20this%20is%20AURA%20Luxe%20Mobile%20regarding%20your%20Order%20${selectedOrder.id}.%20Total:%20${formatCFA(
+                    selectedOrder.total
+                  )}.`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-5 py-2.5 rounded-none bg-[#25D366] hover:bg-[#20bd5a] text-black font-bold text-xs uppercase flex items-center gap-2 transition"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>[ WHATSAPP DISPATCH ]</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: COMPLETE SWAP / TRADE-IN DETAILS */}
+      {selectedTradeIn && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="relative bg-[#0A0A0D] border border-white/20 rounded-none w-full max-w-3xl p-6 sm:p-8 my-6 max-h-[90vh] overflow-y-auto shadow-2xl font-mono text-xs text-white">
+            <span className="absolute top-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+            <span className="absolute top-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+            <span className="absolute bottom-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+            <span className="absolute bottom-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+
+            <button
+              onClick={() => setSelectedTradeIn(null)}
+              className="absolute top-5 right-5 text-white/50 hover:text-white p-1.5 rounded-none border border-white/10 hover:border-white/30 transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-none bg-black border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+                  <RefreshCw className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-bold uppercase text-white">
+                      [ SWAP DETAILS // {selectedTradeIn.id} ]
+                    </h2>
+                    <span className="px-2 py-0.5 text-[9px] uppercase font-bold bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30">
+                      VOUCHER: {selectedTradeIn.voucher_code}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-white/40 mt-0.5">
+                    Logged on{" "}
+                    {new Date(selectedTradeIn.created_at).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}{" "}
+                    • Store / Destination: {selectedTradeIn.city}
+                  </p>
+                </div>
+              </div>
+
+              {/* Status Changer */}
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-white/50 uppercase">Status:</span>
+                <select
+                  value={selectedTradeIn.status}
+                  onChange={(e) => handleTradeInStatusChange(selectedTradeIn.id, e.target.value as any)}
+                  className="bg-black border border-[#D4AF37]/50 text-white rounded-none px-3 py-1.5 text-xs uppercase focus:outline-none focus:border-[#D4AF37]"
+                >
+                  <option value="pending">Pending Inspection</option>
+                  <option value="approved">Approved</option>
+                  <option value="completed">Completed / Exchanged</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 2-Column Info Deck */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              {/* Customer Information */}
+              <div className="p-4 bg-black/60 border border-white/10 space-y-2.5">
+                <span className="text-[10px] text-[#D4AF37] uppercase tracking-widest block font-bold">
+                  01 // CLIENT CONTACT & STORE
+                </span>
+                <div className="space-y-1.5 font-sans text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-white/50 font-mono text-[11px]">Client Name:</span>
+                    <strong className="text-white font-medium">{selectedTradeIn.client_name}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50 font-mono text-[11px]">Phone Number:</span>
+                    <div className="flex items-center gap-2 font-mono">
+                      <a href={`tel:${selectedTradeIn.phone}`} className="text-white hover:text-[#D4AF37]">
+                        {selectedTradeIn.phone}
+                      </a>
+                      <a
+                        href={`https://wa.me/${selectedTradeIn.phone.replace(/[^0-9]/g, "")}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-emerald-400 hover:text-emerald-300"
+                        title="Chat on WhatsApp"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50 font-mono text-[11px]">Handover Store:</span>
+                    <span className="text-white font-mono uppercase font-bold">{selectedTradeIn.city}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50 font-mono text-[11px]">Status:</span>
+                    <span className="text-emerald-400 font-mono uppercase font-bold">{selectedTradeIn.status}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Voucher & Guarantee */}
+              <div className="p-4 bg-black/60 border border-white/10 space-y-2.5">
+                <span className="text-[10px] text-[#D4AF37] uppercase tracking-widest block font-bold">
+                  02 // VOUCHER SECURITY CODE
+                </span>
+                <div className="p-3 bg-zinc-950 border border-emerald-500/40 flex items-center justify-between">
+                  <div>
+                    <span className="text-[9px] text-zinc-400 block">7-DAY PRICE LOCK VOUCHER:</span>
+                    <span className="text-sm font-black text-emerald-400 tracking-wider">
+                      {selectedTradeIn.voucher_code}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(selectedTradeIn.voucher_code);
+                      setCopiedVoucher(true);
+                      setTimeout(() => setCopiedVoucher(false), 2000);
+                    }}
+                    className="px-2.5 py-1 text-[10px] bg-white/5 hover:bg-white/10 text-white border border-white/15"
+                  >
+                    {copiedVoucher ? "COPIED" : "COPY"}
+                  </button>
+                </div>
+                <p className="text-[11px] text-white/50 font-sans">
+                  Client presents this voucher code upon arrival at the showroom or to the courier for immediate credit deduction.
+                </p>
+              </div>
+            </div>
+
+            {/* Hardware Exchanged vs Transaction Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              {/* Phone Giving Up */}
+              <div className="p-4 bg-black border border-white/15 space-y-2">
+                <span className="text-[10px] text-zinc-400 uppercase tracking-widest block font-bold">
+                  PHONE TRADING IN (CURRENT PHONE):
+                </span>
+                <div className="text-sm font-bold text-white">
+                  {selectedTradeIn.brand} {selectedTradeIn.model}
+                </div>
+                <div className="text-xs text-white/80">
+                  Storage: <strong className="text-white">{selectedTradeIn.storage}</strong>
+                </div>
+                <div className="text-xs text-white/80">
+                  Condition: <strong className="text-[#D4AF37]">{selectedTradeIn.condition}</strong>
+                </div>
+                <div className="pt-2 border-t border-white/10 flex justify-between items-baseline">
+                  <span className="text-[11px] text-white/60">Estimated Store Value:</span>
+                  <span className="text-sm font-black text-emerald-400">
+                    {formatCFA(selectedTradeIn.valuation_fcfa)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Transaction Summary & Notes */}
+              <div className="p-4 bg-black border border-white/15 space-y-2">
+                <span className="text-[10px] text-[#D4AF37] uppercase tracking-widest block font-bold">
+                  SWAP DETAILS & PROPOSED PRICING:
+                </span>
+                {selectedTradeIn.notes ? (
+                  <div className="p-2.5 bg-zinc-950 border border-white/10 font-sans text-xs text-white/90 leading-relaxed whitespace-pre-wrap">
+                    {selectedTradeIn.notes}
+                  </div>
+                ) : (
+                  <div className="text-xs text-white/50 italic">
+                    Standard trade-in request. Detailed notes were not provided.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setSelectedTradeIn(null)}
+                className="px-4 py-2.5 rounded-none text-white/60 hover:text-white border border-white/10 hover:border-white/30 text-xs uppercase"
+              >
+                [ CLOSE ]
+              </button>
+
+              <div className="flex items-center gap-2">
+                <a
+                  href={`tel:${selectedTradeIn.phone}`}
+                  className="px-4 py-2.5 rounded-none bg-white/5 hover:bg-white/10 text-white border border-white/15 text-xs uppercase transition flex items-center gap-1.5"
+                >
+                  <PhoneCall className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>[ CALL ]</span>
+                </a>
+                <a
+                  href={`https://wa.me/${selectedTradeIn.phone.replace(/[^0-9]/g, "")}?text=Hello%20${encodeURIComponent(
+                    selectedTradeIn.client_name
+                  )},%20this%20is%20AURA%20Luxe%20Mobile%20regarding%20your%20Trade-In%20Appraisal%20for%20the%20${encodeURIComponent(
+                    selectedTradeIn.model
+                  )}%20(Voucher:%20${selectedTradeIn.voucher_code}).`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-5 py-2.5 rounded-none bg-[#25D366] hover:bg-[#20bd5a] text-black font-bold text-xs uppercase flex items-center gap-2 transition"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>[ WHATSAPP CLIENT ]</span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       )}
