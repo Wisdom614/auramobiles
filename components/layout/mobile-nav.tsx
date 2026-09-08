@@ -3,30 +3,28 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Smartphone, RefreshCw, Tag, ShoppingBag } from "lucide-react";
+import { Home, Smartphone, RefreshCw, User, ShoppingBag } from "lucide-react";
 import { useCart } from "@/lib/store/cart-context";
-
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ElementType;
-  badge?: number;
-}
+import { useAuth } from "@/lib/store/auth-context";
 
 export function MobileNav() {
   const pathname = usePathname();
   const { itemCount, setIsCartOpen } = useCart();
+  const { user, profile } = useAuth();
 
-  const navItems: NavItem[] = [
+  const navItems = [
     { label: "Store", href: "/", icon: Home },
     { label: "Phones", href: "/phones", icon: Smartphone },
-    { label: "Swap", href: "/trade-in", icon: RefreshCw },
-    { label: "Deals", href: "/phones?deal=true", icon: Tag },
+    { label: "Swap", href: "/trade-in", icon: RefreshCw, highlight: true },
+    { label: user || profile ? "Account" : "Sign In", href: "/account", icon: User },
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0C0C0E]/95 backdrop-blur-xl border-t border-white/10 px-2 py-1.5 shadow-2xl">
-      <div className="grid grid-cols-5 items-center justify-around text-center">
+    <nav
+      aria-label="Mobile Bottom Navigation"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#09090B]/95 backdrop-blur-xl border-t border-white/10 shadow-2xl rounded-none font-sans"
+    >
+      <div className="grid grid-cols-5 items-center justify-around text-center h-14">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
@@ -34,43 +32,53 @@ export function MobileNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`relative flex flex-col items-center justify-center py-1 rounded-lg transition-all ${
+              className={`relative flex flex-col items-center justify-center h-full transition-all ${
                 isActive ? "text-[#D4AF37]" : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
+              {isActive && (
+                <span className="absolute top-0 left-2 right-2 h-[2px] bg-[#D4AF37]" />
+              )}
               <div className="relative">
-                <Icon className={`w-5 h-5 ${isActive ? "text-[#D4AF37]" : ""}`} />
-                {item.badge !== undefined && item.badge > 0 && (
-                  <span className="absolute -top-1 -right-2 w-3.5 h-3.5 rounded-full bg-[#D4AF37] text-black text-[9px] font-bold flex items-center justify-center">
-                    {item.badge}
-                  </span>
-                )}
+                <Icon
+                  className={`w-4 h-4 ${
+                    isActive
+                      ? "text-[#D4AF37]"
+                      : item.highlight
+                      ? "text-amber-400/80"
+                      : "text-zinc-400"
+                  }`}
+                />
               </div>
-              <span className={`text-[10px] mt-0.5 tracking-tight ${isActive ? "font-semibold text-amber-300" : ""}`}>
+              <span
+                className={`text-[10px] mt-1 font-mono tracking-tight uppercase ${
+                  isActive ? "font-bold text-[#D4AF37]" : "text-zinc-400"
+                }`}
+              >
                 {item.label}
               </span>
             </Link>
           );
         })}
 
-        {/* Cart button */}
+        {/* Bag / Cart Button */}
         <button
           onClick={() => setIsCartOpen(true)}
-          className="relative flex flex-col items-center justify-center py-1 text-zinc-400 hover:text-zinc-200"
+          className="relative flex flex-col items-center justify-center h-full text-zinc-400 hover:text-zinc-200 cursor-pointer"
         >
           <div className="relative">
-            <ShoppingBag className="w-5 h-5 text-[#D4AF37]" />
+            <ShoppingBag className="w-4 h-4 text-[#D4AF37]" />
             {itemCount > 0 && (
-              <span className="absolute -top-1 -right-2 w-4 h-4 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 text-black text-[10px] font-black flex items-center justify-center shadow-sm">
+              <span className="absolute -top-1.5 -right-2 px-1 min-w-[14px] h-[14px] bg-[#D4AF37] text-black font-mono text-[9px] font-black flex items-center justify-center rounded-none leading-none">
                 {itemCount}
               </span>
             )}
           </div>
-          <span className="text-[10px] mt-0.5 font-medium text-zinc-300">
-            Cart
+          <span className="text-[10px] mt-1 font-mono tracking-tight uppercase text-zinc-400">
+            Bag
           </span>
         </button>
       </div>
-    </div>
+    </nav>
   );
 }
