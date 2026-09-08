@@ -162,6 +162,15 @@ function PhonesCatalogContent() {
     return `${(minPrice / 1000).toLocaleString()}K – ${(maxPrice / 1000).toLocaleString()}K`;
   }, [isPriceFiltered, minPrice, maxPrice]);
 
+  const mobilePriceButtonLabel = useMemo(() => {
+    if (!isPriceFiltered) return "50K–1M";
+    if (minPrice === 50000 && maxPrice === 300000) return "< 300K";
+    if (minPrice === 300000 && maxPrice === 600000) return "300K–600K";
+    if (minPrice === 600000 && maxPrice === 1000000) return "600K–1M";
+    if (minPrice === 1000000 && maxPrice >= 2500000) return "1M+";
+    return `${Math.round(minPrice / 1000)}K–${Math.round(maxPrice / 1000)}K`;
+  }, [isPriceFiltered, minPrice, maxPrice]);
+
   const handleSelectPreset = (min: number, max: number) => {
     setMinPrice(min);
     setMaxPrice(max);
@@ -375,27 +384,187 @@ function PhonesCatalogContent() {
               <button
                 type="button"
                 onClick={() => setIsPriceDropdownOpen((prev) => !prev)}
-                className={`px-3 py-1.5 sm:py-2 text-xs font-mono font-bold flex items-center gap-2 border transition-all cursor-pointer rounded-none ${
+                className={`px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-mono font-bold flex items-center gap-1.5 sm:gap-2 border transition-all cursor-pointer rounded-none ${
                   isPriceFiltered
                     ? "bg-[#D4AF37]/15 border-[#D4AF37] text-[#D4AF37] shadow-sm shadow-amber-500/10"
                     : "bg-[#141419] border-white/15 text-zinc-300 hover:text-white hover:border-white/30"
                 }`}
                 title="Click to filter by price range"
               >
-                <Tag className="w-3.5 h-3.5 text-[#D4AF37]" />
-                <span className="uppercase">
-                  Price: <strong className={isPriceFiltered ? "text-white" : "text-[#D4AF37]"}>{priceButtonLabel}</strong>
+                <Tag className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                <span className="uppercase text-[11px] sm:text-xs">
+                  Price:{" "}
+                  <strong className={isPriceFiltered ? "text-white" : "text-[#D4AF37]"}>
+                    <span className="sm:hidden">{mobilePriceButtonLabel}</span>
+                    <span className="hidden sm:inline">{priceButtonLabel}</span>
+                  </strong>
                 </span>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                  className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
                     isPriceDropdownOpen ? "rotate-180 text-[#D4AF37]" : "text-zinc-400"
                   }`}
                 />
               </button>
 
-              {/* FLOATING LUXURY DROPDOWN POPOVER */}
+              {/* 1. MOBILE BOTTOM SHEET MODAL (sm:hidden) */}
               {isPriceDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-[340px] sm:w-[410px] max-w-[92vw] bg-[#0E0E12] border border-[#D4AF37]/60 shadow-2xl z-50 p-4 sm:p-5 text-white font-mono space-y-4 animate-in fade-in zoom-in-95 duration-150">
+                <div className="sm:hidden">
+                  {/* Dark Backdrop */}
+                  <div
+                    className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 animate-in fade-in duration-200"
+                    onClick={() => setIsPriceDropdownOpen(false)}
+                    aria-hidden="true"
+                  />
+
+                  {/* Sliding Bottom Sheet Drawer */}
+                  <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Price Range Filter"
+                    className="fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto bg-[#0E0E12] border-t-2 border-[#D4AF37] shadow-[0_-10px_40px_rgba(0,0,0,0.9)] p-5 pb-8 text-white font-mono space-y-4 rounded-t-2xl animate-in slide-in-from-bottom duration-200"
+                  >
+                    {/* Pull bar / sheet pill */}
+                    <div className="flex justify-center -mt-1 mb-1">
+                      <div className="w-10 h-1 bg-white/25 rounded-full" />
+                    </div>
+
+                    {/* Mobile Drawer Header */}
+                    <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                      <div>
+                        <span className="text-[11px] text-[#D4AF37] uppercase tracking-wider block font-bold">
+                          [ PRICE RANGE FILTER ]
+                        </span>
+                        <span className="text-xs text-zinc-300 font-semibold">
+                          {formatCFA(minPrice)} – {maxPrice >= 2500000 ? "Any (2.5M+)" : formatCFA(maxPrice)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        {isPriceFiltered && (
+                          <button
+                            type="button"
+                            onClick={handleResetPrice}
+                            className="text-[11px] text-[#D4AF37] hover:underline uppercase transition cursor-pointer font-bold"
+                          >
+                            [ Reset ]
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setIsPriceDropdownOpen(false)}
+                          className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                          aria-label="Close price filter"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Fast Selection Brackets (Mobile) */}
+                    <div className="space-y-2">
+                      <span className="text-[10px] text-zinc-400 uppercase tracking-widest block font-bold">
+                        CURATED PRICE BRACKETS:
+                      </span>
+                      <div className="grid grid-cols-1 gap-2">
+                        {PRICE_PRESETS.map((preset) => {
+                          const isActive = minPrice === preset.min && maxPrice === preset.max;
+                          const count = presetCounts[preset.id] || 0;
+                          return (
+                            <button
+                              key={preset.id}
+                              type="button"
+                              onClick={() => {
+                                handleSelectPreset(preset.min, preset.max);
+                              }}
+                              className={`px-3 py-2.5 text-left text-xs border transition-colors flex items-center justify-between cursor-pointer rounded-none ${
+                                isActive
+                                  ? "bg-[#D4AF37]/20 border-[#D4AF37] text-white font-bold shadow-sm shadow-[#D4AF37]/10"
+                                  : "bg-black/60 border-white/10 text-zinc-300 hover:text-white hover:border-white/25 active:bg-white/5"
+                              }`}
+                            >
+                              <span className="text-xs font-semibold">{preset.label}</span>
+                              <span
+                                className={`text-[10px] px-2 py-0.5 shrink-0 ${
+                                  isActive ? "bg-[#D4AF37] text-black font-bold" : "bg-white/10 text-zinc-400"
+                                }`}
+                              >
+                                {count} units
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Custom Range Form (Mobile) */}
+                    <div className="pt-3 border-t border-white/10 space-y-2.5">
+                      <span className="text-[10px] text-zinc-400 uppercase tracking-widest block font-bold">
+                        OR ENTER CUSTOM RANGE (FCFA):
+                      </span>
+                      <form onSubmit={(e) => { handleApplyCustomPrice(e); setIsPriceDropdownOpen(false); }} className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <div className="relative flex-1">
+                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[9px] text-zinc-500 font-bold uppercase pointer-events-none">
+                              MIN
+                            </span>
+                            <input
+                              type="number"
+                              min={0}
+                              step={10000}
+                              value={inputMin}
+                              onChange={(e) => setInputMin(e.target.value)}
+                              placeholder="50000"
+                              className="w-full bg-black border border-white/20 pl-10 pr-2 py-2.5 text-xs text-white focus:outline-none focus:border-[#D4AF37] rounded-none font-mono"
+                            />
+                          </div>
+
+                          <span className="text-zinc-500 select-none font-bold">—</span>
+
+                          <div className="relative flex-1">
+                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[9px] text-zinc-500 font-bold uppercase pointer-events-none">
+                              MAX
+                            </span>
+                            <input
+                              type="number"
+                              min={0}
+                              step={25000}
+                              value={inputMax}
+                              onChange={(e) => setInputMax(e.target.value)}
+                              placeholder="1000000"
+                              className="w-full bg-black border border-white/20 pl-10 pr-2 py-2.5 text-xs text-white focus:outline-none focus:border-[#D4AF37] rounded-none font-mono"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-3 pt-2">
+                          <span className="text-[11px] text-zinc-400">
+                            <strong className="text-[#D4AF37]">{filteredPhones.length}</strong> matching units
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="submit"
+                              className="px-4 py-2 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-wider hover:opacity-95 transition cursor-pointer shadow-md"
+                            >
+                              Apply Range
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setIsPriceDropdownOpen(false)}
+                              className="px-3.5 py-2 bg-white/10 border border-white/20 hover:border-white/40 text-white text-xs uppercase transition cursor-pointer"
+                            >
+                              Done
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 2. DESKTOP FLOATING LUXURY DROPDOWN POPOVER (hidden sm:block) */}
+              {isPriceDropdownOpen && (
+                <div className="hidden sm:block absolute right-0 mt-2 w-[410px] bg-[#0E0E12] border border-[#D4AF37]/60 shadow-2xl z-50 p-5 text-white font-mono space-y-4 animate-in fade-in zoom-in-95 duration-150">
                   {/* Viewfinder crosshairs */}
                   <span className="absolute top-1 left-1 text-[8px] text-[#D4AF37] select-none">+</span>
                   <span className="absolute top-1 right-1 text-[8px] text-[#D4AF37] select-none">+</span>
@@ -429,7 +598,7 @@ function PhonesCatalogContent() {
                     <span className="text-[9px] text-zinc-500 uppercase tracking-widest block">
                       CURATED PRICE BRACKETS:
                     </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                    <div className="grid grid-cols-2 gap-1.5">
                       {PRICE_PRESETS.map((preset) => {
                         const isActive = minPrice === preset.min && maxPrice === preset.max;
                         const count = presetCounts[preset.id] || 0;
