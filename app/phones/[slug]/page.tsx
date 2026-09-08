@@ -113,6 +113,18 @@ export default function PhoneDetailPage({ params }: PageProps) {
     };
   }, [resolvedParams.slug]);
 
+  // Always reset scroll to the top upon route navigation or slug change
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [resolvedParams.slug]);
+
+  // Ensure scroll remains clean after data loading finishes
+  useEffect(() => {
+    if (!isLoading && phone) {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
+  }, [isLoading, phone]);
+
   // Loading Skeleton
   if (isLoading) {
     return (
@@ -207,7 +219,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
           
           {/* Left: Device Photos Gallery */}
-          <div className="lg:col-span-6 space-y-4 sticky top-24">
+          <div className="lg:col-span-6 space-y-4 lg:sticky lg:top-24">
             <div className="relative aspect-square rounded-3xl bg-gradient-to-b from-[#141419] to-[#0A0A0D] border border-white/10 p-8 flex items-center justify-center overflow-hidden shadow-2xl group">
               <img
                 src={activeImage}
