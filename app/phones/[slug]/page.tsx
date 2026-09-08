@@ -12,7 +12,6 @@ import {
   Truck,
   RotateCcw,
   RefreshCw,
-  Zap,
   ArrowRight,
   Package,
   MessageCircle,
@@ -20,6 +19,7 @@ import {
   Camera,
   BatteryCharging,
   Smartphone,
+  Share2,
 } from "lucide-react";
 import { Phone } from "@/lib/data/phones";
 import { formatCFA } from "@/lib/formatters";
@@ -45,8 +45,10 @@ export default function PhoneDetailPage({ params }: PageProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [selectedStorageIdx, setSelectedStorageIdx] = useState(0);
+  const [selectedColorIdx, setSelectedColorIdx] = useState(0);
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   // Load product and related items strictly from database
   useEffect(() => {
@@ -125,21 +127,21 @@ export default function PhoneDetailPage({ params }: PageProps) {
     }
   }, [isLoading, phone]);
 
-  // Loading Skeleton
+  // Loading Skeleton in Architectural Style
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#09090B] text-zinc-100 py-8 sm:py-12 animate-pulse">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-          <div className="h-4 w-44 bg-white/10 rounded-md" />
+          <div className="h-4 w-48 bg-white/10 rounded-none" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
-            <div className="lg:col-span-6 aspect-square rounded-3xl bg-[#121217] border border-white/5" />
-            <div className="lg:col-span-6 space-y-6">
-              <div className="h-4 w-28 bg-[#D4AF37]/20 rounded" />
-              <div className="h-9 w-3/4 bg-white/10 rounded-xl" />
-              <div className="h-4 w-full bg-white/5 rounded" />
-              <div className="h-24 bg-[#121217] rounded-2xl border border-white/5" />
-              <div className="h-12 bg-white/5 rounded-xl" />
-              <div className="h-14 bg-white/10 rounded-xl" />
+            <div className="lg:col-span-7 aspect-square rounded-none bg-[#121217] border border-white/10" />
+            <div className="lg:col-span-5 space-y-6">
+              <div className="h-4 w-32 bg-[#D4AF37]/20 rounded-none" />
+              <div className="h-10 w-3/4 bg-white/10 rounded-none" />
+              <div className="h-4 w-full bg-white/5 rounded-none" />
+              <div className="h-28 bg-[#121217] rounded-none border border-white/10" />
+              <div className="h-14 bg-white/5 rounded-none" />
+              <div className="h-14 bg-white/10 rounded-none" />
             </div>
           </div>
         </div>
@@ -150,16 +152,21 @@ export default function PhoneDetailPage({ params }: PageProps) {
   if (!phone) {
     return (
       <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center text-center px-4 py-20">
-        <h1 className="text-2xl font-bold text-white mb-2">Smartphone Not Found</h1>
-        <p className="text-xs text-zinc-400 mb-6 max-w-sm">
-          The requested device was not found in our database inventory.
-        </p>
-        <Link
-          href="/phones"
-          className="px-6 py-3 rounded-xl gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider"
-        >
-          Browse All Phones
-        </Link>
+        <div className="p-8 border border-white/10 bg-[#121217] max-w-md w-full rounded-none">
+          <span className="text-[10px] font-mono uppercase text-[#D4AF37] font-bold block mb-2">
+            [ ERROR // ITEM NOT IN ARCHIVE ]
+          </span>
+          <h1 className="text-2xl font-bold text-white mb-2">Smartphone Not Found</h1>
+          <p className="text-xs text-zinc-400 mb-6">
+            The requested device was not found in our current boutique inventory.
+          </p>
+          <Link
+            href="/phones"
+            className="w-full inline-block py-3.5 gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider rounded-none hover:opacity-90 transition-all text-center"
+          >
+            Browse Smartphone Catalog
+          </Link>
+        </div>
       </div>
     );
   }
@@ -171,143 +178,204 @@ export default function PhoneDetailPage({ params }: PageProps) {
     stock: 5,
   };
 
+  const currentColor = phone.colorVariants?.[selectedColorIdx] || phone.colorVariants?.[0] || {
+    id: "standard",
+    name: "Factory Finish",
+    hex: "#9A958E",
+    image: phone.images?.[0] || "/placeholder.png",
+  };
+
   const imagesList =
     Array.isArray(phone.images) && phone.images.length > 0
       ? phone.images
-      : ["/placeholder.png"];
+      : [currentColor.image || phone.images?.[0] || "/placeholder.png"];
+  
   const activeImage = imagesList[selectedImageIdx] || imagesList[0] || "/placeholder.png";
-
-  const defaultColor = phone.colorVariants?.[0] || {
-    id: "standard",
-    name: "Standard Edition",
-    hex: "#8A8A8E",
-    image: activeImage,
-  };
 
   const currentPrice = activeStorage.price || phone.basePrice;
   const inWish = isInWishlist(phone.id);
 
   const handleAddToCart = () => {
-    addItem(phone, activeStorage, defaultColor, 1);
+    addItem(phone, activeStorage, currentColor, 1);
     setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 1500);
+    setTimeout(() => setIsAdded(false), 2000);
   };
 
   const handleBuyNow = () => {
-    addItem(phone, activeStorage, defaultColor, 1);
+    addItem(phone, activeStorage, currentColor, 1);
     router.push("/checkout");
+  };
+
+  const handleCopyShare = () => {
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(window.location.href);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#09090B] text-zinc-100 py-8 sm:py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-xs text-zinc-400 mb-8 font-mono overflow-x-auto">
-          <Link href="/" className="hover:text-[#D4AF37] transition-colors">Home</Link>
-          <span>/</span>
-          <Link href="/phones" className="hover:text-[#D4AF37] transition-colors">Phones</Link>
-          <span>/</span>
-          <Link href={`/phones?brand=${phone.brand}`} className="hover:text-[#D4AF37] transition-colors">
-            {phone.brand}
-          </Link>
-          <span>/</span>
-          <span className="text-[#D4AF37] truncate">{phone.name}</span>
-        </nav>
+        {/* 1. Breadcrumbs Navigation (Swiss Monospaced Style) */}
+        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+          <nav className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono tracking-wider overflow-x-auto">
+            <Link href="/" className="hover:text-white transition-colors">AURA</Link>
+            <span>/</span>
+            <Link href="/phones" className="hover:text-white transition-colors">ARCHIVE</Link>
+            <span>/</span>
+            <Link href={`/phones?brand=${phone.brand}`} className="hover:text-white transition-colors uppercase">
+              {phone.brand}
+            </Link>
+            <span>/</span>
+            <span className="text-[#D4AF37] font-semibold truncate uppercase">{phone.name}</span>
+          </nav>
 
-        {/* Product Hero Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+          <button
+            onClick={handleCopyShare}
+            className="p-1.5 text-zinc-400 hover:text-white border border-white/10 hover:border-white/30 rounded-none transition-colors text-xs flex items-center gap-1.5 font-mono shrink-0 ml-2"
+            title="Share device link"
+          >
+            {copiedLink ? (
+              <span className="text-emerald-400 text-[10px]">LINK COPIED</span>
+            ) : (
+              <>
+                <Share2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline text-[10px]">SHARE</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* 2. Product Hero Grid (Strict Architectural 2-Column Structure) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           
-          {/* Left: Device Photos Gallery */}
-          <div className="lg:col-span-6 space-y-4 lg:sticky lg:top-24">
-            <div className="relative aspect-square rounded-3xl bg-gradient-to-b from-[#141419] to-[#0A0A0D] border border-white/10 p-8 flex items-center justify-center overflow-hidden shadow-2xl group">
-              <img
-                src={activeImage}
-                alt={phone.name}
-                className="max-h-full max-w-full object-contain filter drop-shadow-[0_25px_35px_rgba(0,0,0,0.85)] group-hover:scale-105 transition-transform duration-500"
-              />
+          {/* LEFT COLUMN: Gallery with Straight Edges & Technical Crosshairs (7 Cols) */}
+          <div className="lg:col-span-7 space-y-4 lg:sticky lg:top-24">
+            
+            {/* Main Showcase Canvas */}
+            <div className="relative aspect-square sm:aspect-[4/3] lg:aspect-square bg-[#0D0D10] border border-white/15 p-8 sm:p-12 flex items-center justify-center overflow-hidden rounded-none shadow-2xl group">
               
-              {/* Status Badges */}
-              <div className="absolute top-4 left-4 flex flex-col gap-1.5">
+              {/* Technical Viewfinder Corner Crosshairs */}
+              <span className="absolute top-2 left-2 text-[10px] font-mono text-zinc-600 select-none">+</span>
+              <span className="absolute top-2 right-2 text-[10px] font-mono text-zinc-600 select-none">+</span>
+              <span className="absolute bottom-2 left-2 text-[10px] font-mono text-zinc-600 select-none">+</span>
+              <span className="absolute bottom-2 right-2 text-[10px] font-mono text-zinc-600 select-none">+</span>
+
+              {/* Technical Blueprint Micro-Label */}
+              <div className="absolute top-3 left-4 flex items-center gap-2">
+                <span className="text-[9px] font-mono tracking-widest text-[#D4AF37] uppercase font-bold border border-[#D4AF37]/30 px-2 py-0.5 bg-black/60">
+                  {phone.condition === "Certified Refurbished" ? "CERTIFIED PRE-OWNED" : "SEALED HARDWARE"}
+                </span>
                 {phone.isNew && (
-                  <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    Official Release
-                  </span>
-                )}
-                {phone.condition === "Certified Refurbished" ? (
-                  <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-emerald-950/90 text-emerald-300 border border-emerald-500/30">
-                    Certified Pre-Owned
-                  </span>
-                ) : (
-                  <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-zinc-900/90 text-zinc-300 border border-white/15">
-                    100% Genuine Sealed
+                  <span className="text-[9px] font-mono tracking-widest text-amber-300 uppercase font-bold border border-amber-400/30 px-2 py-0.5 bg-black/60">
+                    FLAGSHIP RELEASE
                   </span>
                 )}
               </div>
 
+              {/* Product Photo */}
+              <img
+                src={activeImage}
+                alt={phone.name}
+                className="max-h-full max-w-full object-contain filter drop-shadow-[0_30px_40px_rgba(0,0,0,0.95)] transition-transform duration-500 group-hover:scale-105"
+              />
+
+              {/* Image Counter Badge */}
               {imagesList.length > 1 && (
-                <div className="absolute bottom-4 right-4 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-mono text-zinc-400">
-                  {selectedImageIdx + 1} / {imagesList.length} Photos
+                <div className="absolute bottom-3 right-4 px-2 py-0.5 bg-black/80 border border-white/15 text-[9px] font-mono text-zinc-400 rounded-none">
+                  FRAME [ 0{selectedImageIdx + 1} / 0{imagesList.length} ]
                 </div>
               )}
             </div>
 
-            {/* Real Device Image Gallery Thumbnails */}
+            {/* Thumbnail Strip (Sharp Rectangular Tiles) */}
             {imagesList.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2.5">
                 {imagesList.map((imgUrl, idx) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedImageIdx(idx)}
-                    className={`relative w-20 h-20 rounded-2xl bg-[#121217] border p-2 flex items-center justify-center transition-all shrink-0 cursor-pointer overflow-hidden ${
+                    className={`relative aspect-square bg-[#121217] border p-2 flex items-center justify-center transition-all cursor-pointer rounded-none ${
                       selectedImageIdx === idx
-                        ? "border-[#D4AF37] ring-2 ring-[#D4AF37]/50 shadow-md shadow-[#D4AF37]/10"
-                        : "border-white/10 hover:border-white/30 opacity-70 hover:opacity-100"
+                        ? "border-[#D4AF37] ring-1 ring-[#D4AF37] bg-white/5 opacity-100"
+                        : "border-white/10 hover:border-white/30 opacity-60 hover:opacity-100"
                     }`}
                   >
                     <img
                       src={imgUrl}
-                      alt={`${phone.name} view ${idx + 1}`}
+                      alt={`${phone.name} angle ${idx + 1}`}
                       className="max-h-full max-w-full object-contain"
                     />
                   </button>
                 ))}
               </div>
             )}
-          </div>
 
-          {/* Right: Product Details & Buying Actions */}
-          <div className="lg:col-span-6 space-y-6">
-            
-            {/* Title & Brand */}
-            <div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono uppercase tracking-widest text-[#D4AF37] font-semibold">
-                  {phone.brand} Official Flagship
-                </span>
-                <div className="flex items-center gap-1 text-xs text-amber-300">
-                  <Star className="w-4 h-4 fill-amber-300" />
-                  <span className="font-bold">{phone.rating}</span>
-                  <span className="text-zinc-500">({phone.reviewCount} verified reviews)</span>
+            {/* Guarantees Technical Strip (3 Equal Blocks) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 border border-white/10 divide-y sm:divide-y-0 sm:divide-x divide-white/10 text-xs">
+              <div className="p-3.5 bg-[#0F0F13] flex items-center gap-2.5">
+                <ShieldCheck className="w-4 h-4 text-[#D4AF37] shrink-0" />
+                <div>
+                  <span className="text-[10px] font-mono uppercase text-zinc-400 block font-bold">WARRANTY</span>
+                  <span className="text-white font-medium text-[11px]">{phone.warranty}</span>
                 </div>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white mt-1">
+              <div className="p-3.5 bg-[#0F0F13] flex items-center gap-2.5">
+                <Truck className="w-4 h-4 text-[#D4AF37] shrink-0" />
+                <div>
+                  <span className="text-[10px] font-mono uppercase text-zinc-400 block font-bold">EXPRESS DELIVERY</span>
+                  <span className="text-white font-medium text-[11px]">Same-Day Douala & Yaoundé</span>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-[#0F0F13] flex items-center gap-2.5">
+                <RotateCcw className="w-4 h-4 text-[#D4AF37] shrink-0" />
+                <div>
+                  <span className="text-[10px] font-mono uppercase text-zinc-400 block font-bold">REPLACEMENT</span>
+                  <span className="text-white font-medium text-[11px]">7-Day Hardware Exchange</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* RIGHT COLUMN: Technical Configuration & Acquisition (5 Cols) */}
+          <div className="lg:col-span-5 space-y-6">
+            
+            {/* Header: Brand, Title, Rating */}
+            <div className="border-b border-white/10 pb-5">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37] font-bold">
+                  [ {phone.brand.toUpperCase()} // OFFICIAL SPECIFICATION ]
+                </span>
+                
+                <div className="flex items-center gap-1 text-xs text-amber-300 font-mono">
+                  <Star className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
+                  <span className="font-bold">{phone.rating}</span>
+                  <span className="text-zinc-500">({phone.reviewCount})</span>
+                </div>
+              </div>
+
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">
                 {phone.name}
               </h1>
-              <p className="text-sm text-zinc-400 mt-1.5 leading-relaxed">
+
+              <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
                 {phone.tagline}
               </p>
             </div>
 
-            {/* Price Box */}
-            <div className="p-4 rounded-2xl bg-[#121217] border border-white/8 flex items-baseline justify-between">
+            {/* Pricing Matrix Block (Straight-Edged Table Box) */}
+            <div className="border border-white/15 bg-[#121217] p-5 rounded-none flex items-baseline justify-between">
               <div>
-                <span className="text-[10px] text-zinc-400 uppercase font-mono tracking-wider block">
-                  Official Boutique Price
+                <span className="text-[9px] text-zinc-500 uppercase font-mono tracking-widest block font-bold">
+                  BOUTIQUE SPECIFICATION PRICE
                 </span>
-                <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-2xl sm:text-3xl font-black text-[#D4AF37] font-mono">
+                <div className="flex items-baseline gap-2.5 mt-1">
+                  <span className="text-2xl sm:text-3xl font-black text-[#D4AF37] font-mono tracking-tight">
                     {formatCFA(currentPrice)}
                   </span>
                   {phone.originalPrice && phone.originalPrice > currentPrice && (
@@ -317,179 +385,230 @@ export default function PhoneDetailPage({ params }: PageProps) {
                   )}
                 </div>
               </div>
+
               <div className="text-right">
-                <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-semibold">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>{activeStorage.stock > 0 ? `In Stock (${activeStorage.stock} units)` : "Sold Out"}</span>
+                <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400 uppercase">
+                  <span className="w-1.5 h-1.5 rounded-none bg-emerald-400 animate-pulse" />
+                  <span>{activeStorage.stock > 0 ? `${activeStorage.stock} UNITS READY` : "DEPLETED"}</span>
                 </span>
-                <span className="text-[10px] text-zinc-400 block mt-0.5">
-                  Douala & Yaoundé Express VIP
+                <span className="text-[10px] text-zinc-500 block font-mono mt-0.5">
+                  SHOWROOM DISPATCH READY
                 </span>
               </div>
             </div>
 
             {/* Instant Hardware Specs Matrix (4 Pillars) */}
             {phone.specs && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="grid grid-cols-2 gap-px bg-white/10 border border-white/10 text-xs">
                 {phone.specs.processor && (
-                  <div className="p-3 rounded-xl bg-[#121217] border border-white/5 space-y-1">
+                  <div className="p-3 bg-[#0E0E12] space-y-0.5">
                     <div className="flex items-center gap-1.5 text-[#D4AF37]">
                       <Cpu className="w-3.5 h-3.5" />
-                      <span className="text-[9px] uppercase font-mono tracking-wider font-semibold">Processor</span>
+                      <span className="text-[9px] uppercase font-mono tracking-wider font-bold">PROCESSOR</span>
                     </div>
-                    <p className="text-[11px] font-bold text-white truncate">{phone.specs.processor}</p>
+                    <p className="text-[11px] font-bold text-white truncate font-mono">{phone.specs.processor}</p>
                   </div>
                 )}
                 {phone.specs.rearCamera && (
-                  <div className="p-3 rounded-xl bg-[#121217] border border-white/5 space-y-1">
+                  <div className="p-3 bg-[#0E0E12] space-y-0.5">
                     <div className="flex items-center gap-1.5 text-[#D4AF37]">
                       <Camera className="w-3.5 h-3.5" />
-                      <span className="text-[9px] uppercase font-mono tracking-wider font-semibold">Camera</span>
+                      <span className="text-[9px] uppercase font-mono tracking-wider font-bold">MAIN CAMERA</span>
                     </div>
-                    <p className="text-[11px] font-bold text-white truncate">{phone.specs.rearCamera.split("+")[0]}</p>
+                    <p className="text-[11px] font-bold text-white truncate font-mono">{phone.specs.rearCamera.split("+")[0]}</p>
                   </div>
                 )}
                 {phone.specs.battery && (
-                  <div className="p-3 rounded-xl bg-[#121217] border border-white/5 space-y-1">
+                  <div className="p-3 bg-[#0E0E12] space-y-0.5">
                     <div className="flex items-center gap-1.5 text-[#D4AF37]">
                       <BatteryCharging className="w-3.5 h-3.5" />
-                      <span className="text-[9px] uppercase font-mono tracking-wider font-semibold">Battery</span>
+                      <span className="text-[9px] uppercase font-mono tracking-wider font-bold">BATTERY CAPACITY</span>
                     </div>
-                    <p className="text-[11px] font-bold text-white truncate">{phone.specs.battery}</p>
+                    <p className="text-[11px] font-bold text-white truncate font-mono">{phone.specs.battery}</p>
                   </div>
                 )}
                 {phone.specs.screen && (
-                  <div className="p-3 rounded-xl bg-[#121217] border border-white/5 space-y-1">
+                  <div className="p-3 bg-[#0E0E12] space-y-0.5">
                     <div className="flex items-center gap-1.5 text-[#D4AF37]">
                       <Smartphone className="w-3.5 h-3.5" />
-                      <span className="text-[9px] uppercase font-mono tracking-wider font-semibold">Display</span>
+                      <span className="text-[9px] uppercase font-mono tracking-wider font-bold">PANEL RESOLUTION</span>
                     </div>
-                    <p className="text-[11px] font-bold text-white truncate">{phone.specs.screen.split(" ")[0]} OLED</p>
+                    <p className="text-[11px] font-bold text-white truncate font-mono">{phone.specs.screen.split(" ")[0]} OLED</p>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Storage Capacity Selector (Core focus for customer choice) */}
+            {/* Storage Capacity Selector (Sharp Modular Blocks) */}
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-white uppercase tracking-wider font-mono">
-                  Select Storage Capacity:
-                </label>
+                <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                  [ 01. SELECT STORAGE TIER ]
+                </span>
                 <span className="text-xs text-[#D4AF37] font-mono font-bold">
                   {activeStorage.size}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                {phone.storageVariants.map((variant, idx) => (
-                  <button
-                    key={variant.id}
-                    onClick={() => setSelectedStorageIdx(idx)}
-                    className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                      selectedStorageIdx === idx
-                        ? "bg-[#D4AF37]/15 border-[#D4AF37] ring-1 ring-[#D4AF37]"
-                        : "bg-[#141419] border-white/10 hover:border-white/25 text-zinc-300"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-black text-white block">
-                        {variant.size}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {phone.storageVariants.map((variant, idx) => {
+                  const isSelected = selectedStorageIdx === idx;
+                  return (
+                    <button
+                      key={variant.id}
+                      onClick={() => setSelectedStorageIdx(idx)}
+                      className={`p-3 border text-left transition-all cursor-pointer rounded-none relative ${
+                        isSelected
+                          ? "bg-[#181820] border-[#D4AF37] ring-1 ring-[#D4AF37]"
+                          : "bg-[#101015] border-white/10 hover:border-white/25 text-zinc-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black font-mono text-white block">
+                          {variant.size}
+                        </span>
+                        {isSelected && (
+                          <span className="w-1.5 h-1.5 bg-[#D4AF37] rounded-none" />
+                        )}
+                      </div>
+                      <span className="text-[11px] text-[#D4AF37] font-mono font-bold block mt-1">
+                        {formatCFA(variant.price)}
                       </span>
-                      {selectedStorageIdx === idx && (
-                        <Check className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      )}
-                    </div>
-                    <span className="text-xs text-[#D4AF37] font-mono font-bold block mt-1">
-                      {formatCFA(variant.price)}
-                    </span>
-                    <span className="text-[9px] text-zinc-500 block mt-0.5">
-                      {variant.stock > 0 ? `${variant.stock} units ready` : "Out of stock"}
-                    </span>
-                  </button>
-                ))}
+                      <span className="text-[9px] text-zinc-500 font-mono block mt-0.5 uppercase">
+                        {variant.stock > 0 ? `${variant.stock} UNITS` : "SOLD OUT"}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Primary Action Buttons */}
-            <div className="space-y-3 pt-2">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={handleAddToCart}
-                  className="flex-1 py-4 rounded-xl gold-gradient-bg text-black font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-amber-500/15 hover:opacity-95 transition-all min-h-[48px] cursor-pointer"
-                >
-                  {isAdded ? (
-                    <>
-                      <Check className="w-4 h-4 stroke-[3] text-black" />
-                      <span>Added to Bag!</span>
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingBag className="w-4 h-4 text-black" />
-                      <span>Add to Cart</span>
-                    </>
-                  )}
-                </button>
+            {/* Color Finish Selector (If available) */}
+            {phone.colorVariants && phone.colorVariants.length > 0 && (
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                    [ 02. FACTORY COLORWAY ]
+                  </span>
+                  <span className="text-xs text-zinc-300 font-mono font-semibold">
+                    {currentColor.name}
+                  </span>
+                </div>
 
-                <a
-                  href={`https://wa.me/${settings.whatsappCleanNumber || "237699442100"}?text=${encodeURIComponent(
-                    `Hello ${settings.storeName}, I want to order the ${phone.name} (${activeStorage.size}) for ${formatCFA(
-                      currentPrice
-                    )}. Please confirm availability and delivery in Douala/Yaoundé.`
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="py-4 px-6 rounded-xl bg-emerald-950/50 hover:bg-emerald-900/60 border border-emerald-500/40 text-emerald-400 font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all min-h-[48px]"
-                >
-                  <MessageCircle className="w-4 h-4 text-emerald-400" />
-                  <span>Order via WhatsApp</span>
-                </a>
+                <div className="flex flex-wrap gap-2.5">
+                  {phone.colorVariants.map((color, idx) => {
+                    const isSelected = selectedColorIdx === idx;
+                    return (
+                      <button
+                        key={color.id || idx}
+                        onClick={() => {
+                          setSelectedColorIdx(idx);
+                          // If color variant specifies an image, select it
+                          if (color.image) {
+                            const imgIdx = imagesList.indexOf(color.image);
+                            if (imgIdx !== -1) setSelectedImageIdx(imgIdx);
+                          }
+                        }}
+                        className={`p-2 border text-left transition-all cursor-pointer rounded-none flex items-center gap-2 ${
+                          isSelected
+                            ? "bg-[#181820] border-[#D4AF37] ring-1 ring-[#D4AF37]"
+                            : "bg-[#101015] border-white/10 hover:border-white/25 text-zinc-300"
+                        }`}
+                      >
+                        <span
+                          className="w-4 h-4 rounded-none border border-white/20 shrink-0"
+                          style={{ backgroundColor: color.hex }}
+                        />
+                        <span className="text-[11px] font-mono text-zinc-200">{color.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
+            )}
 
-              <div className="flex gap-3">
+            {/* Acquisition & Order CTAs (Strict Straight Edges) */}
+            <div className="space-y-2.5 pt-2">
+              
+              {/* Primary Add to Cart Button */}
+              <button
+                onClick={handleAddToCart}
+                className="w-full py-4 gold-gradient-bg text-black font-black text-xs sm:text-sm uppercase tracking-widest flex items-center justify-center gap-2 rounded-none shadow-lg shadow-amber-500/10 hover:opacity-95 transition-all cursor-pointer min-h-[50px]"
+              >
+                {isAdded ? (
+                  <>
+                    <Check className="w-4 h-4 stroke-[3] text-black" />
+                    <span>ACQUIRED & ADDED TO BAG</span>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="w-4 h-4 text-black" />
+                    <span>ACQUIRE SEALED UNIT / ADD TO BAG</span>
+                  </>
+                )}
+              </button>
+
+              {/* 1-Tap WhatsApp Fast Order */}
+              <a
+                href={`https://wa.me/${settings.whatsappCleanNumber || "237699442100"}?text=${encodeURIComponent(
+                  `Hello ${settings.storeName}, I want to acquire the ${phone.name} (${activeStorage.size}, ${currentColor.name}) for ${formatCFA(
+                    currentPrice
+                  )}. Please confirm availability and delivery dispatch in Douala/Yaoundé.`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3.5 px-4 bg-[#0A1A10] hover:bg-[#0E2617] border border-[#25D366]/40 text-[#25D366] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 rounded-none transition-all min-h-[46px]"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>ORDER DIRECT VIA WHATSAPP (1-TAP)</span>
+              </a>
+
+              {/* Secondary Row: Direct Checkout + Wishlist */}
+              <div className="flex gap-2">
                 <button
                   onClick={handleBuyNow}
-                  className="flex-1 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs uppercase tracking-wider transition-all"
+                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-mono font-semibold text-xs uppercase tracking-wider rounded-none transition-all"
                 >
-                  Direct Checkout
+                  DIRECT CHECKOUT →
                 </button>
 
                 <button
                   onClick={() => toggleWishlist(phone.id)}
                   aria-label="Wishlist"
-                  className={`px-4 py-3 rounded-xl border transition-colors ${
+                  className={`px-4 py-3 border rounded-none transition-colors ${
                     inWish
                       ? "bg-rose-950/40 border-rose-500 text-rose-400"
-                      : "bg-[#141419] border-white/10 text-zinc-400 hover:text-white"
+                      : "bg-[#121217] border-white/10 text-zinc-400 hover:text-white"
                   }`}
                 >
                   <Heart className={`w-4 h-4 ${inWish ? "fill-rose-500 text-rose-500" : ""}`} />
                 </button>
               </div>
 
-              {/* Trade-In Hook */}
+              {/* Trade-In Hook (Sharp Blueprint Callout) */}
               <Link
                 href={`/trade-in?target=${phone.slug}`}
-                className="w-full py-3 px-4 rounded-xl bg-[#141419] hover:bg-[#1A1A22] border border-[#D4AF37]/30 text-amber-200 text-xs font-semibold flex items-center justify-between transition-colors"
+                className="w-full py-3 px-4 bg-[#101016] hover:bg-[#161622] border border-[#D4AF37]/30 text-amber-200 text-xs font-mono flex items-center justify-between rounded-none transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <RefreshCw className="w-4 h-4 text-[#D4AF37]" />
-                  <span>Have an old phone? Trade it in toward this {phone.name}</span>
+                  <RefreshCw className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>PHONE SWAP: Value your old phone toward this unit</span>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-[#D4AF37]" />
               </Link>
+
             </div>
 
-            {/* Device Highlights */}
+            {/* Highlights Checklist */}
             {phone.highlights && phone.highlights.length > 0 && (
-              <div className="pt-4 border-t border-white/8 space-y-2.5">
-                <span className="text-[10px] text-zinc-400 uppercase font-mono tracking-wider block font-semibold">
-                  Device Highlights
+              <div className="border-t border-white/10 pt-4 space-y-2">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block font-bold">
+                  [ ARCHITECTURAL HIGHLIGHTS ]
                 </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-zinc-300">
+                <div className="space-y-1.5 text-xs text-zinc-300 font-mono">
                   {phone.highlights.map((h, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="text-[#D4AF37] font-bold shrink-0">■</span>
                       <span>{h}</span>
                     </div>
                   ))}
@@ -497,75 +616,101 @@ export default function PhoneDetailPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Guarantees Strip */}
-            <div className="grid grid-cols-3 gap-3 pt-4 border-t border-white/8 text-[11px] text-zinc-400">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#D4AF37] shrink-0" />
-                <span>{phone.warranty}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Truck className="w-4 h-4 text-[#D4AF37] shrink-0" />
-                <span>Same-day Douala/Ydé</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <RotateCcw className="w-4 h-4 text-[#D4AF37] shrink-0" />
-                <span>7-Day Replacement</span>
-              </div>
-            </div>
-
           </div>
 
         </div>
 
-        {/* Specifications & Box Contents Tabs/Section */}
-        <div className="mt-16 pt-12 border-t border-white/10 space-y-10">
-          <div>
-            <h2 className="text-2xl font-bold text-white mb-6">
-              Technical Specifications
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {phone.specs &&
-                Object.entries(phone.specs).map(([key, val]) => (
-                  <div
-                    key={key}
-                    className="p-3.5 rounded-xl bg-[#121217] border border-white/5 flex items-start justify-between gap-4 text-xs"
-                  >
-                    <span className="text-zinc-400 uppercase font-mono tracking-wider shrink-0">
-                      {key.replace(/([A-Z])/g, " $1")}
-                    </span>
-                    <span className="text-white font-medium text-right">
-                      {val}
-                    </span>
-                  </div>
-                ))}
+        {/* 3. Technical Specifications Blueprint Grid (Swiss-Style Technical Table) */}
+        <div className="mt-16 pt-12 border-t border-white/10 space-y-8">
+          
+          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-white/10 pb-4">
+            <div>
+              <span className="text-[10px] font-mono uppercase text-[#D4AF37] tracking-widest font-bold block mb-1">
+                ENGINEERING SPECIFICATION ARCHIVE
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+                Technical Specifications Sheet
+              </h2>
+            </div>
+            <span className="text-xs font-mono text-zinc-500">
+              SERIAL REF: {phone.slug.toUpperCase()}
+            </span>
+          </div>
+
+          {/* Continuous Architectural Table with Exposed Gridlines */}
+          <div className="border border-white/10 bg-[#0E0E12] rounded-none overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/10">
+              
+              {/* Left Spec Column */}
+              <div className="divide-y divide-white/10 text-xs">
+                {phone.specs &&
+                  Object.entries(phone.specs)
+                    .slice(0, Math.ceil(Object.keys(phone.specs).length / 2))
+                    .map(([key, val]) => (
+                      <div key={key} className="p-3.5 flex items-baseline justify-between gap-4">
+                        <span className="text-zinc-500 font-mono text-[10px] uppercase tracking-wider shrink-0 font-bold">
+                          {key.replace(/([A-Z])/g, " $1")}
+                        </span>
+                        <span className="text-white font-mono text-right text-xs">
+                          {val}
+                        </span>
+                      </div>
+                    ))}
+              </div>
+
+              {/* Right Spec Column */}
+              <div className="divide-y divide-white/10 text-xs">
+                {phone.specs &&
+                  Object.entries(phone.specs)
+                    .slice(Math.ceil(Object.keys(phone.specs).length / 2))
+                    .map(([key, val]) => (
+                      <div key={key} className="p-3.5 flex items-baseline justify-between gap-4">
+                        <span className="text-zinc-500 font-mono text-[10px] uppercase tracking-wider shrink-0 font-bold">
+                          {key.replace(/([A-Z])/g, " $1")}
+                        </span>
+                        <span className="text-white font-mono text-right text-xs">
+                          {val}
+                        </span>
+                      </div>
+                    ))}
+              </div>
+
             </div>
           </div>
 
-          {/* Box Contents */}
+          {/* Box Contents (Sharp Blueprint Checklist) */}
           {phone.boxContents && phone.boxContents.length > 0 && (
-            <div className="p-6 rounded-2xl bg-[#121217] border border-white/8">
-              <div className="flex items-center gap-2 text-white font-bold text-sm mb-3">
+            <div className="p-5 border border-white/10 bg-[#0F0F14] rounded-none space-y-3">
+              <div className="flex items-center gap-2 text-white font-bold text-xs uppercase font-mono tracking-wider">
                 <Package className="w-4 h-4 text-[#D4AF37]" />
-                <span>In The Box (Official Sealed Packaging)</span>
+                <span>OFFICIAL SEALED BOX CONTENTS</span>
               </div>
-              <div className="flex flex-wrap gap-2 text-xs text-zinc-300">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono text-zinc-300">
                 {phone.boxContents.map((item, i) => (
-                  <span key={i} className="px-3 py-1.5 rounded-lg bg-[#181820] border border-white/5">
-                    {item}
-                  </span>
+                  <div key={i} className="p-2.5 bg-[#14141A] border border-white/5 flex items-center gap-2 rounded-none">
+                    <span className="text-[#D4AF37] text-[10px]">✔</span>
+                    <span>{item}</span>
+                  </div>
                 ))}
               </div>
             </div>
           )}
+
         </div>
 
-        {/* Related Phones from Database */}
+        {/* 4. Related Phones Archive (Sharp Grid) */}
         {relatedPhones.length > 0 && (
-          <div className="mt-16 pt-12 border-t border-white/10">
-            <h2 className="text-xl sm:text-2xl font-bold text-white mb-6">
-              You May Also Consider
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="mt-16 pt-12 border-t border-white/10 space-y-6">
+            <div className="flex items-baseline justify-between border-b border-white/10 pb-4">
+              <h2 className="text-lg sm:text-xl font-bold text-white uppercase tracking-wider font-mono">
+                [ YOU MAY ALSO CONSIDER // ALTERNATIVE HARDWARE ]
+              </h2>
+              <Link href="/phones" className="text-xs font-mono text-[#D4AF37] hover:underline">
+                VIEW COMPLETE ARCHIVE →
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {relatedPhones.map((relPhone) => (
                 <ProductCard key={relPhone.id} phone={relPhone} layout="grid" />
               ))}

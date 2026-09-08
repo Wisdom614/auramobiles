@@ -31,11 +31,11 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
   // List Layout
   if (layout === "list") {
     return (
-      <div className="group rounded-2xl bg-[#121217] border border-white/8 hover:border-[#D4AF37]/40 transition-all p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:gap-6 items-center">
+      <div className="group rounded-none bg-[#121217] border border-white/8 hover:border-[#D4AF37]/50 transition-all p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:gap-6 items-center">
         {/* Thumbnail */}
         <Link
           href={`/phones/${phone.slug}`}
-          className="w-full sm:w-40 h-40 rounded-xl bg-black overflow-hidden relative shrink-0 flex items-center justify-center p-3"
+          className="w-full sm:w-40 h-40 rounded-none bg-black overflow-hidden relative shrink-0 flex items-center justify-center p-3 border border-white/5"
         >
           <img
             src={activeImage}
@@ -43,7 +43,7 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
             className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
           />
           {phone.condition === "Certified Refurbished" && (
-            <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/90 text-emerald-300 border border-emerald-500/30">
+            <span className="absolute top-2 left-2 px-2 py-0.5 rounded-none text-[10px] font-semibold bg-emerald-950/90 text-emerald-300 border border-emerald-500/30">
               Pre-Owned
             </span>
           )}
@@ -61,15 +61,15 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
           </Link>
           <p className="text-xs text-zinc-400 line-clamp-1">{phone.tagline}</p>
           <div className="flex items-center justify-center sm:justify-start gap-2 pt-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            <span className="text-[11px] text-emerald-400 font-medium">In Stock • Official Warranty</span>
+            <span className="w-1.5 h-1.5 rounded-none bg-emerald-400" />
+            <span className="text-[11px] text-emerald-400 font-medium font-mono">In Stock • Official Warranty</span>
           </div>
         </div>
 
         {/* Price & Primary CTA */}
         <div className="w-full sm:w-48 sm:border-l sm:border-white/10 sm:pl-6 flex flex-col items-center sm:items-end gap-3 shrink-0">
           <div className="text-center sm:text-right">
-            <span className="text-xs text-zinc-400 block">Price</span>
+            <span className="text-xs text-zinc-400 block font-mono">Price</span>
             <span className="text-lg font-black text-[#D4AF37] font-mono">
               {formatCFA(phone.basePrice)}
             </span>
@@ -77,7 +77,7 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
 
           <button
             onClick={handleQuickAdd}
-            className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all min-h-[44px] ${
+            className={`w-full py-2.5 px-4 rounded-none font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all min-h-[44px] cursor-pointer ${
               isAddedToast
                 ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/20"
                 : "gold-gradient-bg text-black hover:opacity-95 shadow-md shadow-amber-500/10"
@@ -100,13 +100,13 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
     );
   }
 
-  // Grid Layout (Default: Mobile-First, Clean & Compact)
+  // Grid Layout (Default: Mobile-First, Clean & Compact, Straight Edges)
   return (
-    <div className="group rounded-2xl bg-[#121217] border border-white/8 hover:border-[#D4AF37]/50 hover:shadow-xl hover:shadow-black/50 transition-all duration-200 flex flex-col justify-between overflow-hidden relative">
+    <div className="group rounded-none bg-[#121217] border border-white/10 hover:border-[#D4AF37]/60 hover:shadow-xl hover:shadow-black/50 transition-all duration-200 flex flex-col justify-between overflow-hidden relative">
       {/* Condition Badge (Only if Pre-Owned) */}
       {phone.condition === "Certified Refurbished" && (
         <div className="absolute top-2.5 left-2.5 z-10">
-          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-950/90 text-emerald-300 border border-emerald-500/30">
+          <span className="px-2 py-0.5 rounded-none text-[10px] font-bold uppercase tracking-wider bg-emerald-950/90 text-emerald-300 border border-emerald-500/30 font-mono">
             Pre-Owned
           </span>
         </div>
@@ -115,7 +115,7 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
       {/* Product Image Link */}
       <Link
         href={`/phones/${phone.slug}`}
-        className="relative h-44 sm:h-52 w-full bg-[#0D0D10] flex items-center justify-center p-4 overflow-hidden block"
+        className="relative h-44 sm:h-52 w-full bg-[#0D0D10] flex items-center justify-center p-4 overflow-hidden block border-b border-white/5"
       >
         <img
           src={activeImage}
@@ -128,13 +128,13 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
       <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between space-y-3">
         <div>
           {/* Brand */}
-          <span className="font-mono uppercase tracking-wider text-[#D4AF37] font-semibold text-[10px] block mb-0.5">
+          <span className="font-mono uppercase tracking-wider text-[#D4AF37] font-bold text-[10px] block mb-0.5">
             {phone.brand}
           </span>
 
           {/* Title */}
           <Link href={`/phones/${phone.slug}`}>
-            <h3 className="text-sm font-bold text-white group-hover:text-amber-200 transition-colors truncate">
+            <h3 className="text-sm font-bold text-white group-hover:text-amber-200 transition-colors truncate uppercase">
               {phone.name}
             </h3>
           </Link>
@@ -144,7 +144,7 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
             <span className="text-sm sm:text-base font-black text-white font-mono">
               {formatCFA(phone.basePrice)}
             </span>
-            <span className="text-[10px] text-emerald-400 font-medium">In Stock</span>
+            <span className="text-[10px] text-emerald-400 font-medium font-mono">In Stock</span>
           </div>
         </div>
 
@@ -152,7 +152,7 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
         <button
           onClick={handleQuickAdd}
           aria-label={`Add ${phone.name} to cart`}
-          className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all min-h-[44px] cursor-pointer ${
+          className={`w-full py-2.5 px-3 rounded-none font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all min-h-[44px] cursor-pointer ${
             isAddedToast
               ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/20"
               : "gold-gradient-bg text-black hover:opacity-95 shadow-md shadow-amber-500/10 active:scale-[0.98]"
