@@ -97,26 +97,26 @@ const TRADE_SOURCE_MODELS: DeviceModel[] = [
 const PHYSICAL_CONDITIONS = [
   {
     id: "flawless",
-    title: "Grade A — Flawless / Mint",
-    desc: "0 visible scratches, 100% genuine factory parts, battery health ≥ 85%",
+    title: "Like New (Flawless)",
+    desc: "No scratches at all, original parts, battery health 85% or above",
     factor: 1.0,
   },
   {
     id: "excellent",
-    title: "Grade B — Excellent Condition",
-    desc: "Microscopic pocket hairline marks, flawless screen glass, battery ≥ 80%",
+    title: "Very Good Condition",
+    desc: "Only tiny faint marks from normal pocket use, clean screen, battery 80% or above",
     factor: 0.88,
   },
   {
     id: "good",
-    title: "Grade C — Moderate Cosmetic Wear",
-    desc: "Minor bezel scuffs or casing marks, fully responsive touch and cameras",
+    title: "Good (Used)",
+    desc: "Visible scratches on body or edges, but screen and cameras work 100% normally",
     factor: 0.74,
   },
   {
     id: "damaged",
-    title: "Grade D — Screen / Back Glass Crack",
-    desc: "Cracked outer glass or battery service alert, mainboard operates normally",
+    title: "Cracked Screen or Back Glass",
+    desc: "Screen or back glass is cracked, but the phone turns on and works",
     factor: 0.50,
   },
 ];
@@ -155,7 +155,7 @@ function TradeInContent() {
   const [targetSlug, setTargetSlug] = useState<string>("samsung-galaxy-s24-ultra");
 
   // User Proposed Worth of their device
-  const [proposedWorth, setProposedWorth] = useState<string>("");
+  const [proposedWorth, setProposedWorth] = useState<string>("420000");
   const [isProposedCustom, setIsProposedCustom] = useState<boolean>(false);
 
   // Client Details
@@ -223,7 +223,7 @@ function TradeInContent() {
     return PHYSICAL_CONDITIONS.find((c) => c.id === selectedCondition) || PHYSICAL_CONDITIONS[0];
   }, [selectedCondition]);
 
-  // Automated Algorithmic Trade-in Credit Calculation
+  // Automated Trade-in Credit Calculation
   const algorithmicValuation = useMemo(() => {
     const base = currentModelData.baseValuation;
     const condFactor = currentCondition.factor;
@@ -296,7 +296,7 @@ function TradeInContent() {
     setGeneratedVoucher(voucher);
     setSubmitted(true);
 
-    const notesSummary = `SWAP: ${sourceBrand} ${sourceModel} (${sourceStorage}, ${currentCondition.title}) → Target: ${targetFlagship.name} (${formatCFA(targetRetailPrice)}) | Algorithmic Credit: ${formatCFA(algorithmicValuation)} | Client Proposed: ${formatCFA(parsedProposedWorth)} (Delta: ${valuationDelta >= 0 ? "+" : ""}${formatCFA(valuationDelta)}) | Net Balance Due: ${formatCFA(clientProposedNetBalance)} | Protocol: ${inspectionProtocol.replace("_", " ").toUpperCase()}`;
+    const notesSummary = `SWAP: ${sourceBrand} ${sourceModel} (${sourceStorage}, ${currentCondition.title}) → New: ${targetFlagship.name} (${formatCFA(targetRetailPrice)}) | Our Estimate: ${formatCFA(algorithmicValuation)} | Customer Proposed: ${formatCFA(parsedProposedWorth)} (Diff: ${valuationDelta >= 0 ? "+" : ""}${formatCFA(valuationDelta)}) | Balance Due: ${formatCFA(clientProposedNetBalance)} | Store: ${inspectionProtocol.replace("_", " ").toUpperCase()}`;
 
     try {
       await insertTradeInToDB({
@@ -320,27 +320,26 @@ function TradeInContent() {
 
   // 1-Click WhatsApp Direct Dispatch
   const handleWhatsAppDispatch = () => {
-    const message = `*AURA LUXE MOBILE — CERTIFIED HARDWARE SWAP MANIFEST*
+    const message = `*AURA LUXE MOBILE — PHONE SWAP DETAILS*
 Voucher Code: *${generatedVoucher}*
-Client: *${customerName}*
+Customer Name: *${customerName}*
 Phone: *${customerPhone}*
 
-*SOURCE DEVICE (GIVING UP):*
-• Device: ${sourceBrand} ${sourceModel}
-• Storage: ${sourceStorage}
+*MY CURRENT PHONE (TRADING IN):*
+• Phone: ${sourceBrand} ${sourceModel} (${sourceStorage})
 • Condition: ${currentCondition.title}
-• Certified Algorithmic Credit: ${formatCFA(algorithmicValuation)}
-• Client Proposed Valuation: ${formatCFA(parsedProposedWorth)}
+• Estimated Value: ${formatCFA(algorithmicValuation)}
+• My Proposed Price: ${formatCFA(parsedProposedWorth)}
 
-*TARGET FLAGSHIP (RECEIVING):*
-• Upgrade Target: ${targetFlagship.name}
-• Retail Value: ${formatCFA(targetRetailPrice)}
-• Estimated Balance Due: ${formatCFA(clientProposedNetBalance)}
+*NEW PHONE I WANT:*
+• Model: ${targetFlagship.name}
+• Retail Price: ${formatCFA(targetRetailPrice)}
+• Amount I Pay to Swap: ${formatCFA(clientProposedNetBalance)}
 
-*INSPECTION PROTOCOL:*
-• Location/Method: ${inspectionProtocol.replace("_", " ").toUpperCase()}
+*WHERE I WANT TO SWAP:*
+• Location: ${inspectionProtocol.replace("_", " ").toUpperCase()}
 
-Hello AURA Concierge, I have locked my hardware exchange voucher online. Please confirm showroom appointment and stock allocation.`;
+Hello AURA, I just completed my phone swap request online. Please confirm stock and when I can come.`;
 
     const url = `https://wa.me/${cleanWaNumber}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
@@ -358,7 +357,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
     <div className="min-h-screen bg-[#09090D] text-zinc-100 py-10 sm:py-16 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
 
-        {/* 1. Protocol Hero Strip */}
+        {/* 1. Hero Header */}
         <div className="border border-white/10 bg-[#0E0E12] p-6 sm:p-8 relative">
           {/* Viewfinder corner crosshairs */}
           <span className="absolute top-2 left-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
@@ -371,35 +370,35 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-none bg-emerald-400 animate-pulse" />
                 <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37]">
-                  [ PROTOCOL // CERTIFIED HARDWARE SWAP &amp; RESIDUAL APPRAISAL ]
+                  [ PHONE SWAP &amp; TRADE-IN ]
                 </span>
               </div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white uppercase tracking-tight">
-                Exchange Hardware. Elevate Your Standard.
+                Swap Your Old Phone For A New One.
               </h1>
               <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-sans">
-                Trade your current iPhone or Samsung flagship directly for any factory-sealed unit in our vault. State your proposed phone valuation, compute the upgrade delta in real-time, and lock your appraisal voucher with our Douala &amp; Yaoundé showrooms.
+                Trade in your current iPhone or Samsung and use its value toward any brand new phone in our store. Tell us what you think your phone is worth, see your price difference right away, and reserve your swap with our Douala or Yaoundé store.
               </p>
             </div>
 
-            {/* Fast Telemetry Badges */}
+            {/* Quick Guarantees */}
             <div className="flex flex-col sm:flex-row md:flex-col gap-2 shrink-0 font-mono text-[10px]">
               <div className="p-2.5 bg-black border border-white/10 flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-[#D4AF37]" />
-                <span className="text-zinc-300">MILITARY DATA WIPE ON PREMISES</span>
+                <span className="text-zinc-300">FREE SECURE DATA WIPE &amp; RESET</span>
               </div>
               <div className="p-2.5 bg-black border border-white/10 flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-[#25D366]" />
-                <span className="text-zinc-300">BONAPRISO &amp; BASTOS LOUNGES</span>
+                <span className="text-zinc-300">DOUALA &amp; YAOUNDÉ STORES</span>
               </div>
             </div>
           </div>
 
-          {/* 2. Fast Swap Mode Switcher (Tactile Hardware Keys) */}
+          {/* 2. Fast Swap Mode Switcher */}
           <div className="mt-8 pt-6 border-t border-white/10">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">
-                [ RAPID SWAP ARCHITECTURE ]:
+                Choose Swap Type:
               </span>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -413,7 +412,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                   }`}
                 >
                   <ArrowLeftRight className="w-3.5 h-3.5" />
-                  <span>[ ⇄ IPHONE TO SAMSUNG ]</span>
+                  <span>[ ⇄ SWAP IPHONE FOR SAMSUNG ]</span>
                 </button>
 
                 <button
@@ -426,7 +425,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                   }`}
                 >
                   <ArrowLeftRight className="w-3.5 h-3.5" />
-                  <span>[ ⇄ SAMSUNG TO IPHONE ]</span>
+                  <span>[ ⇄ SWAP SAMSUNG FOR IPHONE ]</span>
                 </button>
 
                 <button
@@ -439,39 +438,39 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                   }`}
                 >
                   <Cpu className="w-3.5 h-3.5" />
-                  <span>[ ⇄ CUSTOM SELECTION ]</span>
+                  <span>[ ⇄ SWAP ANY OTHER PHONE ]</span>
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* 3. The 2-Column Architectural Cockpit */}
+        {/* 3. The 2-Column Trade-in Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* ========================================================== */}
-          {/* LEFT 7 COLS: THE HARDWARE VALUATION & SELECTION ENGINE */}
+          {/* LEFT 7 COLS: THE EASY SWAP FORM */}
           {/* ========================================================== */}
           <div className="lg:col-span-7 space-y-8">
 
-            {/* BAY 01: SOURCE DEVICE (What You Are Giving Up) */}
+            {/* STEP 1: CURRENT PHONE */}
             <div className="bg-[#0E0E12] border border-white/10 p-6 relative">
               <span className="absolute top-1.5 left-1.5 text-[9px] font-mono text-[#D4AF37]/50 select-none">+</span>
               <span className="absolute top-1.5 right-1.5 text-[9px] font-mono text-[#D4AF37]/50 select-none">+</span>
 
               <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
                 <span className="text-xs font-mono uppercase tracking-widest text-[#D4AF37] font-bold">
-                  [ BAY 01 // SOURCE DEVICE YOU ARE TRADING IN ]
+                  1. The Phone You Want to Swap (Your Current Phone)
                 </span>
-                <span className="text-[10px] font-mono text-zinc-400">
-                  ORIGIN: {sourceBrand.toUpperCase()}
+                <span className="text-[10px] font-mono text-zinc-400 uppercase">
+                  Brand: {sourceBrand}
                 </span>
               </div>
 
               {/* Brand Selector */}
               <div className="space-y-2 mb-4">
                 <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block">
-                  1. Current Device Manufacturer:
+                  Select Phone Brand:
                 </label>
                 <div className="grid grid-cols-5 gap-2">
                   {(["Apple", "Samsung", "Google", "Xiaomi", "Tecno"] as const).map((b) => (
@@ -502,7 +501,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                 <div className="sm:col-span-8 space-y-1.5">
                   <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block">
-                    2. Specific Model:
+                    Select Phone Model:
                   </label>
                   <select
                     value={sourceModel}
@@ -526,7 +525,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
 
                 <div className="sm:col-span-4 space-y-1.5">
                   <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block">
-                    3. Storage Tier:
+                    Storage Size:
                   </label>
                   <select
                     value={sourceStorage}
@@ -543,24 +542,24 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
               </div>
             </div>
 
-            {/* BAY 02: TARGET FLAGSHIP UPGRADE (What You Want to Receive) */}
+            {/* STEP 2: NEW PHONE YOU WANT */}
             <div className="bg-[#0E0E12] border border-white/10 p-6 relative">
               <span className="absolute top-1.5 left-1.5 text-[9px] font-mono text-[#D4AF37]/50 select-none">+</span>
               <span className="absolute top-1.5 right-1.5 text-[9px] font-mono text-[#D4AF37]/50 select-none">+</span>
 
               <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
                 <span className="text-xs font-mono uppercase tracking-widest text-[#D4AF37] font-bold">
-                  [ BAY 02 // TARGET FLAGSHIP UPGRADE YOU WISH TO RECEIVE ]
+                  2. The New Phone You Want to Buy
                 </span>
                 <span className="text-[10px] font-mono text-emerald-400">
-                  FACTORY-SEALED VAULT UNITS
+                  100% BRAND NEW IN BOX
                 </span>
               </div>
 
-              {/* Target Flagship Picker */}
+              {/* Target Phone Picker */}
               <div className="space-y-3">
                 <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block">
-                  Select Desired Upgrade Flagship:
+                  Choose the new phone you want:
                 </label>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[310px] overflow-y-auto pr-1 no-scrollbar">
@@ -599,24 +598,24 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
               </div>
             </div>
 
-            {/* BAY 03: 65-POINT DIAGNOSTIC & PHYSICAL CONDITION MATRIX */}
+            {/* STEP 3: PHONE CONDITION */}
             <div className="bg-[#0E0E12] border border-white/10 p-6 relative">
               <span className="absolute top-1.5 left-1.5 text-[9px] font-mono text-[#D4AF37]/50 select-none">+</span>
               <span className="absolute top-1.5 right-1.5 text-[9px] font-mono text-[#D4AF37]/50 select-none">+</span>
 
               <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
                 <span className="text-xs font-mono uppercase tracking-widest text-[#D4AF37] font-bold">
-                  [ BAY 03 // HARDWARE INTEGRITY &amp; DIAGNOSTIC MATRIX ]
+                  3. Condition of Your Current Phone
                 </span>
                 <span className="text-[10px] font-mono text-zinc-400">
-                  STANDARD AURA SPEC
+                  HONEST ASSESSMENT
                 </span>
               </div>
 
               {/* Physical Grade Selection */}
               <div className="space-y-2 mb-6">
                 <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block">
-                  Select Physical Grade:
+                  How does the phone look physically?
                 </label>
                 <div className="space-y-2">
                   {PHYSICAL_CONDITIONS.map((cond) => (
@@ -636,7 +635,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                             {cond.title}
                           </span>
                           <span className="text-[9px] font-mono px-1.5 py-0.2 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30">
-                            {Math.round(cond.factor * 100)}% VALUATION FACTOR
+                            {Math.round(cond.factor * 100)}% VALUE
                           </span>
                         </div>
                         <p className="text-[11px] text-zinc-400 font-sans leading-snug">
@@ -655,7 +654,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
               {/* Functional Diagnostic Checklist */}
               <div className="space-y-2 pt-4 border-t border-white/10">
                 <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block">
-                  Hardware Integrity Confirmation:
+                  Quick Feature Check:
                 </label>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
@@ -666,7 +665,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                       onChange={(e) => setDisplayFunctional(e.target.checked)}
                       className="rounded-none accent-[#D4AF37] w-4 h-4"
                     />
-                    <span className="text-zinc-200 text-[11px]">Display &amp; Touch 100% Intact</span>
+                    <span className="text-zinc-200 text-[11px]">Screen and touch work perfectly</span>
                   </label>
 
                   <label className="p-3 bg-black border border-white/10 flex items-center gap-2.5 cursor-pointer hover:border-white/30 transition-colors">
@@ -676,7 +675,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                       onChange={(e) => setBiometricsFunctional(e.target.checked)}
                       className="rounded-none accent-[#D4AF37] w-4 h-4"
                     />
-                    <span className="text-zinc-200 text-[11px]">Biometrics / Face ID Active</span>
+                    <span className="text-zinc-200 text-[11px]">Face ID or Fingerprint works</span>
                   </label>
 
                   <label className="p-3 bg-black border border-white/10 flex items-center gap-2.5 cursor-pointer hover:border-white/30 transition-colors">
@@ -686,7 +685,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                       onChange={(e) => setCamerasFunctional(e.target.checked)}
                       className="rounded-none accent-[#D4AF37] w-4 h-4"
                     />
-                    <span className="text-zinc-200 text-[11px]">All Camera Lenses Pristine</span>
+                    <span className="text-zinc-200 text-[11px]">All cameras take clear photos</span>
                   </label>
 
                   <label className="p-3 bg-black border border-white/10 flex items-center gap-2.5 cursor-pointer hover:border-white/30 transition-colors">
@@ -696,23 +695,23 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                       onChange={(e) => setHasOriginalBox(e.target.checked)}
                       className="rounded-none accent-[#D4AF37] w-4 h-4"
                     />
-                    <span className="text-[#D4AF37] text-[11px]">Original Box Included (+10,000 F)</span>
+                    <span className="text-[#D4AF37] text-[11px]">Original box included (+10,000 F bonus)</span>
                   </label>
                 </div>
               </div>
             </div>
 
-            {/* BAY 04: CLIENT PROPOSED WORTH & VALUATION DELTA ENGINE */}
+            {/* STEP 4: PROPOSED WORTH & PRICE COMPARISON */}
             <div className="bg-[#0E0E12] border border-white/10 p-6 relative">
               <span className="absolute top-1.5 left-1.5 text-[9px] font-mono text-[#D4AF37]/50 select-none">+</span>
               <span className="absolute top-1.5 right-1.5 text-[9px] font-mono text-[#D4AF37]/50 select-none">+</span>
 
               <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
                 <span className="text-xs font-mono uppercase tracking-widest text-[#D4AF37] font-bold">
-                  [ BAY 04 // CLIENT PROPOSED WORTH &amp; VALUATION DELTA ]
+                  4. What You Think Your Phone Is Worth
                 </span>
                 <span className="text-[10px] font-mono text-zinc-400">
-                  BIDIRECTIONAL PRICING
+                  FAIR PRICING
                 </span>
               </div>
 
@@ -720,10 +719,10 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                 <div className="p-4 bg-black border border-white/10 space-y-2">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <label className="text-xs font-mono uppercase font-bold text-white block">
-                      Enter Your Proposed Phone Worth (FCFA):
+                      How much do you think your phone is worth? (FCFA):
                     </label>
                     <span className="text-[10px] font-mono text-zinc-400">
-                      AURA BASELINE: {formatCFA(algorithmicValuation)}
+                      Our Estimated Price: {formatCFA(algorithmicValuation)}
                     </span>
                   </div>
 
@@ -745,7 +744,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
 
                   <div className="flex items-center justify-between pt-1">
                     <span className="text-[10px] text-zinc-400 font-mono">
-                      State your personal valuation for showroom appraisal review.
+                      Enter your desired price so our store team can review it with you.
                     </span>
                     {isProposedCustom && (
                       <button
@@ -756,46 +755,46 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                         }}
                         className="text-[10px] text-[#D4AF37] hover:underline font-mono uppercase"
                       >
-                        [ RESET TO ALGORITHMIC ESTIMATE ]
+                        [ Reset to our estimated price ]
                       </button>
                     )}
                   </div>
                 </div>
 
-                {/* Real-time Valuation Delta Analysis Card */}
+                {/* Price Comparison Card */}
                 <div className="p-4 rounded-none bg-black border border-white/15 space-y-3 font-mono">
                   <div className="text-[10px] uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/10 flex items-center justify-between">
-                    <span>VALUATION COMPARATIVE MATRIX</span>
-                    <span>DELTA: {valuationDelta >= 0 ? `+${formatCFA(valuationDelta)}` : formatCFA(valuationDelta)} ({valuationDeltaPercent}%)</span>
+                    <span>PRICE COMPARISON</span>
+                    <span>DIFFERENCE: {valuationDelta >= 0 ? `+${formatCFA(valuationDelta)}` : formatCFA(valuationDelta)} ({valuationDeltaPercent}%)</span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 text-xs">
                     <div className="p-2.5 bg-zinc-950 border border-white/10">
-                      <span className="text-[9px] text-zinc-500 uppercase block">AURA Algorithmic Base:</span>
+                      <span className="text-[9px] text-zinc-500 uppercase block">Our Estimated Price:</span>
                       <span className="text-sm font-black text-white block mt-0.5">{formatCFA(algorithmicValuation)}</span>
                     </div>
 
                     <div className="p-2.5 bg-zinc-950 border border-white/10">
-                      <span className="text-[9px] text-[#D4AF37] uppercase block">Client Proposed Valuation:</span>
+                      <span className="text-[9px] text-[#D4AF37] uppercase block">Your Proposed Price:</span>
                       <span className="text-sm font-black text-[#D4AF37] block mt-0.5">{formatCFA(parsedProposedWorth)}</span>
                     </div>
                   </div>
 
                   {/* Dynamic Status Indicator */}
                   {valuationDelta <= 0 ? (
-                    <div className="p-2.5 bg-emerald-950/30 border border-emerald-500/40 text-emerald-300 text-[11px] flex items-center gap-2">
+                    <div className="p-2.5 bg-emerald-950/30 border border-emerald-500/40 text-emerald-300 text-[11px] flex items-center gap-2 font-sans">
                       <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
-                      <span>[ GUARANTEED MATCH ]: Your valuation aligns with our matrix. Eligible for immediate instant boutique payout.</span>
+                      <span><strong>Great Match:</strong> Your proposed price matches or is lower than our estimate. You can complete your swap right away!</span>
                     </div>
                   ) : valuationDeltaPercent <= 15 ? (
-                    <div className="p-2.5 bg-amber-950/30 border border-amber-500/40 text-amber-200 text-[11px] flex items-center gap-2">
+                    <div className="p-2.5 bg-amber-950/30 border border-amber-500/40 text-amber-200 text-[11px] flex items-center gap-2 font-sans">
                       <Info className="w-4 h-4 shrink-0 text-amber-400" />
-                      <span>[ REASONABLE NEGOTIATION MARGIN ]: Within acceptable showroom tolerance (+{valuationDeltaPercent}%). Subject to physical technician inspection.</span>
+                      <span><strong>Close Offer:</strong> Your price is very close to our estimate (+{valuationDeltaPercent}%). Bring your phone to our store and we will inspect it to give you the top price.</span>
                     </div>
                   ) : (
-                    <div className="p-2.5 bg-rose-950/30 border border-rose-500/40 text-rose-300 text-[11px] flex items-center gap-2">
+                    <div className="p-2.5 bg-rose-950/30 border border-rose-500/40 text-rose-300 text-[11px] flex items-center gap-2 font-sans">
                       <Info className="w-4 h-4 shrink-0 text-rose-400" />
-                      <span>[ CUSTOM VALUATION CLAIM ]: Proposed valuation exceeds algorithmic matrix by +{valuationDeltaPercent}%. Senior hardware inspector review required.</span>
+                      <span><strong>Higher Than Usual:</strong> Your proposed price is higher than our estimate (+{valuationDeltaPercent}%). Our technicians will carefully inspect it in store to see if we can accommodate your offer.</span>
                     </div>
                   )}
                 </div>
@@ -805,7 +804,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
           </div>
 
           {/* ========================================================== */}
-          {/* RIGHT 5 COLS: LIVE FINANCIAL LEDGER & VOUCHER LOCK */}
+          {/* RIGHT 5 COLS: SUMMARY & CONFIRMATION */}
           {/* ========================================================== */}
           <div className="lg:col-span-5 space-y-6 sticky top-24">
             
@@ -818,10 +817,10 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
 
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
                 <span className="text-xs uppercase tracking-widest text-[#D4AF37] font-bold">
-                  [ EXCHANGE LEDGER // CERTIFICATE ]
+                  Swap Summary &amp; Estimate
                 </span>
                 <span className="text-[9px] px-2 py-0.5 bg-[#25D366]/20 text-[#25D366] border border-[#25D366]/40 uppercase">
-                  7-DAY PRICE LOCK
+                  PRICE VALID FOR 7 DAYS
                 </span>
               </div>
 
@@ -829,7 +828,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
               <div className="mt-4 space-y-3 text-xs">
                 {/* Source device */}
                 <div className="p-3 bg-black border border-white/10 space-y-1">
-                  <span className="text-[9px] text-zinc-500 uppercase block tracking-wider">SOURCE DEVICE (TRADING IN):</span>
+                  <span className="text-[9px] text-zinc-500 uppercase block tracking-wider">YOUR CURRENT PHONE (TRADING IN):</span>
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-white">{sourceBrand} {sourceModel}</span>
                     <span className="text-zinc-400">{sourceStorage}</span>
@@ -839,7 +838,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
 
                 {/* Target flagship */}
                 <div className="p-3 bg-black border border-white/10 space-y-1">
-                  <span className="text-[9px] text-zinc-500 uppercase block tracking-wider">TARGET FLAGSHIP (RECEIVING):</span>
+                  <span className="text-[9px] text-zinc-500 uppercase block tracking-wider">THE NEW PHONE YOU WANT:</span>
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-white">{targetFlagship.name}</span>
                     <span className="text-emerald-400 font-bold">{formatCFA(targetRetailPrice)}</span>
@@ -850,16 +849,16 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                 {/* The Exchange Math */}
                 <div className="p-4 bg-zinc-950 border border-white/15 space-y-2 font-mono">
                   <div className="flex justify-between text-zinc-400 text-[11px]">
-                    <span>Target Retail Value:</span>
+                    <span>New Phone Price:</span>
                     <span>{formatCFA(targetRetailPrice)}</span>
                   </div>
                   <div className="flex justify-between text-[#25D366] text-[11px]">
-                    <span>Estimated Trade-in Credit:</span>
+                    <span>Value for Your Old Phone:</span>
                     <span>- {formatCFA(algorithmicValuation)}</span>
                   </div>
                   {hasOriginalBox && (
                     <div className="flex justify-between text-[#D4AF37] text-[10px]">
-                      <span>Original Box Incentive:</span>
+                      <span>Original Box Bonus:</span>
                       <span>- 10,000 FCFA</span>
                     </div>
                   )}
@@ -867,10 +866,10 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                   <div className="pt-2 border-t border-white/15 flex items-baseline justify-between">
                     <div>
                       <span className="text-xs font-black text-white block uppercase">
-                        Net Balance Payable:
+                        Total You Pay To Swap:
                       </span>
                       <span className="text-[9px] text-zinc-400 font-sans">
-                        At boutique collection / delivery
+                        Pay only this difference in store or on delivery
                       </span>
                     </div>
                     <span className="text-2xl font-black text-[#D4AF37]">
@@ -880,7 +879,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
 
                   {isProposedCustom && valuationDelta !== 0 && (
                     <div className="pt-1 text-[10px] text-zinc-400 flex justify-between border-t border-white/5">
-                      <span>If client proposed worth accepted:</span>
+                      <span>If your proposed price is accepted:</span>
                       <span className="text-white font-bold">{formatCFA(clientProposedNetBalance)}</span>
                     </div>
                   )}
@@ -893,10 +892,10 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                   <div className="p-4 bg-emerald-950/30 border border-emerald-500/40 text-center space-y-2">
                     <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
                     <h4 className="text-sm font-bold text-white font-mono uppercase">
-                      Appraisal Voucher Issued
+                      Swap Request Confirmed!
                     </h4>
                     <p className="text-xs text-zinc-300 font-sans">
-                      Thank you, <strong className="text-white">{customerName}</strong>. Your hardware swap certificate has been registered under voucher code:
+                      Thank you, <strong className="text-white">{customerName}</strong>. We have saved your swap request. Here is your voucher code:
                     </p>
                     
                     <div className="p-2.5 bg-black border border-emerald-500/60 flex items-center justify-between mt-2">
@@ -922,7 +921,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                       className="w-full py-3 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-black font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 border border-[#25D366] transition-all"
                     >
                       <MessageCircle className="w-4 h-4" />
-                      <span>[ DISPATCH TO SHOWROOM ON WHATSAPP ]</span>
+                      <span>[ SEND DETAILS TO US ON WHATSAPP ]</span>
                     </button>
 
                     <button
@@ -930,14 +929,14 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                       onClick={() => setSubmitted(false)}
                       className="w-full py-2.5 px-4 bg-black hover:bg-zinc-900 border border-white/15 text-zinc-300 hover:text-white text-xs uppercase tracking-wider transition-colors"
                     >
-                      [ CONFIGURE ANOTHER SWAP ]
+                      [ SWAP ANOTHER PHONE ]
                     </button>
                   </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="mt-5 space-y-3 pt-4 border-t border-white/10">
                   <span className="text-xs font-mono uppercase tracking-wider text-white font-bold block">
-                    [ LOCK APPRAISAL &amp; RESERVE FLAGSHIP ]:
+                    Confirm Your Swap &amp; Reserve Phone:
                   </span>
 
                   <input
@@ -961,7 +960,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                   {/* Inspection Protocol Choice */}
                   <div className="space-y-1.5 pt-1">
                     <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block">
-                      Inspection Location &amp; Handover:
+                      Where would you like to do the swap?
                     </label>
                     <div className="grid grid-cols-1 gap-1.5 text-xs font-mono">
                       <button
@@ -973,7 +972,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                             : "bg-black border-white/10 text-zinc-400"
                         }`}
                       >
-                        <span>Douala Showroom (Bonapriso Lounge)</span>
+                        <span>Douala Store (Bonapriso)</span>
                         {inspectionProtocol === "douala_lounge" && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
                       </button>
 
@@ -986,7 +985,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                             : "bg-black border-white/10 text-zinc-400"
                         }`}
                       >
-                        <span>Yaoundé Flagship (Bastos Lounge)</span>
+                        <span>Yaoundé Store (Bastos)</span>
                         {inspectionProtocol === "yaounde_lounge" && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
                       </button>
 
@@ -999,7 +998,7 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                             : "bg-black border-white/10 text-zinc-400"
                         }`}
                       >
-                        <span>VIP Doorstep Courier Inspection (DLA / YDE)</span>
+                        <span>Home or Office Delivery (Douala or Yaoundé)</span>
                         {inspectionProtocol === "doorstep_vip" && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
                       </button>
                     </div>
@@ -1009,20 +1008,20 @@ Hello AURA Concierge, I have locked my hardware exchange voucher online. Please 
                     type="submit"
                     className="w-full py-3.5 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-widest transition-all border border-[#D4AF37] shadow-lg shadow-amber-500/10 mt-2"
                   >
-                    [ LOCK TRADE-IN OFFER &amp; RESERVE ]
+                    [ SUBMIT SWAP REQUEST &amp; RESERVE PHONE ]
                   </button>
                 </form>
               )}
 
-              {/* Official Boutique Guarantees */}
+              {/* Guarantees */}
               <div className="mt-5 pt-3 border-t border-white/10 text-[10px] text-zinc-400 space-y-1.5 font-sans">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
-                  <span>Military-grade Department of Defense data sanitization</span>
+                  <span>We safely erase all your personal data and photos before the swap</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Building2 className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
-                  <span>Immediate cash deduction applied directly at checkout</span>
+                  <span>The value of your old phone is deducted directly from your new phone price</span>
                 </div>
               </div>
 
@@ -1042,7 +1041,7 @@ export default function TradeInPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-[#09090D] flex items-center justify-center text-[#D4AF37] font-mono text-xs">
-          [ LOADING AURA TRADE-IN TERMINAL... ]
+          [ LOADING PHONE SWAP PAGE... ]
         </div>
       }
     >
