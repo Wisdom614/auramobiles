@@ -1,7 +1,17 @@
 -- ==========================================================
--- AURA LUXE MOBILE - SUPABASE DATABASE SCHEMA
+-- AURA LUXE MOBILE - SUPABASE DATABASE SCHEMA & GRANTS
 -- Run this in your Supabase Dashboard -> SQL Editor
 -- ==========================================================
+
+-- 0. GRANT ESSENTIAL SCHEMA USAGE & TABLE PRIVILEGES
+GRANT USAGE ON SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT ALL ON ALL ROUTINES IN SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, anon, authenticated, service_role;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO postgres, anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON ROUTINES TO postgres, anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO postgres, anon, authenticated, service_role;
 
 -- 1. PHONES / INVENTORY TABLE
 CREATE TABLE IF NOT EXISTS public.phones (
@@ -31,7 +41,7 @@ CREATE TABLE IF NOT EXISTS public.phones (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Ensure all columns exist if table was already created previously:
+-- Ensure all columns exist if table was previously created:
 ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS name TEXT;
 ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS tagline TEXT;
 ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'flagship';
@@ -78,26 +88,22 @@ CREATE TABLE IF NOT EXISTS public.trade_ins (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- GRANT PRIVILEGES ON SPECIFIC TABLES
+GRANT ALL ON TABLE public.phones TO postgres, anon, authenticated, service_role;
+GRANT ALL ON TABLE public.orders TO postgres, anon, authenticated, service_role;
+GRANT ALL ON TABLE public.trade_ins TO postgres, anon, authenticated, service_role;
+
 -- ENABLE ROW LEVEL SECURITY (RLS)
 ALTER TABLE public.phones ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.trade_ins ENABLE ROW LEVEL SECURITY;
 
 -- POLICIES:
-DROP POLICY IF EXISTS "Public can view phones" ON public.phones;
-CREATE POLICY "Public can view phones" ON public.phones FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow all on phones" ON public.phones;
+CREATE POLICY "Allow all on phones" ON public.phones FOR ALL USING (true) WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Allow manage phones" ON public.phones;
-CREATE POLICY "Allow manage phones" ON public.phones FOR ALL USING (true);
+DROP POLICY IF EXISTS "Allow all on orders" ON public.orders;
+CREATE POLICY "Allow all on orders" ON public.orders FOR ALL USING (true) WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Allow read orders" ON public.orders;
-CREATE POLICY "Allow read orders" ON public.orders FOR SELECT USING (true);
-
-DROP POLICY IF EXISTS "Allow create orders" ON public.orders;
-CREATE POLICY "Allow create orders" ON public.orders FOR INSERT WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Allow update orders" ON public.orders;
-CREATE POLICY "Allow update orders" ON public.orders FOR UPDATE USING (true);
-
-DROP POLICY IF EXISTS "Allow manage trade_ins" ON public.trade_ins;
-CREATE POLICY "Allow manage trade_ins" ON public.trade_ins FOR ALL USING (true);
+DROP POLICY IF EXISTS "Allow all on trade_ins" ON public.trade_ins;
+CREATE POLICY "Allow all on trade_ins" ON public.trade_ins FOR ALL USING (true) WITH CHECK (true);
