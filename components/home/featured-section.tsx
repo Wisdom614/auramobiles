@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Star, Heart, ShoppingBag, Check } from "lucide-react";
+import { Star, Heart, ShoppingBag, Check, ArrowRight } from "lucide-react";
 import { PHONES, Phone } from "@/lib/data/phones";
 import { formatCFA } from "@/lib/formatters";
 import { useWishlist } from "@/lib/store/wishlist-context";
@@ -24,63 +24,76 @@ function BestSellerCard({ phone }: BestSellerCardProps) {
     e.stopPropagation();
     addItem(phone, phone.storageVariants[0], phone.colorVariants[0], 1);
     setAdded(true);
-    setTimeout(() => setAdded(false), 1400);
+    setTimeout(() => setAdded(false), 1500);
   };
 
   return (
-    <div className="group rounded-2xl bg-[#121217] border border-white/8 hover:border-[#D4AF37]/50 p-3.5 sm:p-4 transition-all duration-200 hover:shadow-xl hover:shadow-black/60 flex flex-col justify-between shrink-0 w-[200px] sm:w-[220px] lg:w-auto h-full">
-      {/* Product Image Link */}
+    <div className="bg-[#0E0E12] border border-white/10 hover:border-[#D4AF37]/60 p-4 transition-all flex flex-col justify-between shrink-0 w-[220px] sm:w-[240px] lg:w-auto h-full relative group">
+      
+      {/* Top Telemetry */}
+      <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/5 font-mono text-[9px]">
+        <span className="text-[#D4AF37] uppercase tracking-wider font-semibold">
+          [ {phone.brand} ]
+        </span>
+        <span className="text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+          <span className="w-1.5 h-1.5 bg-emerald-400"></span>
+          SEALED
+        </span>
+      </div>
+
+      {/* Product Image Canvas */}
       <Link
         href={`/phones/${phone.slug}`}
-        className="w-full h-36 sm:h-40 rounded-xl bg-[#09090C] border border-white/5 p-3 flex items-center justify-center overflow-hidden block"
+        className="w-full h-40 sm:h-44 bg-black border border-white/10 p-3 flex items-center justify-center overflow-hidden block relative group"
       >
         <img
           src={activeImage}
           alt={phone.name}
-          className="h-full w-auto max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+          className="h-full w-auto max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
         />
       </Link>
 
       {/* Info */}
-      <div className="pt-3 pb-2 space-y-1">
-        <span className="text-[10px] uppercase font-mono tracking-wider text-[#D4AF37] block font-semibold">
-          {phone.brand}
-        </span>
-
+      <div className="pt-3 pb-3 space-y-1">
         <Link href={`/phones/${phone.slug}`}>
-          <h3 className="text-xs sm:text-sm font-bold text-white group-hover:text-amber-200 transition-colors truncate">
+          <h3 className="text-xs sm:text-sm font-bold text-white group-hover:text-[#D4AF37] transition-colors truncate uppercase font-sans">
             {phone.name}
           </h3>
         </Link>
+        <p className="text-[10px] font-mono text-zinc-500 truncate">
+          {phone.storageVariants[0]?.size} • {phone.warranty || "12M Warranty"}
+        </p>
 
-        {/* Price & In Stock */}
-        <div className="flex items-baseline justify-between pt-1">
-          <span className="text-xs sm:text-sm font-black text-white font-mono">
+        {/* Price */}
+        <div className="flex items-baseline justify-between pt-1 font-mono">
+          <span className="text-xs sm:text-sm font-black text-white">
             {formatCFA(phone.basePrice)}
           </span>
-          <span className="text-[10px] text-emerald-400 font-medium">In Stock</span>
+          <span className="text-[9px] text-zinc-500 uppercase tracking-wider">
+            STOCK READY
+          </span>
         </div>
       </div>
 
-      {/* Obvious Add to Cart Button */}
+      {/* Tactile Add to Bag Button */}
       <button
         onClick={handleQuickAdd}
-        aria-label={`Add ${phone.name} to cart`}
-        className={`w-full py-2 px-3 rounded-xl font-bold text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all min-h-[40px] cursor-pointer ${
+        aria-label={`Add ${phone.name} to bag`}
+        className={`w-full py-2.5 px-3 font-mono font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-1.5 transition-all min-h-[40px] cursor-pointer border ${
           added
-            ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/20"
-            : "gold-gradient-bg text-black hover:opacity-95 shadow-md shadow-amber-500/10 active:scale-[0.98]"
+            ? "bg-emerald-500 text-black border-emerald-500 font-bold"
+            : "gold-gradient-bg text-black border-transparent hover:opacity-95"
         }`}
       >
         {added ? (
           <>
             <Check className="w-3.5 h-3.5 stroke-[3]" />
-            <span>Added!</span>
+            <span>UNIT ADDED!</span>
           </>
         ) : (
           <>
-            <ShoppingBag className="w-3.5 h-3.5" />
-            <span>Add to Cart</span>
+            <ShoppingBag className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>ACQUIRE UNIT</span>
           </>
         )}
       </button>
@@ -92,7 +105,7 @@ export function FeaturedSection() {
   const [activeBrand, setActiveBrand] = useState<string>("all");
   const [phonesList, setPhonesList] = useState<Phone[]>(PHONES);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getPhonesFromDB().then((dbList) => {
       if (dbList && dbList.length > 0) {
         setPhonesList(dbList);
@@ -101,12 +114,12 @@ export function FeaturedSection() {
   }, []);
 
   const filterTabs = [
-    { label: "All", value: "all" },
-    { label: "Apple", value: "apple" },
-    { label: "Samsung", value: "samsung" },
-    { label: "Xiaomi", value: "xiaomi" },
-    { label: "Tecno", value: "tecno" },
-    { label: "Infinix", value: "infinix" },
+    { label: "ALL HARDWARE", value: "all" },
+    { label: "APPLE", value: "apple" },
+    { label: "SAMSUNG", value: "samsung" },
+    { label: "XIAOMI", value: "xiaomi" },
+    { label: "TECNO", value: "tecno" },
+    { label: "INFINIX", value: "infinix" },
   ];
 
   const filteredPhones =
@@ -121,30 +134,30 @@ export function FeaturedSection() {
       : phonesList.filter((p) => p.brand.toLowerCase() === activeBrand.toLowerCase()).slice(0, 5);
 
   return (
-    <section className="py-14 sm:py-16 bg-[#09090B] border-b border-white/5 relative">
+    <section className="py-14 sm:py-16 bg-[#09090B] border-b border-white/10 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header (Matching Reference Design) */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between pb-4 mb-6 border-b border-white/10 gap-4">
           <div>
-            <h2 className="text-xl sm:text-2xl font-black text-[#D4AF37] tracking-tight">
-              Best Sellers
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37] block">
+              [ CURATED SELECTION // HIGH VELOCITY HARDWARE ]
+            </span>
+            <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight font-sans mt-0.5">
+              Verified Flagship Best Sellers
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-              The most loved phones, chosen by thousands.
-            </p>
           </div>
 
-          {/* Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+          {/* Segmented Filter Switches (Teenage Engineering Style) */}
+          <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none font-mono">
             {filterTabs.map((tab) => (
               <button
                 key={tab.value}
                 onClick={() => setActiveBrand(tab.value)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition-all shrink-0 ${
+                className={`px-3 py-1.5 text-[10px] uppercase font-bold tracking-wider transition-all cursor-pointer border ${
                   activeBrand === tab.value
-                    ? "bg-[#D4AF37] text-black shadow-sm"
-                    : "text-zinc-400 hover:text-white bg-transparent"
+                    ? "bg-[#D4AF37] text-black border-[#D4AF37]"
+                    : "bg-[#121217] text-zinc-400 border-white/10 hover:text-white hover:border-white/30"
                 }`}
               >
                 {tab.label}
@@ -153,13 +166,22 @@ export function FeaturedSection() {
           </div>
         </div>
 
-        {/* 5 Cards Row: Mobile horizontal touch swipe track / Desktop 5-col grid */}
-        <div className="flex lg:grid lg:grid-cols-5 gap-3.5 sm:gap-4 overflow-x-auto pb-4 lg:pb-0 scrollbar-none snap-x snap-mandatory">
+        {/* Grid of Devices */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           {filteredPhones.map((phone) => (
-            <div key={phone.id} className="snap-start shrink-0">
-              <BestSellerCard phone={phone} />
-            </div>
+            <BestSellerCard key={phone.id} phone={phone} />
           ))}
+        </div>
+
+        {/* View full collection trigger */}
+        <div className="mt-8 text-center">
+          <Link
+            href="/phones"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#121217] hover:bg-[#181820] text-white border border-white/15 hover:border-[#D4AF37] text-xs font-mono font-bold uppercase tracking-widest transition"
+          >
+            <span>[ EXPLORE ENTIRE HARDWARE VAULT ]</span>
+            <ArrowRight className="w-3.5 h-3.5 text-[#D4AF37]" />
+          </Link>
         </div>
 
       </div>

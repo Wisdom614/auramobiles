@@ -24,75 +24,80 @@ const PILLARS: Pillar[] = [
     icon: Cpu,
     title: "65-Point Diagnostic Audit",
     subtitle: "Hardware & Biometrics Tested",
-    description: "Every unit undergoes stringent automated diagnostic checks: battery cycles, display touch sampling, Face ID/Fingerprint, cameras, and thermal curves.",
+    description: "Every device undergoes stringent automated checks: battery cycle telemetry, display sampling, Face ID/Fingerprint sensors, and optical stabilization.",
     metric: "100%",
     metricLabel: "Audit Passed",
   },
   {
     icon: Building2,
     title: "Local Flagship Showrooms",
-    subtitle: "Douala (Akwa) & Yaoundé (Bastos)",
-    description: "Visit our dedicated physical boutiques to test devices in person, transfer your contacts seamlessly, or get immediate hands-on technical guidance.",
+    subtitle: "Douala & Yaoundé Lounges",
+    description: "Visit our dedicated physical boutiques to test devices in person, transfer your data securely, or consult with our hardware technicians.",
     metric: "2",
-    metricLabel: "Showroom Locations",
+    metricLabel: "Central Lounges",
   },
   {
     icon: ShieldCheck,
-    title: "Authentic Serial & IMEI Verification",
-    subtitle: "Direct Brand Lineage",
-    description: "No grey-market clones or bypass devices. Verify your serial number live on the official Apple or Samsung coverage portal before completing purchase.",
+    title: "Official Serial & IMEI Lineage",
+    subtitle: "Zero Grey Market Risk",
+    description: "No bypasses or counterfeit clones. Live verification on official Apple and Samsung manufacturer portals before completing acquisition.",
     metric: "15k+",
-    metricLabel: "Verified Devices",
+    metricLabel: "Verified Releases",
   },
   {
     icon: UserCheck,
-    title: "VIP White-Glove Concierge",
-    subtitle: "Free Full Device Setup",
-    description: "Our technicians transfer your WhatsApp, banking apps, photos, and eSIM on the spot with zero downtime and guaranteed complete privacy.",
+    title: "VIP White-Glove Setup",
+    subtitle: "Complete Data Migration",
+    description: "Our concierge team migrates WhatsApp databases, banking applications, media libraries, and eSIMs with zero downtime and strict confidentiality.",
     metric: "4.9/5",
-    metricLabel: "Customer Satisfaction",
+    metricLabel: "Client Rating",
   },
 ];
 
 export function WhyChooseUs() {
   return (
-    <section className="py-20 bg-[#0B0B0E] border-b border-white/5 relative">
+    <section className="py-16 sm:py-20 bg-[#09090B] border-b border-white/10 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#D4AF37] font-semibold">
-            Uncompromising Standards
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37] block">
+            [ OPERATIONAL INTEGRITY // APEX QUALITY STANDARDS ]
           </span>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight mt-1.5">
-            Why Customers Choose AURA
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white uppercase tracking-tight font-sans mt-1">
+            Why Discerning Clients Choose AURA
           </h2>
-          <p className="text-zinc-400 text-sm mt-2 leading-relaxed">
-            We bridge international flagship technology and premier local reliability across Cameroon.
+          <p className="text-zinc-400 text-xs sm:text-sm mt-2 leading-relaxed">
+            Bridging international consumer electronics excellence with local Cameroon reliability and warranty security.
           </p>
         </div>
 
-        {/* 4 Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* 4-Pillar Architectural Table with 1px Grids */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border border-white/15 divide-y md:divide-y-0 md:divide-x divide-white/15 bg-[#0E0E12]">
           {PILLARS.map((pillar, idx) => {
             const Icon = pillar.icon;
             return (
               <div
                 key={idx}
-                className="rounded-2xl bg-[#121216] border border-white/8 hover:border-[#D4AF37]/40 p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/70 group"
+                className="p-6 flex flex-col justify-between hover:bg-[#121217] transition-colors relative group"
               >
                 <div>
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-[#D4AF37]/25 flex items-center justify-center group-hover:bg-[#D4AF37]/20 group-hover:border-[#D4AF37]/50 transition-colors">
-                      <Icon className="w-6 h-6 text-[#D4AF37]" />
-                    </div>
-                    <span className="text-xs font-mono text-zinc-400">0{idx + 1}</span>
+                  {/* Chamber index */}
+                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10 font-mono text-[10px]">
+                    <span className="text-[#D4AF37] uppercase tracking-wider">
+                      [ STANDARD 0{idx + 1} ]
+                    </span>
+                    <span className="text-zinc-600">VERIFIED</span>
                   </div>
 
-                  <h3 className="text-base font-bold text-white group-hover:text-amber-200 transition-colors">
+                  <div className="w-9 h-9 bg-black border border-white/15 flex items-center justify-center mb-4 group-hover:border-[#D4AF37] transition-colors">
+                    <Icon className="w-4 h-4 text-[#D4AF37]" />
+                  </div>
+
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wide font-sans">
                     {pillar.title}
                   </h3>
-                  <p className="text-xs text-[#D4AF37] font-mono mt-0.5 font-medium">
+                  <p className="text-[10px] text-[#D4AF37] font-mono mt-0.5 uppercase">
                     {pillar.subtitle}
                   </p>
 
@@ -102,11 +107,11 @@ export function WhyChooseUs() {
                 </div>
 
                 {/* Metric Bottom Box */}
-                <div className="mt-6 pt-4 border-t border-white/5 flex items-baseline justify-between">
-                  <span className="text-2xl font-black text-white group-hover:text-[#D4AF37] transition-colors">
+                <div className="mt-6 pt-4 border-t border-white/10 flex items-baseline justify-between font-mono">
+                  <span className="text-xl sm:text-2xl font-black text-white group-hover:text-[#D4AF37] transition-colors">
                     {pillar.metric}
                   </span>
-                  <span className="text-[10px] text-zinc-400 uppercase font-mono tracking-wider">
+                  <span className="text-[9px] text-zinc-500 uppercase tracking-wider">
                     {pillar.metricLabel}
                   </span>
                 </div>
