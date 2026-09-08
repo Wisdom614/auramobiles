@@ -672,6 +672,7 @@ export default function AdminDashboardPage() {
                                   alt={phone.name}
                                   width={48}
                                   height={48}
+                                  unoptimized
                                   className="object-contain max-h-full"
                                 />
                               </div>
@@ -963,6 +964,7 @@ export default function AdminDashboardPage() {
                       alt="Preview"
                       width={80}
                       height={80}
+                      unoptimized
                       className="object-contain max-h-full"
                     />
                   </div>
