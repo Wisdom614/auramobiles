@@ -75,6 +75,7 @@ function mapModelToDbPhone(phone: Phone): any {
     id: phone.id,
     slug: phone.slug,
     name: phone.name,
+    model: phone.name,
     brand: phone.brand,
     tagline: phone.tagline,
     category: phone.category,

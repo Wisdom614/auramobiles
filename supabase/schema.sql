@@ -42,6 +42,8 @@ CREATE TABLE IF NOT EXISTS public.phones (
 );
 
 -- Ensure all columns exist if table was previously created:
+ALTER TABLE public.phones ALTER COLUMN model DROP NOT NULL;
+ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS model TEXT;
 ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS name TEXT;
 ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS tagline TEXT;
 ALTER TABLE public.phones ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'flagship';
