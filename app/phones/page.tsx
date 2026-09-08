@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, Suspense } from "react";
+import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -17,6 +17,7 @@ import {
   Filter,
   Check,
   ArrowRight,
+  ChevronDown,
 } from "lucide-react";
 import { PHONES, Phone } from "@/lib/data/phones";
 import { BRANDS } from "@/lib/data/brands";
@@ -37,6 +38,14 @@ const STORAGE_OPTIONS = ["all", "128GB", "256GB", "512GB", "1TB"];
 
 const DEFAULT_MIN_PRICE = 50000;
 const DEFAULT_MAX_PRICE = 1000000;
+
+const PRICE_PRESETS = [
+  { id: "all", label: "Default (50K – 1M)", min: DEFAULT_MIN_PRICE, max: DEFAULT_MAX_PRICE },
+  { id: "under-300", label: "Under 300,000 FCFA", min: 50000, max: 300000 },
+  { id: "300-600", label: "300,000 – 600,000 FCFA", min: 300000, max: 600000 },
+  { id: "600-1m", label: "600,000 – 1,000,000 FCFA", min: 600000, max: 1000000 },
+  { id: "above-1m", label: "1,000,000+ FCFA (Ultra)", min: 1000000, max: 2500000 },
+];
 
 function PhonesCatalogContent() {
   const searchParams = useSearchParams();
@@ -59,8 +68,34 @@ function PhonesCatalogContent() {
   const [inputMin, setInputMin] = useState<string>("50000");
   const [inputMax, setInputMax] = useState<string>("1000000");
 
+  // Compact Price Dropdown state & ref
+  const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
+  const priceDropdownRef = useRef<HTMLDivElement>(null);
+
   const [searchQuery, setSearchQuery] = useState<string>(initialSearch);
   const [sortBy, setSortBy] = useState<"featured" | "price_asc" | "price_desc" | "rating">("featured");
+
+  // Close dropdown on outside click or ESC key
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (priceDropdownRef.current && !priceDropdownRef.current.contains(event.target as Node)) {
+        setIsPriceDropdownOpen(false);
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsPriceDropdownOpen(false);
+      }
+    }
+    if (isPriceDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isPriceDropdownOpen]);
 
   useEffect(() => {
     async function loadCatalog() {
@@ -102,9 +137,44 @@ function PhonesCatalogContent() {
     return counts;
   }, [phonesList]);
 
+  // Compute live preset matches
+  const presetCounts = useMemo(() => {
+    return PRICE_PRESETS.reduce((acc, preset) => {
+      acc[preset.id] = phonesList.filter((p) => {
+        const brandMatch = selectedBrand === "all" || p.brand.toLowerCase() === selectedBrand.toLowerCase();
+        const priceMatch = p.basePrice >= preset.min && p.basePrice <= preset.max;
+        return brandMatch && priceMatch;
+      }).length;
+      return acc;
+    }, {} as Record<string, number>);
+  }, [phonesList, selectedBrand]);
+
   // Count active non-default filters
   const isPriceFiltered =
-    minPrice > DEFAULT_MIN_PRICE || maxPrice < 2500000;
+    minPrice !== DEFAULT_MIN_PRICE || maxPrice !== DEFAULT_MAX_PRICE;
+
+  const priceButtonLabel = useMemo(() => {
+    if (!isPriceFiltered) return "50,000 – 1,000,000 FCFA";
+    if (minPrice === 50000 && maxPrice === 300000) return "Under 300K";
+    if (minPrice === 300000 && maxPrice === 600000) return "300K – 600K";
+    if (minPrice === 600000 && maxPrice === 1000000) return "600K – 1M";
+    if (minPrice === 1000000 && maxPrice >= 2500000) return "1M+ FCFA";
+    return `${(minPrice / 1000).toLocaleString()}K – ${(maxPrice / 1000).toLocaleString()}K`;
+  }, [isPriceFiltered, minPrice, maxPrice]);
+
+  const handleSelectPreset = (min: number, max: number) => {
+    setMinPrice(min);
+    setMaxPrice(max);
+    setInputMin(String(min));
+    setInputMax(String(max));
+  };
+
+  const handleResetPrice = () => {
+    setMinPrice(DEFAULT_MIN_PRICE);
+    setMaxPrice(DEFAULT_MAX_PRICE);
+    setInputMin("50000");
+    setInputMax("1000000");
+  };
 
   const activeFiltersCount = [
     selectedBrand !== "all",
@@ -134,12 +204,10 @@ function PhonesCatalogContent() {
     setSelectedCategory("all");
     setSelectedCondition("all");
     setSelectedStorage("all");
-    setMinPrice(DEFAULT_MIN_PRICE);
-    setMaxPrice(2500000);
-    setInputMin("50000");
-    setInputMax("2500000");
+    handleResetPrice();
     setSearchQuery("");
     setSortBy("featured");
+    setIsPriceDropdownOpen(false);
   };
 
   // Multi-dimensional filter logic
@@ -281,144 +349,220 @@ function PhonesCatalogContent() {
           })}
         </div>
 
-        {/* 3. PROMINENT FILTER CONTROL CENTER (CLEARLY VISIBLE BRAND & PRICE FILTERING) */}
-        <div className="bg-[#0E0E12] border border-white/10 p-4 sm:p-6 shadow-2xl relative rounded-none space-y-6">
+        {/* 3. PROMINENT FILTER CONTROL CENTER (BRAND SELECTION + COMPACT PRICE DROPDOWN) */}
+        <div className="bg-[#0E0E12] border border-white/10 p-4 sm:p-5 shadow-2xl relative rounded-none space-y-4">
           {/* Architectural corner crosshairs */}
           <span className="absolute -top-1 -left-1 text-[#D4AF37] font-mono text-[9px] select-none">+</span>
           <span className="absolute -top-1 -right-1 text-[#D4AF37] font-mono text-[9px] select-none">+</span>
           <span className="absolute -bottom-1 -left-1 text-[#D4AF37] font-mono text-[9px] select-none">+</span>
           <span className="absolute -bottom-1 -right-1 text-[#D4AF37] font-mono text-[9px] select-none">+</span>
 
-          {/* PART A: PROMINENT BRAND FILTERING */}
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between font-mono text-xs">
-              <span className="text-[10px] text-[#D4AF37] uppercase tracking-widest font-bold flex items-center gap-1.5">
-                <Filter className="w-3 h-3 text-[#D4AF37]" />
-                <span>FILTER BY BRAND</span>
+          {/* Control Bar: Brand Label + Compact Price Dropdown Button */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/10 font-mono text-xs">
+            <div className="flex items-center gap-2">
+              <Filter className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span className="text-[11px] text-white uppercase tracking-widest font-bold">
+                BROWSE BY BRAND
               </span>
-              <span className="text-[10px] text-zinc-500 uppercase">
-                [ {selectedBrand === "all" ? "SHOWING ALL BRANDS" : `SELECTED: ${selectedBrand.toUpperCase()}`} ]
+              <span className="text-zinc-600 hidden sm:inline">•</span>
+              <span className="text-[10px] text-zinc-400 uppercase hidden sm:inline">
+                {selectedBrand === "all" ? "ALL BRANDS" : selectedBrand.toUpperCase()}
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 no-scrollbar font-mono text-xs">
-              {/* All Brands Button */}
+            {/* COMPACT PRICE DROPDOWN FILTER BUTTON */}
+            <div className="relative" ref={priceDropdownRef}>
               <button
-                onClick={() => setSelectedBrand("all")}
-                className={`px-3.5 py-2 text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 rounded-none border cursor-pointer ${
-                  selectedBrand === "all"
-                    ? "bg-white text-black border-white shadow-sm"
-                    : "bg-[#121217] text-zinc-400 hover:text-white border-white/10 hover:border-white/20"
+                type="button"
+                onClick={() => setIsPriceDropdownOpen((prev) => !prev)}
+                className={`px-3 py-1.5 sm:py-2 text-xs font-mono font-bold flex items-center gap-2 border transition-all cursor-pointer rounded-none ${
+                  isPriceFiltered
+                    ? "bg-[#D4AF37]/15 border-[#D4AF37] text-[#D4AF37] shadow-sm shadow-amber-500/10"
+                    : "bg-[#141419] border-white/15 text-zinc-300 hover:text-white hover:border-white/30"
                 }`}
+                title="Click to filter by price range"
               >
-                <span>ALL BRANDS</span>
-                <span className={`text-[10px] px-1.5 py-0.2 ${selectedBrand === "all" ? "bg-black/10 text-black font-bold" : "bg-white/5 text-zinc-500"}`}>
-                  {phonesList.length}
+                <Tag className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <span className="uppercase">
+                  Price: <strong className={isPriceFiltered ? "text-white" : "text-[#D4AF37]"}>{priceButtonLabel}</strong>
                 </span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                    isPriceDropdownOpen ? "rotate-180 text-[#D4AF37]" : "text-zinc-400"
+                  }`}
+                />
               </button>
 
-              {/* Dynamic Brand Buttons with live count */}
-              {BRANDS.map((brand) => {
-                const isSelected = selectedBrand.toLowerCase() === brand.id.toLowerCase();
-                const count = brandCounts[brand.id.toLowerCase()] || 0;
-                return (
-                  <button
-                    key={brand.id}
-                    onClick={() => setSelectedBrand(brand.id)}
-                    className={`px-3 py-2 text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 rounded-none border cursor-pointer ${
-                      isSelected
-                        ? "bg-[#D4AF37]/15 border-[#D4AF37] text-[#D4AF37]"
-                        : "bg-[#121217] text-zinc-400 hover:text-white border-white/10 hover:border-white/20"
-                    }`}
-                  >
-                    <span className="uppercase">{brand.name}</span>
-                    <span className={`text-[10px] px-1 py-0.2 ${isSelected ? "bg-[#D4AF37] text-black font-black" : "bg-white/5 text-zinc-500"}`}>
-                      {count}
+              {/* FLOATING LUXURY DROPDOWN POPOVER */}
+              {isPriceDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-[340px] sm:w-[410px] max-w-[92vw] bg-[#0E0E12] border border-[#D4AF37]/60 shadow-2xl z-50 p-4 sm:p-5 text-white font-mono space-y-4 animate-in fade-in zoom-in-95 duration-150">
+                  {/* Viewfinder crosshairs */}
+                  <span className="absolute top-1 left-1 text-[8px] text-[#D4AF37] select-none">+</span>
+                  <span className="absolute top-1 right-1 text-[8px] text-[#D4AF37] select-none">+</span>
+                  <span className="absolute bottom-1 left-1 text-[8px] text-[#D4AF37] select-none">+</span>
+                  <span className="absolute bottom-1 right-1 text-[8px] text-[#D4AF37] select-none">+</span>
+
+                  {/* Popover Header */}
+                  <div className="flex items-center justify-between pb-2.5 border-b border-white/10">
+                    <div>
+                      <span className="text-[10px] text-[#D4AF37] uppercase tracking-wider block font-bold">
+                        [ PRICE RANGE FILTER ]
+                      </span>
+                      <span className="text-[11px] text-zinc-400">
+                        {formatCFA(minPrice)} – {maxPrice >= 2500000 ? "Any (2.5M+)" : formatCFA(maxPrice)}
+                      </span>
+                    </div>
+
+                    {isPriceFiltered && (
+                      <button
+                        type="button"
+                        onClick={handleResetPrice}
+                        className="text-[10px] text-zinc-400 hover:text-white hover:underline uppercase transition cursor-pointer"
+                      >
+                        [ Reset ]
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Fast Selection Brackets */}
+                  <div className="space-y-1.5">
+                    <span className="text-[9px] text-zinc-500 uppercase tracking-widest block">
+                      CURATED PRICE BRACKETS:
                     </span>
-                  </button>
-                );
-              })}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      {PRICE_PRESETS.map((preset) => {
+                        const isActive = minPrice === preset.min && maxPrice === preset.max;
+                        const count = presetCounts[preset.id] || 0;
+                        return (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            onClick={() => handleSelectPreset(preset.min, preset.max)}
+                            className={`px-2.5 py-2 text-left text-xs border transition-colors flex items-center justify-between cursor-pointer rounded-none ${
+                              isActive
+                                ? "bg-[#D4AF37]/20 border-[#D4AF37] text-white font-bold"
+                                : "bg-black/60 border-white/10 text-zinc-400 hover:text-white hover:border-white/20"
+                            }`}
+                          >
+                            <span className="truncate text-[11px]">{preset.label}</span>
+                            <span
+                              className={`text-[10px] px-1.5 py-0.2 shrink-0 ${
+                                isActive ? "bg-[#D4AF37] text-black font-bold" : "bg-white/5 text-zinc-500"
+                              }`}
+                            >
+                              {count}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Custom Range Form */}
+                  <div className="pt-3 border-t border-white/10 space-y-2">
+                    <span className="text-[9px] text-zinc-500 uppercase tracking-widest block">
+                      OR ENTER CUSTOM RANGE (FCFA):
+                    </span>
+                    <form onSubmit={(e) => { handleApplyCustomPrice(e); setIsPriceDropdownOpen(false); }} className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <div className="relative flex-1">
+                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[9px] text-zinc-500 font-bold uppercase pointer-events-none">
+                            MIN
+                          </span>
+                          <input
+                            type="number"
+                            min={0}
+                            step={10000}
+                            value={inputMin}
+                            onChange={(e) => setInputMin(e.target.value)}
+                            placeholder="50000"
+                            className="w-full bg-black border border-white/20 pl-10 pr-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#D4AF37] rounded-none font-mono"
+                          />
+                        </div>
+
+                        <span className="text-zinc-500 select-none font-bold">—</span>
+
+                        <div className="relative flex-1">
+                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[9px] text-zinc-500 font-bold uppercase pointer-events-none">
+                            MAX
+                          </span>
+                          <input
+                            type="number"
+                            min={0}
+                            step={25000}
+                            value={inputMax}
+                            onChange={(e) => setInputMax(e.target.value)}
+                            placeholder="1000000"
+                            className="w-full bg-black border border-white/20 pl-10 pr-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#D4AF37] rounded-none font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 pt-1">
+                        <span className="text-[10px] text-zinc-400">
+                          {filteredPhones.length} matching units
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="submit"
+                            className="px-3.5 py-1.5 gold-gradient-bg text-black font-extrabold text-[11px] uppercase tracking-wider hover:opacity-95 transition cursor-pointer"
+                          >
+                            Apply
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsPriceDropdownOpen(false)}
+                            className="px-3 py-1.5 bg-white/5 border border-white/15 hover:border-white/30 text-white text-[11px] uppercase transition cursor-pointer"
+                          >
+                            Done
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* PART B: PROMINENT PRICE FILTERING (50,000 FCFA TO 1,000,000 FCFA + CUSTOM RANGE INPUTS) */}
-          {/* PART B: SIMPLE, PROMINENT PRICE RANGE FILTER (50,000 – 1,000,000 FCFA) */}
-          <div className="pt-4 border-t border-white/10 space-y-2.5 font-mono text-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-              <span className="text-[10px] text-[#D4AF37] uppercase tracking-widest font-bold flex items-center gap-1.5">
-                <Tag className="w-3 h-3 text-[#D4AF37]" />
-                <span>PRICE FILTER (50,000 FCFA – 1,000,000 FCFA)</span>
+          {/* Brand Buttons Row */}
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 no-scrollbar font-mono text-xs">
+            {/* All Brands Button */}
+            <button
+              onClick={() => setSelectedBrand("all")}
+              className={`px-3.5 py-2 text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 rounded-none border cursor-pointer ${
+                selectedBrand === "all"
+                  ? "bg-white text-black border-white shadow-sm"
+                  : "bg-[#121217] text-zinc-400 hover:text-white border-white/10 hover:border-white/20"
+              }`}
+            >
+              <span>ALL BRANDS</span>
+              <span className={`text-[10px] px-1.5 py-0.2 ${selectedBrand === "all" ? "bg-black/10 text-black font-bold" : "bg-white/5 text-zinc-500"}`}>
+                {phonesList.length}
               </span>
-              <span className="text-[11px] text-zinc-400">
-                ACTIVE RANGE: <strong className="text-white">{formatCFA(minPrice)}</strong> – <strong className="text-white">{maxPrice >= 2500000 ? "Any (2.5M+)" : formatCFA(maxPrice)}</strong>
-              </span>
-            </div>
+            </button>
 
-            {/* Clean Custom Range Input Row */}
-            <form onSubmit={handleApplyCustomPrice} className="flex flex-wrap sm:flex-nowrap items-center gap-2">
-              <div className="flex items-center gap-2 flex-1 min-w-[240px]">
-                <div className="relative flex-1">
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[9px] text-zinc-500 font-bold uppercase pointer-events-none">
-                    MIN
-                  </span>
-                  <input
-                    type="number"
-                    min={0}
-                    step={10000}
-                    value={inputMin}
-                    onChange={(e) => setInputMin(e.target.value)}
-                    placeholder="50000"
-                    className="w-full bg-[#121217] border border-white/15 pl-11 pr-12 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-[#D4AF37] rounded-none font-mono"
-                  />
-                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-zinc-500 pointer-events-none">
-                    FCFA
-                  </span>
-                </div>
-
-                <span className="text-zinc-500 font-bold select-none">—</span>
-
-                <div className="relative flex-1">
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[9px] text-zinc-500 font-bold uppercase pointer-events-none">
-                    MAX
-                  </span>
-                  <input
-                    type="number"
-                    min={0}
-                    step={25000}
-                    value={inputMax}
-                    onChange={(e) => setInputMax(e.target.value)}
-                    placeholder="1000000"
-                    className="w-full bg-[#121217] border border-white/15 pl-11 pr-12 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-[#D4AF37] rounded-none font-mono"
-                  />
-                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-zinc-500 pointer-events-none">
-                    FCFA
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="py-2 px-4 gold-gradient-bg text-black font-mono font-extrabold text-xs uppercase tracking-wider hover:opacity-95 transition-all rounded-none cursor-pointer h-[38px] shrink-0"
-              >
-                Apply Range
-              </button>
-
-              {(minPrice !== DEFAULT_MIN_PRICE || maxPrice !== DEFAULT_MAX_PRICE) && (
+            {/* Dynamic Brand Buttons with live count */}
+            {BRANDS.map((brand) => {
+              const isSelected = selectedBrand.toLowerCase() === brand.id.toLowerCase();
+              const count = brandCounts[brand.id.toLowerCase()] || 0;
+              return (
                 <button
-                  type="button"
-                  onClick={() => {
-                    setMinPrice(DEFAULT_MIN_PRICE);
-                    setMaxPrice(DEFAULT_MAX_PRICE);
-                    setInputMin("50000");
-                    setInputMax("1000000");
-                  }}
-                  className="py-2 px-3 bg-white/5 border border-white/10 hover:border-white/20 text-zinc-300 hover:text-white text-xs uppercase font-mono transition-all rounded-none cursor-pointer h-[38px] shrink-0"
-                  title="Reset to 50,000 - 1,000,000 FCFA"
+                  key={brand.id}
+                  onClick={() => setSelectedBrand(brand.id)}
+                  className={`px-3 py-2 text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 rounded-none border cursor-pointer ${
+                    isSelected
+                      ? "bg-[#D4AF37]/15 border-[#D4AF37] text-[#D4AF37]"
+                      : "bg-[#121217] text-zinc-400 hover:text-white border-white/10 hover:border-white/20"
+                  }`}
                 >
-                  Reset Price
+                  <span className="uppercase">{brand.name}</span>
+                  <span className={`text-[10px] px-1 py-0.2 ${isSelected ? "bg-[#D4AF37] text-black font-black" : "bg-white/5 text-zinc-500"}`}>
+                    {count}
+                  </span>
                 </button>
-              )}
-            </form>
+              );
+            })}
           </div>
 
           {/* PART C: REFINEMENTS (STORAGE, CONDITION & SORT) */}
