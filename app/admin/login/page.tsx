@@ -13,8 +13,8 @@ import {
   Eye,
   EyeOff,
   Store,
-  Sparkles,
   KeyRound,
+  Terminal,
 } from "lucide-react";
 import { supabase, isAuthorizedAdmin, SUPER_ADMIN_EMAIL } from "@/lib/supabase/client";
 
@@ -59,7 +59,6 @@ export default function AdminLoginPage() {
 
     try {
       const cleanEmail = email.trim().toLowerCase();
-      // Verify authorization before or with sign in
       const authorized = await isAuthorizedAdmin(cleanEmail);
       if (!authorized) {
         setErrorMessage("Access Denied: This email does not have boutique administrator privileges.");
@@ -177,58 +176,67 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-white flex flex-col justify-between p-4 sm:p-8">
+    <div className="min-h-screen bg-[#09090B] text-white flex flex-col justify-between p-4 sm:p-8 font-sans">
+      
       {/* Top Header */}
-      <div className="max-w-6xl w-full mx-auto flex items-center justify-between">
+      <div className="max-w-6xl w-full mx-auto flex items-center justify-between pb-4 border-b border-white/10">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-[#17171F] border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] font-bold text-lg group-hover:border-[#D4AF37] transition">
+          <div className="w-9 h-9 bg-black border border-[#D4AF37] flex items-center justify-center text-[#D4AF37] font-bold text-base font-mono">
             A
           </div>
           <div>
-            <div className="text-sm font-bold tracking-widest text-white uppercase">AURA LUXE</div>
-            <div className="text-[10px] text-[#D4AF37] font-mono tracking-widest">MOBILE BOUTIQUE</div>
+            <div className="text-xs font-black tracking-widest text-white uppercase font-mono">AURA LUXE</div>
+            <div className="text-[9px] text-[#D4AF37] font-mono tracking-widest">VAULT ADMINISTRATION</div>
           </div>
         </Link>
 
         <Link
           href="/"
-          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 text-xs font-medium transition"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#121217] hover:bg-[#181820] text-zinc-300 hover:text-white border border-white/10 text-xs font-mono transition"
         >
           <Store className="w-3.5 h-3.5 text-[#D4AF37]" />
-          <span>Client Storefront</span>
+          <span>[ CLIENT STOREFRONT ]</span>
         </Link>
       </div>
 
-      {/* Center Auth Card */}
-      <div className="max-w-md w-full mx-auto my-12 bg-[#121217] border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-        {/* Glow accent */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-[#D4AF37]/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Center Auth Terminal Card */}
+      <div className="max-w-md w-full mx-auto my-10 bg-[#0E0E12] border border-white/15 p-6 sm:p-8 relative">
+        {/* Viewfinder crosshairs */}
+        <span className="absolute top-2 left-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
+        <span className="absolute top-2 right-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
+        <span className="absolute bottom-2 left-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
+        <span className="absolute bottom-2 right-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
 
         <div className="text-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-[#17171F] border border-[#D4AF37]/40 text-[#D4AF37] flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#D4AF37]/10">
-            <Lock className="w-7 h-7" />
+          <div className="w-12 h-12 bg-black border border-[#D4AF37]/50 text-[#D4AF37] flex items-center justify-center mx-auto mb-3">
+            <Lock className="w-6 h-6" />
           </div>
-          <h1 className="text-xl font-bold tracking-wide text-white">Boutique Administration</h1>
-          <p className="text-xs text-white/50 mt-1">
-            Restricted access for certified AURA Luxe operations personnel
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37] block">
+            [ SYSTEM // VAULT SECURITY TERMINAL ]
+          </span>
+          <h1 className="text-lg font-bold tracking-tight text-white uppercase font-sans mt-0.5">
+            Boutique Operations Access
+          </h1>
+          <p className="text-[11px] text-zinc-400 mt-1 font-mono">
+            Restricted to certified AURA administrative personnel
           </p>
         </div>
 
-        {/* Mode Tabs */}
-        <div className="grid grid-cols-2 gap-1 p-1 bg-black/40 border border-white/10 rounded-xl mb-6 text-xs font-semibold">
+        {/* Mode Switches (Teenage Engineering Hardware Style) */}
+        <div className="grid grid-cols-2 gap-1 p-1 bg-black border border-white/15 mb-6 text-xs font-mono">
           <button
             type="button"
             onClick={() => {
               setMode("signin");
               setErrorMessage(null);
             }}
-            className={`py-2 rounded-lg transition ${
+            className={`py-2 transition cursor-pointer font-bold tracking-wider ${
               mode === "signin"
-                ? "bg-[#D4AF37] text-black shadow font-bold"
-                : "text-white/60 hover:text-white"
+                ? "bg-[#D4AF37] text-black"
+                : "text-zinc-400 hover:text-white"
             }`}
           >
-            Sign In
+            [ SIGN IN ]
           </button>
           <button
             type="button"
@@ -236,26 +244,26 @@ export default function AdminLoginPage() {
               setMode("setup");
               setErrorMessage(null);
             }}
-            className={`py-2 rounded-lg transition ${
+            className={`py-2 transition cursor-pointer font-bold tracking-wider ${
               mode === "setup"
-                ? "bg-[#D4AF37] text-black shadow font-bold"
-                : "text-white/60 hover:text-white"
+                ? "bg-[#D4AF37] text-black"
+                : "text-zinc-400 hover:text-white"
             }`}
           >
-            First-Time Setup
+            [ FIRST SETUP ]
           </button>
         </div>
 
         {/* Alerts */}
         {errorMessage && (
-          <div className="mb-5 p-3.5 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs flex items-start gap-2.5 animate-fade-in">
+          <div className="mb-5 p-3.5 bg-red-950/60 border border-red-500/40 text-red-200 text-xs flex items-start gap-2.5 font-mono">
             <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="mb-5 p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 text-xs flex items-start gap-2.5 animate-fade-in">
+          <div className="mb-5 p-3.5 bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 text-xs flex items-start gap-2.5 font-mono">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
             <span>{successMessage}</span>
           </div>
@@ -265,45 +273,47 @@ export default function AdminLoginPage() {
         {mode === "signin" ? (
           <form onSubmit={handleSignIn} className="space-y-4">
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold text-white/80">Admin Email</label>
+              <div className="flex items-center justify-between mb-1.5 font-mono text-[11px]">
+                <label className="text-zinc-300 uppercase tracking-wider">Admin Email</label>
                 <button
                   type="button"
                   onClick={autofillSuperAdmin}
-                  className="text-[11px] text-[#D4AF37] hover:underline"
+                  className="text-[#D4AF37] hover:underline"
                 >
-                  Use Super Admin Email
+                  [ Fill Super Admin ]
                 </button>
               </div>
               <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
                 <input
                   type="email"
                   required
                   placeholder="name@auramobiles.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#17171F] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full bg-black border border-white/15 pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#D4AF37] font-mono transition"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-white/80 mb-1.5">Security Password</label>
+              <label className="block text-[11px] font-mono uppercase tracking-wider text-zinc-300 mb-1.5">
+                Security Passcode
+              </label>
               <div className="relative">
-                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
                 <input
                   type={showPassword ? "text" : "password"}
                   required
                   placeholder="••••••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#17171F] border border-white/10 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full bg-black border border-white/15 pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#D4AF37] font-mono transition"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -313,13 +323,13 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#B38F26] text-black font-bold text-sm hover:brightness-110 transition shadow-lg flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
+              className="w-full py-3.5 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-widest hover:opacity-95 transition flex items-center justify-center gap-2 mt-2 disabled:opacity-50 cursor-pointer"
             >
               {isLoading ? (
-                <span>Authenticating...</span>
+                <span className="font-mono">AUTHENTICATING TELEMETRY...</span>
               ) : (
                 <>
-                  <span>Access Dashboard</span>
+                  <span>AUTHENTICATE CREDENTIALS</span>
                   <ArrowRight className="w-4 h-4 stroke-[2.5]" />
                 </>
               )}
@@ -329,66 +339,72 @@ export default function AdminLoginPage() {
           /* FIRST TIME SETUP FORM */
           <form onSubmit={handleSetup} className="space-y-4">
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold text-white/80">Authorized Admin Email</label>
+              <div className="flex items-center justify-between mb-1.5 font-mono text-[11px]">
+                <label className="text-zinc-300 uppercase tracking-wider">Authorized Email</label>
                 <button
                   type="button"
                   onClick={autofillSuperAdmin}
-                  className="text-[11px] text-[#D4AF37] hover:underline"
+                  className="text-[#D4AF37] hover:underline"
                 >
-                  Use Super Admin Email
+                  [ Fill Super Admin ]
                 </button>
               </div>
               <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
                 <input
                   type="email"
                   required
                   placeholder={SUPER_ADMIN_EMAIL}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#17171F] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full bg-black border border-white/15 pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#D4AF37] font-mono transition"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-white/80 mb-1.5">Your Full Name</label>
+              <label className="block text-[11px] font-mono uppercase tracking-wider text-zinc-300 mb-1.5">
+                Full Legal Name
+              </label>
               <input
                 type="text"
                 placeholder="Wisdom Besong"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#D4AF37]"
+                className="w-full bg-black border border-white/15 px-3.5 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#D4AF37] transition font-sans"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-white/80 mb-1.5">Create Secure Password</label>
+              <label className="block text-[11px] font-mono uppercase tracking-wider text-zinc-300 mb-1.5">
+                Create Secure Password
+              </label>
               <div className="relative">
-                <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+                <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
                 <input
                   type={showPassword ? "text" : "password"}
                   required
                   placeholder="At least 6 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#17171F] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full bg-black border border-white/15 pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#D4AF37] font-mono transition"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-white/80 mb-1.5">Confirm Password</label>
+              <label className="block text-[11px] font-mono uppercase tracking-wider text-zinc-300 mb-1.5">
+                Confirm Password
+              </label>
               <div className="relative">
-                <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+                <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
                 <input
                   type={showPassword ? "text" : "password"}
                   required
                   placeholder="Repeat password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-[#17171F] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full bg-black border border-white/15 pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#D4AF37] font-mono transition"
                 />
               </div>
             </div>
@@ -396,14 +412,14 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 rounded-xl bg-[#D4AF37] text-black font-bold text-sm hover:bg-[#F3E5AB] transition shadow-lg flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
+              className="w-full py-3.5 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-widest hover:opacity-95 transition flex items-center justify-center gap-2 mt-2 disabled:opacity-50 cursor-pointer"
             >
               {isLoading ? (
-                <span>Registering credentials...</span>
+                <span className="font-mono">ACTIVATING CREDENTIALS...</span>
               ) : (
                 <>
                   <ShieldCheck className="w-4 h-4" />
-                  <span>Set Password & Activate</span>
+                  <span>SET PASSCODE & ACTIVATE</span>
                 </>
               )}
             </button>
@@ -411,15 +427,15 @@ export default function AdminLoginPage() {
         )}
 
         {/* Security Notice */}
-        <div className="mt-6 pt-5 border-t border-white/5 text-[11px] text-white/40 text-center flex items-center justify-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-[#D4AF37]" />
-          <span>Protected by Supabase Auth & Multi-Admin RBAC</span>
+        <div className="mt-6 pt-4 border-t border-white/10 text-[10px] font-mono text-zinc-500 text-center flex items-center justify-center gap-2">
+          <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
+          <span>[ PROTECTED BY SUPABASE AUTH & RBAC SECURITY ]</span>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="max-w-md mx-auto text-center text-xs text-white/30">
-        © {new Date().getFullYear()} AURA Luxe Mobile Boutique Ltd. All administrative activities are logged.
+      <div className="max-w-md mx-auto text-center text-[10px] font-mono text-zinc-600 uppercase tracking-wider">
+        © {new Date().getFullYear()} AURA LUXE MOBILE • ALL ADMIN ACTIONS TELEMETERED
       </div>
     </div>
   );

@@ -818,81 +818,85 @@ export default function AdminDashboardPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-white">
+    <div className="min-h-screen bg-[#070709] text-white">
       {/* Toast Notification */}
       {statusMessage && (
         <div
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl border shadow-2xl backdrop-blur-md animate-fade-in ${
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-none border shadow-2xl backdrop-blur-md animate-fade-in font-mono text-xs ${
             statusMessage.type === "success"
-              ? "bg-[#121217]/95 border-[#D4AF37]/50 text-[#F3E5AB]"
+              ? "bg-[#0A0A0D]/95 border-[#D4AF37]/60 text-[#F3E5AB]"
               : statusMessage.type === "error"
               ? "bg-red-950/95 border-red-500/50 text-red-200"
               : "bg-blue-950/95 border-blue-500/50 text-blue-200"
           }`}
         >
-          {statusMessage.type === "success" && <CheckCircle2 className="w-5 h-5 text-[#D4AF37]" />}
-          {statusMessage.type === "error" && <AlertCircle className="w-5 h-5 text-red-400" />}
-          {statusMessage.type === "info" && <RefreshCw className="w-5 h-5 text-blue-400 animate-spin" />}
-          <span className="text-sm font-medium">{statusMessage.text}</span>
+          {statusMessage.type === "success" && <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" />}
+          {statusMessage.type === "error" && <AlertCircle className="w-4 h-4 text-red-400" />}
+          {statusMessage.type === "info" && <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />}
+          <span className="font-medium tracking-wide uppercase">{statusMessage.text}</span>
         </div>
       )}
 
       {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-[#0D0D12]/90 backdrop-blur-md border-b border-white/10 px-6 py-4">
+      <header className="sticky top-0 z-40 bg-[#09090B]/95 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 py-3.5">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-[#17171F] border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] font-bold text-lg">
+          <div className="flex items-center gap-3.5">
+            <div className="w-9 h-9 rounded-none bg-black border border-[#D4AF37]/50 flex items-center justify-center text-[#D4AF37] font-mono font-bold text-sm tracking-wider shadow-inner">
               A
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-base font-semibold tracking-wide text-white">
-                  AURA LUXE BOUTIQUE
+                <h1 className="text-sm font-mono font-bold tracking-wider text-white uppercase">
+                  AURA LUXE OPERATIONS
                 </h1>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 uppercase">
-                  {isSuperAdmin ? "Super Admin" : "Admin"}
+                <span className="px-2 py-0.5 rounded-none text-[9px] font-mono font-bold bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 uppercase tracking-widest">
+                  [ {isSuperAdmin ? "SUPER ADMIN" : "OPERATOR"} ]
                 </span>
               </div>
-              <p className="text-xs text-white/50">Central Africa Luxury Smartphone Operations</p>
+              <p className="text-[11px] font-mono text-white/40 tracking-wider">
+                CENTRAL AFRICA LUXURY SMARTPHONE OPERATIONS // TERMINAL v2.4
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             {/* Supabase Connection Status Indicator */}
             <div
-              className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border ${
+              className={`hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-none text-[11px] font-mono border ${
                 isSupabaseConnected
                   ? "bg-emerald-950/40 border-emerald-500/30 text-emerald-400"
                   : "bg-amber-950/40 border-amber-500/30 text-amber-300"
               }`}
             >
-              <Database className="w-3.5 h-3.5" />
-              <span>{isSupabaseConnected ? "Supabase Connected" : "Local Mock Storage"}</span>
+              <Database className="w-3 h-3" />
+              <span className="uppercase tracking-wider">
+                {isSupabaseConnected ? "SUPABASE LIVE" : "LOCAL MOCK"}
+              </span>
             </div>
 
             {/* Current Admin User Badge */}
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#17171F] border border-white/10 text-xs">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-none bg-black/60 border border-white/10 text-xs font-mono">
               <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span className="text-white/80 font-medium truncate max-w-[160px]">
+              <span className="text-white/70 truncate max-w-[170px]">
                 {currentUserEmail}
               </span>
             </div>
 
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/30 text-xs font-semibold transition"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-red-950/30 hover:bg-red-900/50 text-red-300 border border-red-500/30 font-mono text-xs uppercase tracking-wider transition"
               title="Sign Out of Admin"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Sign Out</span>
+              <span className="hidden sm:inline">SIGN OUT</span>
             </button>
 
             <Link
               href="/"
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 hover:text-white border border-white/10 text-xs font-medium transition"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-white/5 hover:bg-white/10 text-white/80 hover:text-white border border-white/10 font-mono text-xs uppercase tracking-wider transition"
             >
               <Store className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span className="hidden sm:inline">Storefront</span>
+              <span className="hidden sm:inline">STOREFRONT</span>
             </Link>
           </div>
         </div>
@@ -905,55 +909,55 @@ export default function AdminDashboardPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveTab("overview")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-none font-mono text-xs uppercase tracking-wider border transition ${
                 activeTab === "overview"
-                  ? "bg-[#D4AF37] text-black font-semibold shadow-lg shadow-[#D4AF37]/10"
-                  : "text-white/70 hover:text-white hover:bg-white/5"
+                  ? "bg-[#D4AF37] text-black font-bold border-[#D4AF37]"
+                  : "bg-black/40 text-white/60 hover:text-white border-white/10 hover:border-white/25"
               }`}
             >
-              <LayoutDashboard className="w-4 h-4" />
-              <span>Dashboard</span>
+              <LayoutDashboard className="w-3.5 h-3.5" />
+              <span>[ 01 // DASHBOARD ]</span>
             </button>
 
             <button
               onClick={() => setActiveTab("inventory")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-none font-mono text-xs uppercase tracking-wider border transition ${
                 activeTab === "inventory"
-                  ? "bg-[#D4AF37] text-black font-semibold shadow-lg shadow-[#D4AF37]/10"
-                  : "text-white/70 hover:text-white hover:bg-white/5"
+                  ? "bg-[#D4AF37] text-black font-bold border-[#D4AF37]"
+                  : "bg-black/40 text-white/60 hover:text-white border-white/10 hover:border-white/25"
               }`}
             >
-              <Smartphone className="w-4 h-4" />
-              <span>Inventory ({phones.length})</span>
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>[ 02 // INVENTORY ({phones.length}) ]</span>
             </button>
 
             <button
               onClick={() => setActiveTab("orders")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition relative ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-none font-mono text-xs uppercase tracking-wider border transition relative ${
                 activeTab === "orders"
-                  ? "bg-[#D4AF37] text-black font-semibold shadow-lg shadow-[#D4AF37]/10"
-                  : "text-white/70 hover:text-white hover:bg-white/5"
+                  ? "bg-[#D4AF37] text-black font-bold border-[#D4AF37]"
+                  : "bg-black/40 text-white/60 hover:text-white border-white/10 hover:border-white/25"
               }`}
             >
-              <ShoppingBag className="w-4 h-4" />
-              <span>Orders ({orders.length})</span>
+              <ShoppingBag className="w-3.5 h-3.5" />
+              <span>[ 03 // ORDERS ({orders.length}) ]</span>
               {pendingOrdersCount > 0 && (
-                <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span className="w-2 h-2 rounded-none bg-amber-400"></span>
               )}
             </button>
 
             <button
               onClick={() => setActiveTab("trade-ins")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-none font-mono text-xs uppercase tracking-wider border transition ${
                 activeTab === "trade-ins"
-                  ? "bg-[#D4AF37] text-black font-semibold shadow-lg shadow-[#D4AF37]/10"
-                  : "text-white/70 hover:text-white hover:bg-white/5"
+                  ? "bg-[#D4AF37] text-black font-bold border-[#D4AF37]"
+                  : "bg-black/40 text-white/60 hover:text-white border-white/10 hover:border-white/25"
               }`}
             >
-              <RefreshCw className="w-4 h-4" />
-              <span>Trade-Ins ({tradeIns.length})</span>
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>[ 04 // TRADE-INS ({tradeIns.length}) ]</span>
               {pendingTradeInsCount > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full bg-[#D4AF37] text-black text-[10px] font-bold">
+                <span className="px-1.5 py-0.2 rounded-none bg-[#D4AF37] text-black text-[9px] font-bold">
                   {pendingTradeInsCount}
                 </span>
               )}
@@ -961,36 +965,36 @@ export default function AdminDashboardPage() {
 
             <button
               onClick={() => setActiveTab("site-settings")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-none font-mono text-xs uppercase tracking-wider border transition ${
                 activeTab === "site-settings"
-                  ? "bg-[#D4AF37] text-black font-semibold shadow-lg shadow-[#D4AF37]/10"
-                  : "text-white/70 hover:text-white hover:bg-white/5"
+                  ? "bg-[#D4AF37] text-black font-bold border-[#D4AF37]"
+                  : "bg-black/40 text-white/60 hover:text-white border-white/10 hover:border-white/25"
               }`}
             >
-              <SlidersHorizontal className="w-4 h-4" />
-              <span>Site Settings</span>
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>[ 05 // SITE CONFIG ]</span>
             </button>
 
             <button
               onClick={() => setActiveTab("settings")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-none font-mono text-xs uppercase tracking-wider border transition ${
                 activeTab === "settings"
-                  ? "bg-[#D4AF37] text-black font-semibold shadow-lg shadow-[#D4AF37]/10"
-                  : "text-white/70 hover:text-white hover:bg-white/5"
+                  ? "bg-[#D4AF37] text-black font-bold border-[#D4AF37]"
+                  : "bg-black/40 text-white/60 hover:text-white border-white/10 hover:border-white/25"
               }`}
             >
-              <Users className="w-4 h-4" />
-              <span>Team & Security</span>
+              <Users className="w-3.5 h-3.5" />
+              <span>[ 06 // ACCESS CONTROL ]</span>
             </button>
           </div>
 
           {activeTab === "inventory" && (
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#B38F26] text-black font-semibold text-sm hover:brightness-110 transition shadow-lg shrink-0"
+              className="flex items-center gap-2 px-4 py-2 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-wider border border-[#D4AF37] transition shadow-lg shrink-0"
             >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Add New Phone</span>
+              <Plus className="w-3.5 h-3.5 stroke-[3]" />
+              <span>+ ADD NEW PHONE</span>
             </button>
           )}
         </div>
@@ -998,116 +1002,150 @@ export default function AdminDashboardPage() {
         {/* TAB 1: OVERVIEW METRICS */}
         {activeTab === "overview" && (
           <div className="space-y-8 animate-fade-in">
-            {/* 4 Stat Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-[#121217] border border-white/10 rounded-2xl p-5">
-                <div className="flex items-center justify-between text-white/50 mb-3">
-                  <span className="text-xs uppercase tracking-wider font-semibold">Total Revenue</span>
-                  <DollarSign className="w-5 h-5 text-[#D4AF37]" />
+            {/* Continuous 4-Bay Architectural Ledger */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border border-white/10 bg-black divide-y sm:divide-y-0 sm:divide-x divide-white/10">
+              {/* Bay 1: Revenue */}
+              <div className="relative p-6 bg-[#0B0B0E] hover:bg-[#0E0E12] transition">
+                <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+                <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+                <div className="flex items-center justify-between text-white/40 mb-3">
+                  <span className="font-mono text-[10px] uppercase tracking-widest">BAY 01 // TOTAL REVENUE</span>
+                  <DollarSign className="w-4 h-4 text-[#D4AF37]" />
                 </div>
-                <div className="text-2xl font-bold text-white mb-1">
+                <div className="text-2xl font-mono font-light text-white mb-1 tracking-tight">
                   {formatCFA(totalRevenueFCFA)}
                 </div>
-                <div className="text-xs text-emerald-400 flex items-center gap-1">
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  <span>Real orders placed</span>
+                <div className="text-[11px] font-mono text-emerald-400 flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3" />
+                  <span>Real orders fulfilled & placed</span>
                 </div>
               </div>
 
-              <div className="bg-[#121217] border border-white/10 rounded-2xl p-5">
-                <div className="flex items-center justify-between text-white/50 mb-3">
-                  <span className="text-xs uppercase tracking-wider font-semibold">Pending Fulfillment</span>
-                  <ShoppingBag className="w-5 h-5 text-amber-400" />
+              {/* Bay 2: Pending Orders */}
+              <div className="relative p-6 bg-[#0B0B0E] hover:bg-[#0E0E12] transition">
+                <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+                <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+                <div className="flex items-center justify-between text-white/40 mb-3">
+                  <span className="font-mono text-[10px] uppercase tracking-widest">BAY 02 // PENDING ORDERS</span>
+                  <ShoppingBag className="w-4 h-4 text-amber-400" />
                 </div>
-                <div className="text-2xl font-bold text-white mb-1">{pendingOrdersCount}</div>
-                <div className="text-xs text-amber-400/80">Requires boutique confirmation</div>
+                <div className="text-2xl font-mono font-light text-white mb-1 tracking-tight">
+                  {pendingOrdersCount} DISPATCHES
+                </div>
+                <div className="text-[11px] font-mono text-amber-400/80">Requires boutique confirmation</div>
               </div>
 
-              <div className="bg-[#121217] border border-white/10 rounded-2xl p-5">
-                <div className="flex items-center justify-between text-white/50 mb-3">
-                  <span className="text-xs uppercase tracking-wider font-semibold">Flagship Stock Units</span>
-                  <Smartphone className="w-5 h-5 text-blue-400" />
+              {/* Bay 3: Flagship Stock */}
+              <div className="relative p-6 bg-[#0B0B0E] hover:bg-[#0E0E12] transition">
+                <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+                <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+                <div className="flex items-center justify-between text-white/40 mb-3">
+                  <span className="font-mono text-[10px] uppercase tracking-widest">BAY 03 // STOCK UNITS</span>
+                  <Smartphone className="w-4 h-4 text-blue-400" />
                 </div>
-                <div className="text-2xl font-bold text-white mb-1">{activeStockCount} Units</div>
-                <div className="text-xs text-white/50">{phones.length} active models listed</div>
+                <div className="text-2xl font-mono font-light text-white mb-1 tracking-tight">
+                  {activeStockCount} UNITS
+                </div>
+                <div className="text-[11px] font-mono text-white/50">{phones.length} active models listed</div>
               </div>
 
-              <div className="bg-[#121217] border border-white/10 rounded-2xl p-5">
-                <div className="flex items-center justify-between text-white/50 mb-3">
-                  <span className="text-xs uppercase tracking-wider font-semibold">Trade-In Requests</span>
-                  <RefreshCw className="w-5 h-5 text-purple-400" />
+              {/* Bay 4: Trade-In Requests */}
+              <div className="relative p-6 bg-[#0B0B0E] hover:bg-[#0E0E12] transition">
+                <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+                <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+                <div className="flex items-center justify-between text-white/40 mb-3">
+                  <span className="font-mono text-[10px] uppercase tracking-widest">BAY 04 // APPRAISALS</span>
+                  <RefreshCw className="w-4 h-4 text-purple-400" />
                 </div>
-                <div className="text-2xl font-bold text-white mb-1">{pendingTradeInsCount} Pending</div>
-                <div className="text-xs text-purple-300">Awaiting boutique inspection</div>
+                <div className="text-2xl font-mono font-light text-white mb-1 tracking-tight">
+                  {pendingTradeInsCount} PENDING
+                </div>
+                <div className="text-[11px] font-mono text-purple-300">Awaiting boutique inspection</div>
               </div>
             </div>
 
             {/* Supabase Database Seed / Sync Banner */}
-            <div className="bg-gradient-to-r from-[#17171F] via-[#121217] to-[#17171F] border border-[#D4AF37]/30 rounded-2xl p-6 relative overflow-hidden">
-              <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-radial from-[#D4AF37]/5 to-transparent pointer-events-none" />
+            <div className="relative bg-[#0A0A0D] border border-[#D4AF37]/30 p-6">
+              <span className="absolute top-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+              <span className="absolute top-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+              <span className="absolute bottom-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+              <span className="absolute bottom-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Database className="w-5 h-5 text-[#D4AF37]" />
-                    <h2 className="text-lg font-bold text-white">Supabase Cloud Sync & Catalog Seeder</h2>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Database className="w-4 h-4 text-[#D4AF37]" />
+                    <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-white">
+                      [ DB_SYNC // SUPABASE CLOUD SYNC & CATALOG SEEDER ]
+                    </h2>
                   </div>
-                  <p className="text-sm text-white/70 max-w-xl">
-                    Populate your Supabase database with all 15 default luxury flagship models in one click.
+                  <p className="text-xs font-mono text-white/60 max-w-xl">
+                    Populate your remote Supabase database with all 15 default luxury flagship models in one synchronous execution.
                   </p>
                 </div>
                 <button
                   onClick={handleSeedCatalog}
-                  className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-bold text-sm transition shadow-xl shrink-0"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-wider transition border border-[#D4AF37] shrink-0"
                 >
-                  <RefreshCw className="w-4 h-4" />
-                  <span>Seed Catalog to Supabase</span>
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>EXECUTE CATALOG SEED</span>
                 </button>
               </div>
             </div>
 
             {/* Quick Overview Table: Recent Orders */}
-            <div className="bg-[#121217] border border-white/10 rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-base font-semibold text-white">Recent Client Orders</h3>
+            <div className="relative bg-[#0A0A0D] border border-white/10 p-6">
+              <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute bottom-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute bottom-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                    [ MANIFEST // RECENT CLIENT ORDERS ]
+                  </h3>
+                  <p className="text-[11px] font-mono text-white/40">Latest incoming purchase requests</p>
+                </div>
                 <button
                   onClick={() => setActiveTab("orders")}
-                  className="text-xs font-semibold text-[#D4AF37] hover:underline flex items-center gap-1"
+                  className="text-xs font-mono uppercase tracking-wider text-[#D4AF37] hover:underline flex items-center gap-1"
                 >
-                  <span>View all orders</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span>VIEW ALL ORDERS</span>
+                  <ArrowRight className="w-3 h-3" />
                 </button>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto border border-white/10">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b border-white/10 text-white/40 text-xs uppercase tracking-wider">
-                      <th className="pb-3 font-medium">Order ID</th>
-                      <th className="pb-3 font-medium">Client</th>
-                      <th className="pb-3 font-medium">City</th>
-                      <th className="pb-3 font-medium">Amount</th>
-                      <th className="pb-3 font-medium">Payment</th>
-                      <th className="pb-3 font-medium">Status</th>
+                    <tr className="border-b border-white/10 bg-white/[0.02] text-white/40 font-mono text-[10px] uppercase tracking-widest">
+                      <th className="py-3 px-4 font-medium">ORDER ID</th>
+                      <th className="py-3 px-4 font-medium">CLIENT</th>
+                      <th className="py-3 px-4 font-medium">CITY</th>
+                      <th className="py-3 px-4 font-medium">AMOUNT</th>
+                      <th className="py-3 px-4 font-medium">PAYMENT</th>
+                      <th className="py-3 px-4 font-medium">STATUS</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-white/5 font-mono text-xs">
                     {orders.slice(0, 5).map((order) => (
-                      <tr key={order.id} className="hover:bg-white/[0.02]">
-                        <td className="py-3.5 font-mono text-[#D4AF37] font-semibold">{order.id}</td>
-                        <td className="py-3.5 text-white font-medium">{order.customer.fullName}</td>
-                        <td className="py-3.5 text-white/70">{order.customer.city}</td>
-                        <td className="py-3.5 text-white font-bold">{formatCFA(order.total)}</td>
-                        <td className="py-3.5 text-white/60 capitalize">
+                      <tr key={order.id} className="hover:bg-white/[0.02] transition">
+                        <td className="py-3 px-4 text-[#D4AF37] font-semibold">{order.id}</td>
+                        <td className="py-3 px-4 text-white">{order.customer.fullName}</td>
+                        <td className="py-3 px-4 text-white/60">{order.customer.city}</td>
+                        <td className="py-3 px-4 text-white font-medium">{formatCFA(order.total)}</td>
+                        <td className="py-3 px-4 text-white/60 uppercase">
                           {order.customer.paymentMethod.replace("_", " ")}
                         </td>
-                        <td className="py-3.5">
+                        <td className="py-3 px-4">
                           <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                            className={`inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-mono uppercase tracking-wider border ${
                               order.status === "completed"
-                                ? "bg-emerald-950/60 text-emerald-300 border border-emerald-500/30"
+                                ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/30"
                                 : order.status === "delivering"
-                                ? "bg-blue-950/60 text-blue-300 border border-blue-500/30"
-                                : "bg-amber-950/60 text-amber-300 border border-amber-500/30"
+                                ? "bg-blue-950/60 text-blue-300 border-blue-500/30"
+                                : "bg-amber-950/60 text-amber-300 border-amber-500/30"
                             }`}
                           >
                             {order.status.toUpperCase()}
@@ -1131,33 +1169,38 @@ export default function AdminDashboardPage() {
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
                 <input
                   type="text"
-                  placeholder="Search brand or model..."
+                  placeholder="FILTER BY BRAND OR MODEL..."
                   value={phoneSearch}
                   onChange={(e) => setPhoneSearch(e.target.value)}
-                  className="w-full bg-[#121217] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full bg-[#0A0A0D] border border-white/15 rounded-none pl-10 pr-4 py-2.5 font-mono text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#D4AF37]"
                 />
               </div>
 
-              <div className="text-xs text-white/60">
-                Showing <strong className="text-white">{filteredPhones.length}</strong> of{" "}
-                {phones.length} phones
+              <div className="text-xs font-mono text-white/50 tracking-wider">
+                INDEX COUNT: <strong className="text-white">{filteredPhones.length}</strong> /{" "}
+                {phones.length} HARDWARE UNITS
               </div>
             </div>
 
             {/* Inventory Table */}
-            <div className="bg-[#121217] border border-white/10 rounded-2xl overflow-hidden">
+            <div className="relative bg-[#0A0A0D] border border-white/10 rounded-none overflow-hidden">
+              <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute bottom-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute bottom-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b border-white/10 bg-white/[0.02] text-white/40 text-xs uppercase tracking-wider">
-                      <th className="py-3.5 px-4 font-medium">Device</th>
-                      <th className="py-3.5 px-4 font-medium">Condition</th>
-                      <th className="py-3.5 px-4 font-medium">Price (FCFA)</th>
-                      <th className="py-3.5 px-4 font-medium">Stock Status</th>
-                      <th className="py-3.5 px-4 font-medium text-right">Actions</th>
+                    <tr className="border-b border-white/10 bg-white/[0.02] text-white/40 font-mono text-[10px] uppercase tracking-widest">
+                      <th className="py-3.5 px-4 font-medium">DEVICE MODEL</th>
+                      <th className="py-3.5 px-4 font-medium">CONDITION</th>
+                      <th className="py-3.5 px-4 font-medium">BASE PRICE (FCFA)</th>
+                      <th className="py-3.5 px-4 font-medium">STOCK STATUS</th>
+                      <th className="py-3.5 px-4 font-medium text-right">ACTIONS</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-white/5 font-mono text-xs">
                     {filteredPhones.map((phone) => {
                       const totalStock = phone.storageVariants.reduce((sum, v) => sum + v.stock, 0);
                       const inStock = totalStock > 0;
@@ -1166,7 +1209,7 @@ export default function AdminDashboardPage() {
                         <tr key={phone.id} className="hover:bg-white/[0.02] transition">
                           <td className="py-3.5 px-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-12 h-12 rounded-lg bg-black/40 border border-white/10 p-1 flex items-center justify-center shrink-0 relative overflow-hidden">
+                              <div className="w-12 h-12 rounded-none bg-black border border-white/10 p-1 flex items-center justify-center shrink-0 relative overflow-hidden">
                                 <Image
                                   src={phone.images[0] || "/placeholder.png"}
                                   alt={phone.name}
@@ -1178,17 +1221,17 @@ export default function AdminDashboardPage() {
                               </div>
                               <div>
                                 <div className="font-semibold text-white">{phone.name}</div>
-                                <div className="text-xs text-white/50">{phone.brand} • {phone.storageVariants[0]?.size || "256GB"}</div>
+                                <div className="text-[11px] text-white/50">{phone.brand} // {phone.storageVariants[0]?.size || "256GB"}</div>
                               </div>
                             </div>
                           </td>
 
                           <td className="py-3.5 px-4">
                             <span
-                              className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold ${
+                              className={`inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-mono uppercase tracking-wider border ${
                                 phone.condition === "Brand New"
-                                  ? "bg-[#D4AF37]/15 text-[#F3E5AB] border border-[#D4AF37]/30"
-                                  : "bg-white/10 text-white/80 border border-white/20"
+                                  ? "bg-[#D4AF37]/15 text-[#F3E5AB] border-[#D4AF37]/30"
+                                  : "bg-white/10 text-white/80 border-white/20"
                               }`}
                             >
                               {phone.condition.toUpperCase()}
@@ -1202,18 +1245,18 @@ export default function AdminDashboardPage() {
                           <td className="py-3.5 px-4">
                             <button
                               onClick={() => handleToggleStock(phone)}
-                              className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border transition ${
+                              className={`flex items-center gap-2 px-2.5 py-1 rounded-none text-[10px] font-mono uppercase tracking-wider border transition ${
                                 inStock
                                   ? "bg-emerald-950/40 text-emerald-400 border-emerald-500/30 hover:bg-emerald-950/60"
                                   : "bg-red-950/40 text-red-400 border-red-500/30 hover:bg-red-950/60"
                               }`}
                             >
                               <span
-                                className={`w-1.5 h-1.5 rounded-full ${
+                                className={`w-1.5 h-1.5 rounded-none ${
                                   inStock ? "bg-emerald-400" : "bg-red-400"
                                 }`}
                               />
-                              <span>{inStock ? `In Stock (${totalStock})` : "Out of Stock"}</span>
+                              <span>{inStock ? `IN STOCK (${totalStock})` : "OUT OF STOCK"}</span>
                             </button>
                           </td>
 
@@ -1222,24 +1265,24 @@ export default function AdminDashboardPage() {
                               <Link
                                 href={`/phones/${phone.slug}`}
                                 target="_blank"
-                                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition"
+                                className="p-2 rounded-none bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 transition"
                                 title="View live customer product page"
                               >
-                                <ExternalLink className="w-4 h-4" />
+                                <ExternalLink className="w-3.5 h-3.5" />
                               </Link>
                               <button
                                 onClick={() => handleOpenEditModal(phone)}
-                                className="p-2 rounded-lg bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] border border-[#D4AF37]/30 transition"
+                                className="p-2 rounded-none bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] border border-[#D4AF37]/30 transition"
                                 title="Edit phone details & specs"
                               >
-                                <Edit3 className="w-4 h-4" />
+                                <Edit3 className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => handleDeletePhone(phone.id, phone.name)}
-                                className="p-2 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-400 transition"
+                                className="p-2 rounded-none bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-500/30 transition"
                                 title="Delete phone"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </td>
@@ -1262,33 +1305,38 @@ export default function AdminDashboardPage() {
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
                 <input
                   type="text"
-                  placeholder="Search by ID, client, or phone..."
+                  placeholder="FILTER ORDER ID, CLIENT, PHONE..."
                   value={orderSearch}
                   onChange={(e) => setOrderSearch(e.target.value)}
-                  className="w-full bg-[#121217] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full bg-[#0A0A0D] border border-white/15 rounded-none pl-10 pr-4 py-2.5 font-mono text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#D4AF37]"
                 />
               </div>
 
-              <div className="text-xs text-white/60">
-                Total Orders: <strong className="text-white">{orders.length}</strong>
+              <div className="text-xs font-mono text-white/50 tracking-wider">
+                TOTAL ORDERS LOGGED: <strong className="text-white">{orders.length}</strong>
               </div>
             </div>
 
             {/* Orders Table */}
-            <div className="bg-[#121217] border border-white/10 rounded-2xl overflow-hidden">
+            <div className="relative bg-[#0A0A0D] border border-white/10 rounded-none overflow-hidden">
+              <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute bottom-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute bottom-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b border-white/10 bg-white/[0.02] text-white/40 text-xs uppercase tracking-wider">
-                      <th className="py-3.5 px-4 font-medium">Order ID & Date</th>
-                      <th className="py-3.5 px-4 font-medium">Client & WhatsApp</th>
-                      <th className="py-3.5 px-4 font-medium">Items</th>
-                      <th className="py-3.5 px-4 font-medium">Total FCFA</th>
-                      <th className="py-3.5 px-4 font-medium">Update Status</th>
-                      <th className="py-3.5 px-4 font-medium text-right">Dispatch</th>
+                    <tr className="border-b border-white/10 bg-white/[0.02] text-white/40 font-mono text-[10px] uppercase tracking-widest">
+                      <th className="py-3.5 px-4 font-medium">MANIFEST ID & DATE</th>
+                      <th className="py-3.5 px-4 font-medium">CLIENT & CONTACT</th>
+                      <th className="py-3.5 px-4 font-medium">ORDERED ITEMS</th>
+                      <th className="py-3.5 px-4 font-medium">TOTAL (FCFA)</th>
+                      <th className="py-3.5 px-4 font-medium">STATUS</th>
+                      <th className="py-3.5 px-4 font-medium text-right">DISPATCH</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-white/5 font-mono text-xs">
                     {filteredOrders.map((order) => {
                       const cleanPhone = order.customer.phone.replace(/[^0-9]/g, "");
                       const waLink = `https://wa.me/${cleanPhone}?text=Hello%20${encodeURIComponent(
@@ -1299,7 +1347,7 @@ export default function AdminDashboardPage() {
                         <tr key={order.id} className="hover:bg-white/[0.02] transition">
                           <td className="py-3.5 px-4">
                             <div className="font-mono font-bold text-[#D4AF37]">{order.id}</div>
-                            <div className="text-xs text-white/40">
+                            <div className="text-[11px] text-white/40">
                               {new Date(order.createdAt).toLocaleDateString("en-GB", {
                                 day: "numeric",
                                 month: "short",
@@ -1311,14 +1359,14 @@ export default function AdminDashboardPage() {
 
                           <td className="py-3.5 px-4">
                             <div className="font-medium text-white">{order.customer.fullName}</div>
-                            <div className="text-xs text-white/60">{order.customer.phone}</div>
-                            <div className="text-xs text-white/40 capitalize">{order.customer.city}</div>
+                            <div className="text-[11px] text-white/60">{order.customer.phone}</div>
+                            <div className="text-[11px] text-white/40 uppercase">{order.customer.city}</div>
                           </td>
 
                           <td className="py-3.5 px-4">
                             <div className="space-y-1">
                               {order.items.map((it, idx) => (
-                                <div key={idx} className="text-xs text-white/80">
+                                <div key={idx} className="text-[11px] text-white/80">
                                   {it.quantity}x {it.name} ({it.storage})
                                 </div>
                               ))}
@@ -1327,7 +1375,7 @@ export default function AdminDashboardPage() {
 
                           <td className="py-3.5 px-4">
                             <div className="font-bold text-white">{formatCFA(order.total)}</div>
-                            <div className="text-[11px] text-white/50 capitalize">
+                            <div className="text-[10px] text-white/50 uppercase tracking-wider">
                               {order.customer.paymentMethod.replace("_", " ")}
                             </div>
                           </td>
@@ -1336,7 +1384,7 @@ export default function AdminDashboardPage() {
                             <select
                               value={order.status}
                               onChange={(e) => handleOrderStatusChange(order.id, e.target.value as any)}
-                              className="bg-[#17171F] border border-white/20 text-white rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:border-[#D4AF37] focus:outline-none"
+                              className="bg-black border border-white/20 text-white rounded-none px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wider focus:border-[#D4AF37] focus:outline-none"
                             >
                               <option value="placed">Placed (Received)</option>
                               <option value="confirmed">Confirmed</option>
@@ -1351,7 +1399,7 @@ export default function AdminDashboardPage() {
                               href={waLink}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] border border-[#25D366]/40 text-xs font-bold transition"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#25D366] border border-[#25D366]/40 font-mono text-[11px] uppercase tracking-wider font-bold transition"
                             >
                               <MessageCircle className="w-3.5 h-3.5" />
                               <span>WhatsApp</span>
@@ -1370,21 +1418,26 @@ export default function AdminDashboardPage() {
         {/* TAB 4: TRADE-INS APPRAISALS */}
         {activeTab === "trade-ins" && (
           <div className="space-y-6 animate-fade-in">
-            <div className="bg-[#121217] border border-white/10 rounded-2xl overflow-hidden">
+            <div className="relative bg-[#0A0A0D] border border-white/10 rounded-none overflow-hidden">
+              <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute bottom-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute bottom-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b border-white/10 bg-white/[0.02] text-white/40 text-xs uppercase tracking-wider">
-                      <th className="py-3.5 px-4 font-medium">Trade-In ID</th>
-                      <th className="py-3.5 px-4 font-medium">Client Info</th>
-                      <th className="py-3.5 px-4 font-medium">Exchanged Device</th>
-                      <th className="py-3.5 px-4 font-medium">Condition</th>
-                      <th className="py-3.5 px-4 font-medium">Voucher Value</th>
-                      <th className="py-3.5 px-4 font-medium">Status</th>
-                      <th className="py-3.5 px-4 font-medium text-right">Action</th>
+                    <tr className="border-b border-white/10 bg-white/[0.02] text-white/40 font-mono text-[10px] uppercase tracking-widest">
+                      <th className="py-3.5 px-4 font-medium">TRADE-IN ID</th>
+                      <th className="py-3.5 px-4 font-medium">CLIENT INFO</th>
+                      <th className="py-3.5 px-4 font-medium">EXCHANGED DEVICE</th>
+                      <th className="py-3.5 px-4 font-medium">CONDITION</th>
+                      <th className="py-3.5 px-4 font-medium">VOUCHER VALUE</th>
+                      <th className="py-3.5 px-4 font-medium">STATUS</th>
+                      <th className="py-3.5 px-4 font-medium text-right">ACTION</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-white/5 font-mono text-xs">
                     {tradeIns.map((item) => {
                       const cleanPhone = item.phone.replace(/[^0-9]/g, "");
                       const waLink = `https://wa.me/${cleanPhone}?text=Hello%20${encodeURIComponent(
@@ -1398,13 +1451,13 @@ export default function AdminDashboardPage() {
                           <td className="py-3.5 px-4 font-mono font-bold text-[#D4AF37]">{item.id}</td>
                           <td className="py-3.5 px-4">
                             <div className="font-medium text-white">{item.client_name}</div>
-                            <div className="text-xs text-white/60">{item.phone}</div>
-                            <div className="text-xs text-white/40">{item.city}</div>
+                            <div className="text-[11px] text-white/60">{item.phone}</div>
+                            <div className="text-[11px] text-white/40 uppercase">{item.city}</div>
                           </td>
                           <td className="py-3.5 px-4 font-semibold text-white">
                             {item.brand} {item.model}
                           </td>
-                          <td className="py-3.5 px-4 text-xs text-white/80">{item.condition}</td>
+                          <td className="py-3.5 px-4 text-[11px] text-white/80">{item.condition}</td>
                           <td className="py-3.5 px-4 font-bold text-emerald-400">
                             {formatCFA(item.valuation_fcfa)}
                           </td>
@@ -1412,7 +1465,7 @@ export default function AdminDashboardPage() {
                             <select
                               value={item.status}
                               onChange={(e) => handleTradeInStatusChange(item.id, e.target.value as any)}
-                              className="bg-[#17171F] border border-white/20 text-white rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:border-[#D4AF37] focus:outline-none"
+                              className="bg-black border border-white/20 text-white rounded-none px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wider focus:border-[#D4AF37] focus:outline-none"
                             >
                               <option value="pending">Pending</option>
                               <option value="approved">Approved</option>
@@ -1425,7 +1478,7 @@ export default function AdminDashboardPage() {
                               href={waLink}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#25D366]/20 text-[#25D366] border border-[#25D366]/40 text-xs font-bold hover:bg-[#25D366]/30 transition"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-none bg-[#25D366]/15 text-[#25D366] border border-[#25D366]/40 font-mono text-[11px] uppercase tracking-wider font-bold hover:bg-[#25D366]/25 transition"
                             >
                               <MessageCircle className="w-3.5 h-3.5" />
                               <span>Offer</span>
@@ -1445,20 +1498,25 @@ export default function AdminDashboardPage() {
         {activeTab === "site-settings" && (
           <div className="space-y-8 animate-fade-in">
             {/* Header & Quick Save Bar */}
-            <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="relative bg-[#0A0A0D] border border-white/10 rounded-none p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute bottom-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute bottom-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+
               <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-xl bg-[#17171F] border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
-                  <SlidersHorizontal className="w-6 h-6" />
+                <div className="w-10 h-10 rounded-none bg-black border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+                  <SlidersHorizontal className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    <span>Boutique & System Configuration</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 uppercase">
-                      Live Settings
+                  <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                    <span>[ CONFIG // BOUTIQUE & SYSTEM ARCHITECTURE ]</span>
+                    <span className="px-2 py-0.5 rounded-none text-[9px] font-mono font-bold bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 uppercase tracking-widest">
+                      LIVE
                     </span>
                   </h2>
-                  <p className="text-xs text-white/50">
-                    All system modules (storefront, navbar, footer, checkout, support) adapt dynamically to these values.
+                  <p className="text-[11px] font-mono text-white/40">
+                    Storefront, header, footer, checkout, and concierge adapt synchronously to these values.
                   </p>
                 </div>
               </div>
@@ -1467,40 +1525,43 @@ export default function AdminDashboardPage() {
                 <button
                   type="button"
                   onClick={handleResetSiteSettings}
-                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 text-xs font-semibold transition"
+                  className="px-4 py-2 rounded-none bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 font-mono text-xs uppercase tracking-wider transition"
                 >
-                  Reset Defaults
+                  RESET DEFAULTS
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveSiteSettings}
                   disabled={isSavingSiteSettings}
-                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#B38F26] text-black font-bold text-xs hover:brightness-110 transition shadow-lg shadow-[#D4AF37]/15 flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="px-6 py-2 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-wider border border-[#D4AF37] transition flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>{isSavingSiteSettings ? "Broadcasting..." : "Save Settings"}</span>
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{isSavingSiteSettings ? "BROADCASTING..." : "COMMIT SETTINGS"}</span>
                 </button>
               </div>
             </div>
 
             <form onSubmit={handleSaveSiteSettings} className="space-y-8">
               {/* SECTION 1: BRAND IDENTITY & ANNOUNCEMENT BAR */}
-              <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-5">
+              <div className="relative bg-[#0A0A0D] border border-white/10 rounded-none p-6 space-y-5">
+                <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+                <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+
                 <div className="flex items-center gap-2.5 pb-3 border-b border-white/10">
-                  <Store className="w-5 h-5 text-[#D4AF37]" />
+                  <Store className="w-4 h-4 text-[#D4AF37]" />
                   <div>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-                      1. Brand Identity & Header Announcement
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                      01 // BRAND IDENTITY & TOP TICKER
                     </h3>
-                    <p className="text-xs text-white/50">
-                      Controls the store name in navigation, footer, metadata, and top announcement banner
+                    <p className="text-[11px] font-mono text-white/40">
+                      Store name in navigation, footer, metadata, and top announcement banner
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                    <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
                       Store Name *
                     </label>
                     <input
@@ -1509,12 +1570,12 @@ export default function AdminDashboardPage() {
                       value={siteForm.storeName}
                       onChange={(e) => setSiteForm({ ...siteForm, storeName: e.target.value })}
                       placeholder="e.g. AURA LUXE MOBILE"
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                    <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
                       Brand Tagline / Subtitle
                     </label>
                     <input
@@ -1522,13 +1583,13 @@ export default function AdminDashboardPage() {
                       value={siteForm.tagline}
                       onChange={(e) => setSiteForm({ ...siteForm, tagline: e.target.value })}
                       placeholder="e.g. Central Africa's Premier Luxury Smartphone Boutique"
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-white/80 mb-1">
+                  <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
                     Storefront Top Announcement Bar Message
                   </label>
                   <input
@@ -1536,11 +1597,11 @@ export default function AdminDashboardPage() {
                     value={siteForm.announcementText}
                     onChange={(e) => setSiteForm({ ...siteForm, announcementText: e.target.value })}
                     placeholder="e.g. Free VIP delivery on orders over FCFA 500,000 • 100% Genuine Sealed Devices"
-                    className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                    className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                   />
-                  <div className="mt-2.5 p-3 rounded-xl bg-[#09090B] border border-white/10 flex items-center justify-between text-[11px] text-zinc-400">
+                  <div className="mt-2.5 p-3 rounded-none bg-black border border-white/10 flex items-center justify-between text-[11px] font-mono text-zinc-400">
                     <div className="flex items-center gap-1.5 text-zinc-300">
-                      <Truck className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <Truck className="w-3 h-3 text-[#D4AF37]" />
                       <span>Free delivery over FCFA {siteForm.freeDeliveryThreshold?.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-[#D4AF37] font-medium">
@@ -1554,74 +1615,77 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* SECTION 2: CONCIERGE & DIRECT CONTACTS */}
-              <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-5">
+              <div className="relative bg-[#0A0A0D] border border-white/10 rounded-none p-6 space-y-5">
+                <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+                <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+
                 <div className="flex items-center gap-2.5 pb-3 border-b border-white/10">
-                  <PhoneCall className="w-5 h-5 text-[#D4AF37]" />
+                  <PhoneCall className="w-4 h-4 text-[#D4AF37]" />
                   <div>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-                      2. Concierge Desk & Client Contacts
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                      02 // CONCIERGE DESK & DIRECT CONTACTS
                     </h3>
-                    <p className="text-xs text-white/50">
-                      Direct phone, WhatsApp order dispatch, and customer support channels
+                    <p className="text-[11px] font-mono text-white/40">
+                      Direct telephone, WhatsApp dispatch line, and customer concierge inbox
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                    <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
                       Official WhatsApp Business Line *
                     </label>
                     <div className="relative">
-                      <MessageCircle className="w-4 h-4 text-emerald-400 absolute left-3 top-3" />
+                      <MessageCircle className="w-3.5 h-3.5 text-emerald-400 absolute left-3 top-3" />
                       <input
                         type="text"
                         required
                         value={siteForm.whatsappPhone}
                         onChange={(e) => setSiteForm({ ...siteForm, whatsappPhone: e.target.value })}
                         placeholder="+237 699 44 21 00"
-                        className="w-full bg-[#17171F] border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                        className="w-full bg-black border border-white/15 rounded-none pl-9 pr-3.5 py-2.5 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                       />
                     </div>
-                    <span className="text-[10px] text-white/40 block mt-1">
-                      Used for WhatsApp checkout & quick order confirmations.
+                    <span className="text-[10px] font-mono text-white/40 block mt-1">
+                      Used for WhatsApp checkout & instant order dispatch.
                     </span>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                    <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
                       Direct Telephone Line
                     </label>
                     <div className="relative">
-                      <PhoneCall className="w-4 h-4 text-[#D4AF37] absolute left-3 top-3" />
+                      <PhoneCall className="w-3.5 h-3.5 text-[#D4AF37] absolute left-3 top-3" />
                       <input
                         type="text"
                         value={siteForm.secondaryPhone}
                         onChange={(e) => setSiteForm({ ...siteForm, secondaryPhone: e.target.value })}
                         placeholder="+237 677 88 99 00"
-                        className="w-full bg-[#17171F] border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                        className="w-full bg-black border border-white/15 rounded-none pl-9 pr-3.5 py-2.5 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                       />
                     </div>
-                    <span className="text-[10px] text-white/40 block mt-1">
+                    <span className="text-[10px] font-mono text-white/40 block mt-1">
                       Shown on footer, contact page, and order receipts.
                     </span>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                    <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
                       Support / Concierge Email
                     </label>
                     <div className="relative">
-                      <Mail className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                      <Mail className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-3" />
                       <input
                         type="email"
                         value={siteForm.supportEmail}
                         onChange={(e) => setSiteForm({ ...siteForm, supportEmail: e.target.value })}
                         placeholder="concierge@auraluxe.cm"
-                        className="w-full bg-[#17171F] border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                        className="w-full bg-black border border-white/15 rounded-none pl-9 pr-3.5 py-2.5 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                       />
                     </div>
-                    <span className="text-[10px] text-white/40 block mt-1">
+                    <span className="text-[10px] font-mono text-white/40 block mt-1">
                       Official email for client inquiries and order invoices.
                     </span>
                   </div>
@@ -1629,14 +1693,17 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* SECTION 3: PHYSICAL FLAGSHIP BOUTIQUES */}
-              <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-5">
+              <div className="relative bg-[#0A0A0D] border border-white/10 rounded-none p-6 space-y-5">
+                <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+                <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+
                 <div className="flex items-center gap-2.5 pb-3 border-b border-white/10">
-                  <MapPin className="w-5 h-5 text-[#D4AF37]" />
+                  <MapPin className="w-4 h-4 text-[#D4AF37]" />
                   <div>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-                      3. Physical Flagship Lounges & Working Hours
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                      03 // PHYSICAL FLAGSHIP LOUNGES & WORKING HOURS
                     </h3>
-                    <p className="text-xs text-white/50">
+                    <p className="text-[11px] font-mono text-white/40">
                       Physical locations for client pickups, trade-in device inspections, and luxury lounges
                     </p>
                   </div>
@@ -1644,7 +1711,7 @@ export default function AdminDashboardPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                    <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
                       Douala Flagship Showroom Address
                     </label>
                     <input
@@ -1652,12 +1719,12 @@ export default function AdminDashboardPage() {
                       value={siteForm.doualaAddress}
                       onChange={(e) => setSiteForm({ ...siteForm, doualaAddress: e.target.value })}
                       placeholder="Rue Tokoto, Bonapriso, Douala"
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                    <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
                       Yaoundé Bastos Lounge Address
                     </label>
                     <input
@@ -1665,37 +1732,40 @@ export default function AdminDashboardPage() {
                       value={siteForm.yaoundeAddress}
                       onChange={(e) => setSiteForm({ ...siteForm, yaoundeAddress: e.target.value })}
                       placeholder="Avenue Bastos, Face Ambassade, Yaoundé"
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-white/80 mb-1">
+                  <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
                     Operating / Concierge Hours
                   </label>
                   <div className="relative max-w-md">
-                    <Clock className="w-4 h-4 text-[#D4AF37] absolute left-3 top-3" />
+                    <Clock className="w-3.5 h-3.5 text-[#D4AF37] absolute left-3 top-3" />
                     <input
                       type="text"
                       value={siteForm.openingHours}
                       onChange={(e) => setSiteForm({ ...siteForm, openingHours: e.target.value })}
                       placeholder="Mon - Sat: 08:30 – 19:30"
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                      className="w-full bg-black border border-white/15 rounded-none pl-9 pr-3.5 py-2.5 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                 </div>
               </div>
 
               {/* SECTION 4: DELIVERY FEES & FREE THRESHOLD */}
-              <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-5">
+              <div className="relative bg-[#0A0A0D] border border-white/10 rounded-none p-6 space-y-5">
+                <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+                <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+
                 <div className="flex items-center gap-2.5 pb-3 border-b border-white/10">
-                  <Truck className="w-5 h-5 text-[#D4AF37]" />
+                  <Truck className="w-4 h-4 text-[#D4AF37]" />
                   <div>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-                      4. Logistics, Delivery Fees & Free Delivery Minimum
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                      04 // LOGISTICS, DELIVERY FEES & FREE VIP THRESHOLD
                     </h3>
-                    <p className="text-xs text-white/50">
+                    <p className="text-[11px] font-mono text-white/40">
                       Calculates delivery costs automatically at checkout in Douala, Yaoundé, and nationwide
                     </p>
                   </div>
@@ -1703,7 +1773,7 @@ export default function AdminDashboardPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                    <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
                       Douala & Yaoundé Local Express Fee (FCFA)
                     </label>
                     <input
@@ -1715,15 +1785,15 @@ export default function AdminDashboardPage() {
                       onChange={(e) =>
                         setSiteForm({ ...siteForm, deliveryFeeDoualaYaounde: Number(e.target.value) })
                       }
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono font-bold text-amber-300"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 font-mono text-xs text-amber-300 font-bold focus:border-[#D4AF37] focus:outline-none"
                     />
-                    <span className="text-[10px] text-white/40 block mt-1">
+                    <span className="text-[10px] font-mono text-white/40 block mt-1">
                       Same-day courier to customer doorsteps in Douala/Yaoundé.
                     </span>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                    <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
                       Nationwide Secured Transit Fee (FCFA)
                     </label>
                     <input
@@ -1735,15 +1805,15 @@ export default function AdminDashboardPage() {
                       onChange={(e) =>
                         setSiteForm({ ...siteForm, deliveryFeeNationwide: Number(e.target.value) })
                       }
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono font-bold text-amber-300"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 font-mono text-xs text-amber-300 font-bold focus:border-[#D4AF37] focus:outline-none"
                     />
-                    <span className="text-[10px] text-white/40 block mt-1">
+                    <span className="text-[10px] font-mono text-white/40 block mt-1">
                       Secured transit to Bafoussam, Garoua, Bamenda, Kribi, etc.
                     </span>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                    <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
                       Free VIP Delivery Minimum Order (FCFA)
                     </label>
                     <input
@@ -1755,9 +1825,9 @@ export default function AdminDashboardPage() {
                       onChange={(e) =>
                         setSiteForm({ ...siteForm, freeDeliveryThreshold: Number(e.target.value) })
                       }
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono font-bold text-emerald-400"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 font-mono text-xs text-emerald-400 font-bold focus:border-[#D4AF37] focus:outline-none"
                     />
-                    <span className="text-[10px] text-white/40 block mt-1">
+                    <span className="text-[10px] font-mono text-white/40 block mt-1">
                       Orders reaching this amount enjoy complimentary zero-fee delivery.
                     </span>
                   </div>
@@ -1765,14 +1835,17 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* SECTION 5: MOBILE MONEY PAYMENT INSTRUCTIONS */}
-              <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-5">
+              <div className="relative bg-[#0A0A0D] border border-white/10 rounded-none p-6 space-y-5">
+                <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+                <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+
                 <div className="flex items-center gap-2.5 pb-3 border-b border-white/10">
-                  <DollarSign className="w-5 h-5 text-[#D4AF37]" />
+                  <DollarSign className="w-4 h-4 text-[#D4AF37]" />
                   <div>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-                      5. Local Cameroon Mobile Money Instructions
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                      05 // CAMEROON MOBILE MONEY DISPATCH INSTRUCTIONS
                     </h3>
-                    <p className="text-xs text-white/50">
+                    <p className="text-[11px] font-mono text-white/40">
                       Displayed on checkout page when customers select MTN Mobile Money or Orange Money
                     </p>
                   </div>
@@ -1780,7 +1853,7 @@ export default function AdminDashboardPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                    <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
                       MTN Mobile Money Instructions / Number
                     </label>
                     <input
@@ -1788,12 +1861,12 @@ export default function AdminDashboardPage() {
                       value={siteForm.mtnMomoNumber}
                       onChange={(e) => setSiteForm({ ...siteForm, mtnMomoNumber: e.target.value })}
                       placeholder="e.g. *126# / 677 88 99 00"
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1">
+                    <label className="block text-[11px] font-mono text-white/70 uppercase tracking-wider mb-1">
                       Orange Money Instructions / Number
                     </label>
                     <input
@@ -1801,18 +1874,18 @@ export default function AdminDashboardPage() {
                       value={siteForm.orangeMoneyNumber}
                       onChange={(e) => setSiteForm({ ...siteForm, orangeMoneyNumber: e.target.value })}
                       placeholder="e.g. #150# / 699 44 21 00"
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                 </div>
               </div>
 
               {/* BOTTOM FLOATING SAVE BAR */}
-              <div className="p-4 rounded-2xl bg-[#0F0F14] border border-[#D4AF37]/30 flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-4 shadow-2xl backdrop-blur-md">
-                <div className="text-xs text-white/70 flex items-center gap-2">
+              <div className="p-4 rounded-none bg-[#09090B]/95 border border-[#D4AF37]/40 flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-4 shadow-2xl backdrop-blur-md">
+                <div className="text-xs font-mono text-white/70 flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-[#D4AF37]" />
                   <span>
-                    Settings automatically synchronize across Supabase cloud and client browsers.
+                    Settings synchronize automatically across remote database and client browsers.
                   </span>
                 </div>
 
@@ -1820,17 +1893,17 @@ export default function AdminDashboardPage() {
                   <button
                     type="button"
                     onClick={handleResetSiteSettings}
-                    className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 text-xs font-semibold transition flex-1 sm:flex-initial"
+                    className="px-4 py-2.5 rounded-none bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 font-mono text-xs uppercase tracking-wider transition flex-1 sm:flex-initial"
                   >
-                    Reset Defaults
+                    RESET DEFAULTS
                   </button>
                   <button
                     type="submit"
                     disabled={isSavingSiteSettings}
-                    className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#B38F26] text-black font-bold text-xs hover:brightness-110 transition shadow-lg shadow-[#D4AF37]/20 flex items-center justify-center gap-2 flex-1 sm:flex-initial disabled:opacity-50"
+                    className="px-8 py-2.5 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-wider transition border border-[#D4AF37] flex items-center justify-center gap-2 flex-1 sm:flex-initial disabled:opacity-50"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>{isSavingSiteSettings ? "Saving Settings..." : "Save Boutique Settings"}</span>
+                    <span>{isSavingSiteSettings ? "SAVING..." : "COMMIT BOUTIQUE SETTINGS"}</span>
                   </button>
                 </div>
               </div>
@@ -1844,113 +1917,133 @@ export default function AdminDashboardPage() {
             {/* Grid 2 Columns: Profile/Password & Add Admin */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Profile Card & Password Reset */}
-              <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-6">
+              <div className="relative bg-[#0A0A0D] border border-white/10 rounded-none p-6 space-y-6">
+                <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+                <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#17171F] border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
-                    <ShieldCheck className="w-5 h-5" />
+                  <div className="w-9 h-9 rounded-none bg-black border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+                    <ShieldCheck className="w-4 h-4" />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-white">Administrator Profile</h2>
-                    <p className="text-xs text-white/50">Your active boutique credentials</p>
+                    <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                      [ PROFILE // OPERATOR CREDENTIALS ]
+                    </h2>
+                    <p className="text-[11px] font-mono text-white/40">Active authenticated session</p>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-2 text-xs">
+                <div className="p-4 rounded-none bg-black border border-white/10 space-y-2 text-xs font-mono">
                   <div className="flex items-center justify-between">
-                    <span className="text-white/50">Active Email:</span>
-                    <strong className="text-white font-mono">{currentUserEmail}</strong>
+                    <span className="text-white/40 uppercase">ACTIVE EMAIL:</span>
+                    <strong className="text-white">{currentUserEmail}</strong>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-white/50">Access Level:</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 uppercase">
-                      {isSuperAdmin ? "Primary Super Administrator" : "Boutique Administrator"}
+                    <span className="text-white/40 uppercase">ACCESS LEVEL:</span>
+                    <span className="px-2 py-0.5 rounded-none text-[9px] font-mono font-bold bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 uppercase tracking-widest">
+                      {isSuperAdmin ? "PRIMARY SUPER ADMINISTRATOR" : "BOUTIQUE ADMINISTRATOR"}
                     </span>
                   </div>
                 </div>
 
                 {/* Change Password Form */}
                 <form onSubmit={handleChangePassword} className="space-y-3 pt-2 border-t border-white/10">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#D4AF37] flex items-center gap-2">
+                  <h3 className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#D4AF37] flex items-center gap-2">
                     <KeyRound className="w-3.5 h-3.5" />
-                    <span>Change Security Password</span>
+                    <span>UPDATE SECURITY KEY</span>
                   </h3>
 
                   <div>
-                    <label className="block text-[11px] text-white/70 mb-1">New Password</label>
+                    <label className="block text-[10px] font-mono text-white/60 uppercase tracking-wider mb-1">
+                      New Password
+                    </label>
                     <input
                       type="password"
                       required
                       placeholder="At least 6 characters"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/30 focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 font-mono text-xs text-white placeholder:text-white/30 focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] text-white/70 mb-1">Confirm New Password</label>
+                    <label className="block text-[10px] font-mono text-white/60 uppercase tracking-wider mb-1">
+                      Confirm New Password
+                    </label>
                     <input
                       type="password"
                       required
                       placeholder="Repeat new password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/30 focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 font-mono text-xs text-white placeholder:text-white/30 focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={isChangingPassword}
-                    className="w-full py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-bold text-xs transition shadow flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full py-2.5 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-wider transition border border-[#D4AF37] flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                    {isChangingPassword ? "Updating..." : "Update Password"}
+                    {isChangingPassword ? "UPDATING..." : "UPDATE SECURITY KEY"}
                   </button>
                 </form>
               </div>
 
               {/* Authorize New Admin Card */}
-              <div className="bg-[#121217] border border-white/10 rounded-2xl p-6 space-y-6">
+              <div className="relative bg-[#0A0A0D] border border-white/10 rounded-none p-6 space-y-6">
+                <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+                <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#17171F] border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
-                    <UserPlus className="w-5 h-5" />
+                  <div className="w-9 h-9 rounded-none bg-black border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+                    <UserPlus className="w-4 h-4" />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-white">Authorize New Administrator</h2>
-                    <p className="text-xs text-white/50">Grant dashboard access to trusted boutique staff</p>
+                    <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                      [ ACCESS // AUTHORIZE OPERATOR ]
+                    </h2>
+                    <p className="text-[11px] font-mono text-white/40">Grant terminal privileges to trusted staff</p>
                   </div>
                 </div>
 
                 <form onSubmit={handleAddAdmin} className="space-y-3">
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1">Staff Member Email *</label>
+                    <label className="block text-[10px] font-mono text-white/60 uppercase tracking-wider mb-1">
+                      Staff Member Email *
+                    </label>
                     <input
                       type="email"
                       required
                       placeholder="colleague@auramobiles.com"
                       value={newAdminEmail}
                       onChange={(e) => setNewAdminEmail(e.target.value)}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/30 focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 font-mono text-xs text-white placeholder:text-white/30 focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1">Full Name</label>
+                    <label className="block text-[10px] font-mono text-white/60 uppercase tracking-wider mb-1">
+                      Full Name
+                    </label>
                     <input
                       type="text"
                       placeholder="e.g. Marie Claire"
                       value={newAdminFullName}
                       onChange={(e) => setNewAdminFullName(e.target.value)}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/30 focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 font-mono text-xs text-white placeholder:text-white/30 focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1">Privilege Role</label>
+                    <label className="block text-[10px] font-mono text-white/60 uppercase tracking-wider mb-1">
+                      Privilege Role
+                    </label>
                     <select
                       value={newAdminRole}
                       onChange={(e) => setNewAdminRole(e.target.value as any)}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     >
                       <option value="admin">Administrator (Orders, Inventory & Trade-ins)</option>
                       <option value="super_admin">Super Administrator (Full Team & DB Access)</option>
@@ -1960,71 +2053,78 @@ export default function AdminDashboardPage() {
                   <button
                     type="submit"
                     disabled={isAddingAdmin}
-                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#B38F26] text-black font-bold text-xs hover:brightness-110 transition shadow flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
+                    className="w-full py-2.5 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-wider transition border border-[#D4AF37] flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
                   >
-                    <UserPlus className="w-4 h-4" />
-                    <span>{isAddingAdmin ? "Authorizing..." : "Grant Admin Privileges"}</span>
+                    <UserPlus className="w-3.5 h-3.5" />
+                    <span>{isAddingAdmin ? "AUTHORIZING..." : "GRANT TERMINAL ACCESS"}</span>
                   </button>
                 </form>
               </div>
             </div>
 
             {/* Admin Team Table */}
-            <div className="bg-[#121217] border border-white/10 rounded-2xl p-6">
+            <div className="relative bg-[#0A0A0D] border border-white/10 rounded-none p-6">
+              <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute bottom-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
+              <span className="absolute bottom-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
+
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-base font-bold text-white">Authorized Boutique Team Roster</h3>
-                  <p className="text-xs text-white/50">Personnel authorized to access the AURA Luxe operations portal</p>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                    [ ROSTER // AUTHORIZED OPERATOR TEAM ]
+                  </h3>
+                  <p className="text-[11px] font-mono text-white/40">Personnel authorized to access the AURA Luxe operations portal</p>
                 </div>
-                <span className="px-2.5 py-1 rounded-full bg-white/5 text-xs text-white/70 border border-white/10">
-                  {adminUsers.length} Active Admins
+                <span className="px-2.5 py-1 rounded-none bg-white/5 font-mono text-[10px] uppercase tracking-wider text-white/70 border border-white/10">
+                  {adminUsers.length} ACTIVE OPERATORS
                 </span>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto border border-white/10">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b border-white/10 text-white/40 text-xs uppercase tracking-wider">
-                      <th className="pb-3 font-medium">Administrator</th>
-                      <th className="pb-3 font-medium">Role</th>
-                      <th className="pb-3 font-medium">Added By</th>
-                      <th className="pb-3 font-medium">Member Since</th>
-                      <th className="pb-3 font-medium text-right">Actions</th>
+                    <tr className="border-b border-white/10 bg-white/[0.02] text-white/40 font-mono text-[10px] uppercase tracking-widest">
+                      <th className="py-3 px-4 font-medium">ADMINISTRATOR</th>
+                      <th className="py-3 px-4 font-medium">ROLE</th>
+                      <th className="py-3 px-4 font-medium">ADDED BY</th>
+                      <th className="py-3 px-4 font-medium">MEMBER SINCE</th>
+                      <th className="py-3 px-4 font-medium text-right">ACTIONS</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-white/5 font-mono text-xs">
                     {adminUsers.map((admin) => {
                       const isOwner = admin.email.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase();
 
                       return (
-                        <tr key={admin.id} className="hover:bg-white/[0.02]">
-                          <td className="py-3.5">
+                        <tr key={admin.id} className="hover:bg-white/[0.02] transition">
+                          <td className="py-3 px-4">
                             <div className="font-medium text-white flex items-center gap-2">
                               <span>{admin.full_name || "Administrator"}</span>
                               {isOwner && (
-                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#D4AF37] text-black uppercase">
-                                  Owner
+                                <span className="px-1.5 py-0.2 rounded-none text-[8px] font-bold bg-[#D4AF37] text-black uppercase">
+                                  OWNER
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs font-mono text-white/50">{admin.email}</div>
+                            <div className="text-[11px] text-white/40">{admin.email}</div>
                           </td>
 
-                          <td className="py-3.5">
+                          <td className="py-3 px-4">
                             <span
-                              className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                              className={`inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-mono uppercase tracking-wider border ${
                                 admin.role === "super_admin"
-                                  ? "bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30"
-                                  : "bg-white/10 text-white/80 border border-white/20"
+                                  ? "bg-[#D4AF37]/15 text-[#D4AF37] border-[#D4AF37]/30"
+                                  : "bg-white/10 text-white/80 border-white/20"
                               }`}
                             >
                               {admin.role.replace("_", " ")}
                             </span>
                           </td>
 
-                          <td className="py-3.5 text-xs text-white/60">{admin.created_by || "System"}</td>
+                          <td className="py-3 px-4 text-[11px] text-white/60">{admin.created_by || "System"}</td>
 
-                          <td className="py-3.5 text-xs text-white/40">
+                          <td className="py-3 px-4 text-[11px] text-white/40">
                             {new Date(admin.created_at).toLocaleDateString("en-GB", {
                               day: "numeric",
                               month: "short",
@@ -2032,16 +2132,16 @@ export default function AdminDashboardPage() {
                             })}
                           </td>
 
-                          <td className="py-3.5 text-right">
+                          <td className="py-3 px-4 text-right">
                             {isOwner ? (
-                              <span className="text-[11px] text-white/30 italic">Protected</span>
+                              <span className="text-[10px] text-white/30 uppercase tracking-wider">PROTECTED</span>
                             ) : (
                               <button
                                 onClick={() => handleRemoveAdmin(admin.email)}
-                                className="p-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-400 text-xs transition"
+                                className="px-2.5 py-1 rounded-none bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-500/30 text-[10px] font-mono uppercase tracking-wider transition"
                                 title="Revoke access"
                               >
-                                Revoke
+                                REVOKE
                               </button>
                             )}
                           </td>
@@ -2058,49 +2158,59 @@ export default function AdminDashboardPage() {
 
       {/* MODAL 1: ADD NEW PHONE (WITH 1-CLICK PRESETS) */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
-          <div className="bg-[#121217] border border-white/10 rounded-2xl w-full max-w-3xl p-6 sm:p-8 relative my-8 max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="relative bg-[#0A0A0D] border border-white/20 rounded-none w-full max-w-3xl p-6 sm:p-8 my-8 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <span className="absolute top-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+            <span className="absolute top-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+            <span className="absolute bottom-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+            <span className="absolute bottom-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+
             <button
               onClick={() => setIsAddModalOpen(false)}
-              className="absolute top-5 right-5 text-white/50 hover:text-white p-1 rounded-lg hover:bg-white/10 transition"
+              className="absolute top-5 right-5 text-white/50 hover:text-white p-1.5 rounded-none border border-white/10 hover:border-white/30 transition"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
 
             <div className="flex items-center gap-3 mb-1">
-              <div className="w-9 h-9 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
-                <Smartphone className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-none bg-black border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+                <Smartphone className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Add Flagship Smartphone</h2>
-                <p className="text-xs text-white/50">
-                  Data entered here reflects instantly on customer product pages and catalog search.
+                <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-white">
+                  [ BLUEPRINT // REGISTER FLAGSHIP SMARTPHONE ]
+                </h2>
+                <p className="text-[11px] font-mono text-white/40">
+                  Data committed here synchronizes instantly with client catalog and live specs tables.
                 </p>
               </div>
             </div>
 
             {/* PRESET QUICK-FILL TOOLBAR */}
-            <div className="p-4 rounded-xl bg-gradient-to-r from-[#D4AF37]/15 via-black/50 to-[#D4AF37]/10 border border-[#D4AF37]/40 my-5">
+            <div className="relative p-4 rounded-none bg-[#0E0E14] border border-[#D4AF37]/40 my-5">
+              <span className="absolute top-1.5 left-1.5 text-[9px] font-mono text-[#D4AF37]/40 select-none">+</span>
+              <span className="absolute top-1.5 right-1.5 text-[9px] font-mono text-[#D4AF37]/40 select-none">+</span>
+
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-                  <label className="text-xs font-bold text-white uppercase tracking-wider">
-                    ⚡ 1-Click Flagship Auto-Fill Presets
+                  <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <label className="text-[11px] font-mono font-bold text-white uppercase tracking-wider">
+                    ⚡ 1-CLICK FLAGSHIP SPEC PRESETS
                   </label>
                 </div>
-                <span className="text-[10px] text-[#D4AF37] font-mono font-semibold">
-                  Zero Manual Typing
+                <span className="text-[10px] text-[#D4AF37] font-mono font-semibold uppercase">
+                  ZERO MANUAL TYPING
                 </span>
               </div>
-              <p className="text-[11px] text-white/70 mb-3">
-                Select any flagship model below to automatically populate real verified hardware specs, camera setup, battery capacity, storage options, and luxury photos.
+              <p className="text-[11px] font-mono text-white/60 mb-3">
+                Select any flagship model below to auto-populate hardware specs, camera array, battery, storage tiers, and luxury photos.
               </p>
               <select
                 value={selectedPresetId}
                 onChange={(e) => handleSelectPreset(e.target.value)}
-                className="w-full bg-[#17171F] border border-[#D4AF37]/60 rounded-xl px-3.5 py-2.5 text-xs text-[#F3E5AB] font-bold focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 cursor-pointer"
+                className="w-full bg-black border border-[#D4AF37]/60 rounded-none px-3.5 py-2.5 font-mono text-xs text-[#F3E5AB] font-bold focus:outline-none focus:ring-1 focus:ring-[#D4AF37] cursor-pointer"
               >
-                <option value="">-- Choose a Preset to Auto-Fill Everything --</option>
+                <option value="">-- CHOOSE PRESET TO POPULATE SPEC BLUEPRINT --</option>
                 {FLAGSHIP_PRESETS.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name} ({p.brand}) • {p.condition} • {formatCFA(p.basePrice)}
@@ -2109,19 +2219,19 @@ export default function AdminDashboardPage() {
               </select>
             </div>
 
-            <form onSubmit={handleCreatePhone} className="space-y-6">
+            <form onSubmit={handleCreatePhone} className="space-y-6 font-mono">
               {/* SECTION 1: PHOTO & GALLERY */}
-              <div className="p-4 rounded-xl border border-dashed border-white/20 bg-white/[0.02] space-y-3">
+              <div className="p-4 rounded-none border border-dashed border-white/20 bg-black/40 space-y-3">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-white/80 uppercase tracking-wider flex items-center gap-1.5">
+                  <label className="text-[11px] font-mono font-bold text-white/80 uppercase tracking-wider flex items-center gap-1.5">
                     <ImageIcon className="w-3.5 h-3.5 text-[#D4AF37]" />
-                    <span>Primary Photo & Gallery (Live Customer View)</span>
+                    <span>01 // PRIMARY PHOTO & GALLERY (CUSTOMER VIEW)</span>
                   </label>
-                  <span className="text-[10px] text-white/40">Cloudinary Upload or Direct URLs</span>
+                  <span className="text-[10px] font-mono text-white/40">Cloudinary Upload or Direct URLs</span>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <div className="w-24 h-24 rounded-xl bg-black/60 border border-white/10 p-2 flex items-center justify-center shrink-0 relative overflow-hidden">
+                  <div className="w-24 h-24 rounded-none bg-black border border-white/15 p-2 flex items-center justify-center shrink-0 relative overflow-hidden">
                     <img
                       src={newPhone.thumbnail || "/placeholder.png"}
                       alt="Primary Preview"
@@ -2130,9 +2240,9 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div className="flex-1 w-full space-y-2">
-                    <label className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold cursor-pointer border border-white/20 transition">
-                      <Upload className="w-4 h-4 text-[#D4AF37]" />
-                      <span>{isUploadingImage ? "Uploading to Cloudinary..." : "Upload Primary Photo (Cloudinary)"}</span>
+                    <label className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none bg-white/5 hover:bg-white/10 text-white text-xs font-mono uppercase tracking-wider cursor-pointer border border-white/20 transition">
+                      <Upload className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>{isUploadingImage ? "UPLOADING TO CLOUDINARY..." : "UPLOAD PRIMARY PHOTO (CLOUDINARY)"}</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -2146,13 +2256,13 @@ export default function AdminDashboardPage() {
                       placeholder="Or paste primary image URL..."
                       value={newPhone.thumbnail}
                       onChange={(e) => setNewPhone({ ...newPhone, thumbnail: e.target.value })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-lg px-3 py-2 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none font-mono"
+                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] text-white/60 mb-1">
+                  <label className="block text-[10px] font-mono text-white/60 uppercase tracking-wider mb-1">
                     Additional Gallery Photos (One URL per line — creates customer angle thumbnails)
                   </label>
                   <textarea
@@ -2160,7 +2270,7 @@ export default function AdminDashboardPage() {
                     value={newPhone.extraImagesText}
                     onChange={(e) => setNewPhone({ ...newPhone, extraImagesText: e.target.value })}
                     placeholder="https://images.unsplash.com/...&#10;https://images.unsplash.com/..."
-                    className="w-full bg-[#17171F] border border-white/10 rounded-xl p-3 text-xs text-white/80 focus:border-[#D4AF37] focus:outline-none font-mono"
+                    className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/80 focus:border-[#D4AF37] focus:outline-none font-mono"
                   />
                 </div>
               </div>
@@ -2169,23 +2279,23 @@ export default function AdminDashboardPage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1.5">Model Name *</label>
+                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Model Name *</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g. iPhone 16 Pro Max"
                       value={newPhone.name}
                       onChange={(e) => setNewPhone({ ...newPhone, name: e.target.value })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1.5">Brand *</label>
+                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Brand *</label>
                     <select
                       value={newPhone.brand}
                       onChange={(e) => setNewPhone({ ...newPhone, brand: e.target.value as any })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     >
                       <option value="Apple">Apple</option>
                       <option value="Samsung">Samsung</option>
@@ -2199,46 +2309,46 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-white/80 mb-1.5">Tagline / Luxury Subtitle</label>
+                  <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Tagline / Luxury Subtitle</label>
                   <input
                     type="text"
                     placeholder="e.g. Apple's Ultimate Flagship with Grade 5 Titanium & A18 Pro"
                     value={newPhone.tagline}
                     onChange={(e) => setNewPhone({ ...newPhone, tagline: e.target.value })}
-                    className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                    className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1.5">Base Price in FCFA *</label>
+                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Base Price in FCFA *</label>
                     <input
                       type="number"
                       required
                       step={5000}
                       value={newPhone.basePrice}
                       onChange={(e) => setNewPhone({ ...newPhone, basePrice: Number(e.target.value) })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-[#D4AF37] font-mono font-bold focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-[#D4AF37] font-bold focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1.5">Original Price (FCFA Strike-through)</label>
+                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Original Price (Strike-through)</label>
                     <input
                       type="number"
                       step={5000}
                       value={newPhone.originalPrice}
                       onChange={(e) => setNewPhone({ ...newPhone, originalPrice: Number(e.target.value) })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white/70 font-mono focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white/50 focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1.5">Condition</label>
+                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Condition</label>
                     <select
                       value={newPhone.condition}
                       onChange={(e) => setNewPhone({ ...newPhone, condition: e.target.value as any })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     >
                       <option value="Brand New">Brand New (100% Sealed)</option>
                       <option value="Certified Refurbished">Certified Pre-Owned</option>
@@ -2247,67 +2357,67 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-white/80 mb-1.5">Warranty Guarantee Text</label>
+                  <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Warranty Guarantee Text</label>
                   <input
                     type="text"
                     value={newPhone.warranty}
                     onChange={(e) => setNewPhone({ ...newPhone, warranty: e.target.value })}
-                    className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                    className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                   />
                 </div>
               </div>
 
               {/* SECTION 3: STORAGE VARIANTS & STOCK MANAGER */}
-              <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-3">
+              <div className="p-4 rounded-none bg-black/50 border border-white/15 space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                    <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
                       <Layers className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      <span>Storage Tiers & Stock Inventory</span>
+                      <span>02 // STORAGE TIERS & STOCK INVENTORY</span>
                     </h3>
-                    <p className="text-[11px] text-white/50">
+                    <p className="text-[11px] font-mono text-white/50">
                       These appear as selectable chips on the product page, dynamically updating customer pricing.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={handleAddStorageTier}
-                    className="px-3 py-1.5 rounded-lg bg-[#D4AF37]/20 hover:bg-[#D4AF37]/30 text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-semibold transition"
+                    className="px-3 py-1.5 rounded-none bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-mono uppercase tracking-wider transition"
                   >
-                    + Add Tier
+                    + ADD TIER
                   </button>
                 </div>
 
                 <div className="space-y-2">
                   {(newPhone.storageTiers || []).map((tier, idx) => (
-                    <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-[#17171F] p-2.5 rounded-xl border border-white/5">
+                    <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-black p-2.5 rounded-none border border-white/10">
                       <div className="col-span-3">
-                        <label className="block text-[10px] text-white/40 mb-0.5">Capacity</label>
+                        <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Capacity</label>
                         <input
                           type="text"
                           value={tier.size}
                           onChange={(e) => handleUpdateStorageTier(idx, "size", e.target.value)}
                           placeholder="e.g. 256GB"
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold"
+                          className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-1.5 text-xs text-white font-bold"
                         />
                       </div>
                       <div className="col-span-5">
-                        <label className="block text-[10px] text-white/40 mb-0.5">Price (FCFA)</label>
+                        <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Price (FCFA)</label>
                         <input
                           type="number"
                           step={5000}
                           value={tier.price}
                           onChange={(e) => handleUpdateStorageTier(idx, "price", Number(e.target.value))}
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-[#D4AF37] font-mono font-bold"
+                          className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-1.5 text-xs text-[#D4AF37] font-bold"
                         />
                       </div>
                       <div className="col-span-3">
-                        <label className="block text-[10px] text-white/40 mb-0.5">Stock Units</label>
+                        <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Stock Units</label>
                         <input
                           type="number"
                           value={tier.stock}
                           onChange={(e) => handleUpdateStorageTier(idx, "stock", Number(e.target.value))}
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                          className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-1.5 text-xs text-white"
                         />
                       </div>
                       <div className="col-span-1 pt-4 text-center">
@@ -2326,65 +2436,65 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* SECTION 4: REAL HARDWARE SPECIFICATIONS */}
-              <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-3">
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+              <div className="p-4 rounded-none bg-black/50 border border-white/15 space-y-3">
+                <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
                   <Wrench className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Hardware Specifications (Technical Specs Table)</span>
+                  <span>03 // COMPONENT ARCHITECTURE & HARDWARE SPECS</span>
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] text-white/70 mb-1">Processor</label>
+                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Processor</label>
                     <input
                       type="text"
                       value={newPhone.processor}
                       onChange={(e) => setNewPhone({ ...newPhone, processor: e.target.value })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-white/70 mb-1">Display Screen</label>
+                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Display Screen</label>
                     <input
                       type="text"
                       value={newPhone.screen}
                       onChange={(e) => setNewPhone({ ...newPhone, screen: e.target.value })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-white/70 mb-1">Rear Camera Array</label>
+                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Rear Camera Array</label>
                     <input
                       type="text"
                       value={newPhone.rearCamera}
                       onChange={(e) => setNewPhone({ ...newPhone, rearCamera: e.target.value })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-white/70 mb-1">Battery Capacity</label>
+                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Battery Capacity</label>
                     <input
                       type="text"
                       value={newPhone.battery}
                       onChange={(e) => setNewPhone({ ...newPhone, battery: e.target.value })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-white/70 mb-1">RAM Memory</label>
+                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">RAM Memory</label>
                     <input
                       type="text"
                       value={newPhone.ram}
                       onChange={(e) => setNewPhone({ ...newPhone, ram: e.target.value })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-white/70 mb-1">Fast Charging & Wireless</label>
+                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Fast Charging & Wireless</label>
                     <input
                       type="text"
                       value={newPhone.charging}
                       onChange={(e) => setNewPhone({ ...newPhone, charging: e.target.value })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                 </div>
@@ -2393,45 +2503,45 @@ export default function AdminDashboardPage() {
               {/* SECTION 5: HIGHLIGHTS & BOX CONTENTS */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-white/80 mb-1">
+                  <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">
                     Device Highlights (One bullet per line)
                   </label>
                   <textarea
                     rows={3}
                     value={newPhone.highlightsText}
                     onChange={(e) => setNewPhone({ ...newPhone, highlightsText: e.target.value })}
-                    className="w-full bg-[#17171F] border border-white/10 rounded-xl p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
+                    className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-white/80 mb-1">
+                  <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">
                     What's In The Box (One item per line)
                   </label>
                   <textarea
                     rows={3}
                     value={newPhone.boxContentsText}
                     onChange={(e) => setNewPhone({ ...newPhone, boxContentsText: e.target.value })}
-                    className="w-full bg-[#17171F] border border-white/10 rounded-xl p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
+                    className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
                   />
                 </div>
               </div>
 
               {/* SUBMIT ACTION BAR */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10 sticky bottom-0 bg-[#121217] py-2">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10 sticky bottom-0 bg-[#0A0A0D] py-3">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl text-white/70 hover:text-white text-xs font-medium"
+                  className="px-5 py-2.5 rounded-none text-white/70 hover:text-white font-mono text-xs uppercase tracking-wider"
                 >
-                  Cancel
+                  CANCEL
                 </button>
                 <button
                   type="submit"
                   disabled={isUploadingImage}
-                  className="px-8 py-3 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#B38F26] text-black font-bold text-xs hover:brightness-110 transition shadow-xl shadow-[#D4AF37]/20 flex items-center gap-2"
+                  className="px-8 py-3 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-wider transition border border-[#D4AF37] shadow-xl flex items-center gap-2"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>Save Phone to Inventory</span>
+                  <span>COMMIT TO INVENTORY</span>
                 </button>
               </div>
             </form>
@@ -2441,24 +2551,31 @@ export default function AdminDashboardPage() {
 
       {/* MODAL 2: EDIT EXISTING PHONE */}
       {isEditModalOpen && editingPhone && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
-          <div className="bg-[#121217] border border-white/10 rounded-2xl w-full max-w-3xl p-6 sm:p-8 relative my-8 max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="relative bg-[#0A0A0D] border border-white/20 rounded-none w-full max-w-3xl p-6 sm:p-8 my-8 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <span className="absolute top-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+            <span className="absolute top-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+            <span className="absolute bottom-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+            <span className="absolute bottom-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+
             <button
               onClick={() => setIsEditModalOpen(false)}
-              className="absolute top-5 right-5 text-white/50 hover:text-white p-1 rounded-lg hover:bg-white/10 transition"
+              className="absolute top-5 right-5 text-white/50 hover:text-white p-1.5 rounded-none border border-white/10 hover:border-white/30 transition"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
 
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
-                  <Edit3 className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-none bg-black border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+                  <Edit3 className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">Edit Smartphone Details</h2>
-                  <p className="text-xs text-white/50">
-                    Modifying <strong className="text-white">{editingPhone.name}</strong> • Updates reflect instantly in client view.
+                  <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-white">
+                    [ EDIT // {editingPhone.name} ]
+                  </h2>
+                  <p className="text-[11px] font-mono text-white/40">
+                    Modifications reflect immediately on customer pages and checkout pricing.
                   </p>
                 </div>
               </div>
@@ -2466,23 +2583,23 @@ export default function AdminDashboardPage() {
               <Link
                 href={`/phones/${editingPhone.slug}`}
                 target="_blank"
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs text-white font-medium transition"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-mono uppercase tracking-wider text-white transition"
               >
                 <Eye className="w-3.5 h-3.5 text-[#D4AF37]" />
-                <span>View Live Page</span>
+                <span>VIEW LIVE PAGE</span>
               </Link>
             </div>
 
-            <form onSubmit={handleSaveEditPhone} className="space-y-6">
+            <form onSubmit={handleSaveEditPhone} className="space-y-6 font-mono">
               {/* PHOTO SECTION */}
-              <div className="p-4 rounded-xl border border-dashed border-white/20 bg-white/[0.02] space-y-3">
-                <label className="text-xs font-semibold text-white/80 uppercase tracking-wider flex items-center gap-1.5">
+              <div className="p-4 rounded-none border border-dashed border-white/20 bg-black/40 space-y-3">
+                <label className="text-[11px] font-mono font-bold text-white/80 uppercase tracking-wider flex items-center gap-1.5">
                   <ImageIcon className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Update Photo & Multi-Angle Gallery</span>
+                  <span>01 // UPDATE PRIMARY PHOTO & GALLERY ASSETS</span>
                 </label>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <div className="w-24 h-24 rounded-xl bg-black/60 border border-white/10 p-2 flex items-center justify-center shrink-0 relative overflow-hidden">
+                  <div className="w-24 h-24 rounded-none bg-black border border-white/15 p-2 flex items-center justify-center shrink-0 relative overflow-hidden">
                     <img
                       src={editingPhone.images?.[0] || "/placeholder.png"}
                       alt={editingPhone.name}
@@ -2491,9 +2608,9 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div className="flex-1 w-full space-y-2">
-                    <label className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold cursor-pointer border border-white/20 transition">
-                      <Upload className="w-4 h-4 text-[#D4AF37]" />
-                      <span>{isUploadingEditImage ? "Uploading..." : "Replace Primary Image (Cloudinary)"}</span>
+                    <label className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none bg-white/5 hover:bg-white/10 text-white text-xs font-mono uppercase tracking-wider cursor-pointer border border-white/20 transition">
+                      <Upload className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>{isUploadingEditImage ? "UPLOADING..." : "REPLACE PRIMARY IMAGE (CLOUDINARY)"}</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -2512,20 +2629,20 @@ export default function AdminDashboardPage() {
                           images: [e.target.value, ...(editingPhone.images?.slice(1) || [])],
                         })
                       }
-                      className="w-full bg-[#17171F] border border-white/10 rounded-lg px-3 py-2 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none font-mono"
+                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] text-white/60 mb-1">
+                  <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">
                     Additional Gallery Photos (One URL per line — creates angle thumbnails for customer)
                   </label>
                   <textarea
                     rows={2}
                     value={editExtraImagesText}
                     onChange={(e) => setEditExtraImagesText(e.target.value)}
-                    className="w-full bg-[#17171F] border border-white/10 rounded-xl p-3 text-xs text-white/80 focus:border-[#D4AF37] focus:outline-none font-mono"
+                    className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/80 focus:border-[#D4AF37] focus:outline-none"
                   />
                 </div>
               </div>
@@ -2534,22 +2651,22 @@ export default function AdminDashboardPage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1.5">Model Name *</label>
+                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Model Name *</label>
                     <input
                       type="text"
                       required
                       value={editingPhone.name}
                       onChange={(e) => setEditingPhone({ ...editingPhone, name: e.target.value })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-[#D4AF37] focus:outline-none font-semibold"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-bold"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1.5">Brand</label>
+                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Brand</label>
                     <select
                       value={editingPhone.brand}
                       onChange={(e) => setEditingPhone({ ...editingPhone, brand: e.target.value as any })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     >
                       <option value="Apple">Apple</option>
                       <option value="Samsung">Samsung</option>
@@ -2563,45 +2680,45 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-white/80 mb-1.5">Tagline / Subtitle</label>
+                  <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Tagline / Subtitle</label>
                   <input
                     type="text"
                     value={editingPhone.tagline}
                     onChange={(e) => setEditingPhone({ ...editingPhone, tagline: e.target.value })}
-                    className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                    className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1.5">Base Price in FCFA *</label>
+                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Base Price in FCFA *</label>
                     <input
                       type="number"
                       required
                       step={5000}
                       value={editingPhone.basePrice}
                       onChange={(e) => setEditingPhone({ ...editingPhone, basePrice: Number(e.target.value) })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-[#D4AF37] font-mono font-bold focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-[#D4AF37] font-bold focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1.5">Original Price (Strike-through)</label>
+                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Original Price (Strike-through)</label>
                     <input
                       type="number"
                       step={5000}
                       value={editingPhone.originalPrice || ""}
                       onChange={(e) => setEditingPhone({ ...editingPhone, originalPrice: e.target.value ? Number(e.target.value) : undefined })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white/70 font-mono focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white/50 focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-white/80 mb-1.5">Condition</label>
+                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Condition</label>
                     <select
                       value={editingPhone.condition}
                       onChange={(e) => setEditingPhone({ ...editingPhone, condition: e.target.value as any })}
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     >
                       <option value="Brand New">Brand New (Sealed)</option>
                       <option value="Certified Refurbished">Certified Pre-Owned</option>
@@ -2610,66 +2727,66 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-white/80 mb-1.5">Warranty Guarantee String</label>
+                  <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Warranty Guarantee String</label>
                   <input
                     type="text"
                     value={editingPhone.warranty}
                     onChange={(e) => setEditingPhone({ ...editingPhone, warranty: e.target.value })}
-                    className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                    className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                   />
                 </div>
               </div>
 
               {/* STORAGE TIERS MANAGER */}
-              <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-3">
+              <div className="p-4 rounded-none bg-black/50 border border-white/15 space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                    <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
                       <Layers className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      <span>Storage Tiers & Stock Count</span>
+                      <span>02 // STORAGE TIERS & STOCK UNITS</span>
                     </h3>
-                    <p className="text-[11px] text-white/50">
+                    <p className="text-[11px] font-mono text-white/50">
                       Manage capacities, pricing per size, and units currently in stock.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={handleAddEditStorageTier}
-                    className="px-3 py-1.5 rounded-lg bg-[#D4AF37]/20 hover:bg-[#D4AF37]/30 text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-semibold transition"
+                    className="px-3 py-1.5 rounded-none bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-mono uppercase tracking-wider transition"
                   >
-                    + Add Storage Tier
+                    + ADD STORAGE TIER
                   </button>
                 </div>
 
                 <div className="space-y-2">
                   {(editingPhone.storageVariants || []).map((tier, idx) => (
-                    <div key={tier.id || idx} className="grid grid-cols-12 gap-2 items-center bg-[#17171F] p-2.5 rounded-xl border border-white/5">
+                    <div key={tier.id || idx} className="grid grid-cols-12 gap-2 items-center bg-black p-2.5 rounded-none border border-white/10">
                       <div className="col-span-3">
-                        <label className="block text-[10px] text-white/40 mb-0.5">Capacity</label>
+                        <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Capacity</label>
                         <input
                           type="text"
                           value={tier.size}
                           onChange={(e) => handleUpdateEditStorageTier(idx, "size", e.target.value)}
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold"
+                          className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-1.5 text-xs text-white font-bold"
                         />
                       </div>
                       <div className="col-span-5">
-                        <label className="block text-[10px] text-white/40 mb-0.5">Price (FCFA)</label>
+                        <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Price (FCFA)</label>
                         <input
                           type="number"
                           step={5000}
                           value={tier.price}
                           onChange={(e) => handleUpdateEditStorageTier(idx, "price", Number(e.target.value))}
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-[#D4AF37] font-mono font-bold"
+                          className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-1.5 text-xs text-[#D4AF37] font-bold"
                         />
                       </div>
                       <div className="col-span-3">
-                        <label className="block text-[10px] text-white/40 mb-0.5">Stock Units</label>
+                        <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Stock Units</label>
                         <input
                           type="number"
                           value={tier.stock}
                           onChange={(e) => handleUpdateEditStorageTier(idx, "stock", Number(e.target.value))}
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                          className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-1.5 text-xs text-white"
                         />
                       </div>
                       <div className="col-span-1 pt-4 text-center">
@@ -2688,15 +2805,15 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* HARDWARE SPECS */}
-              <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-3">
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+              <div className="p-4 rounded-none bg-black/50 border border-white/15 space-y-3">
+                <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
                   <Wrench className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Hardware Specifications</span>
+                  <span>03 // HARDWARE SPECIFICATIONS</span>
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] text-white/70 mb-1">Processor</label>
+                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Processor</label>
                     <input
                       type="text"
                       value={editingPhone.specs?.processor || ""}
@@ -2706,11 +2823,11 @@ export default function AdminDashboardPage() {
                           specs: { ...editingPhone.specs, processor: e.target.value },
                         })
                       }
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-white/70 mb-1">Screen / Display</label>
+                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Screen / Display</label>
                     <input
                       type="text"
                       value={editingPhone.specs?.screen || ""}
@@ -2720,11 +2837,11 @@ export default function AdminDashboardPage() {
                           specs: { ...editingPhone.specs, screen: e.target.value },
                         })
                       }
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-white/70 mb-1">Rear Camera</label>
+                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Rear Camera</label>
                     <input
                       type="text"
                       value={editingPhone.specs?.rearCamera || ""}
@@ -2734,11 +2851,11 @@ export default function AdminDashboardPage() {
                           specs: { ...editingPhone.specs, rearCamera: e.target.value },
                         })
                       }
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-white/70 mb-1">Battery</label>
+                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Battery</label>
                     <input
                       type="text"
                       value={editingPhone.specs?.battery || ""}
@@ -2748,7 +2865,7 @@ export default function AdminDashboardPage() {
                           specs: { ...editingPhone.specs, battery: e.target.value },
                         })
                       }
-                      className="w-full bg-[#17171F] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                     />
                   </div>
                 </div>
@@ -2757,45 +2874,45 @@ export default function AdminDashboardPage() {
               {/* HIGHLIGHTS & BOX CONTENTS */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-white/80 mb-1">
+                  <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">
                     Device Highlights (One per line)
                   </label>
                   <textarea
                     rows={3}
                     value={editHighlightsText}
                     onChange={(e) => setEditHighlightsText(e.target.value)}
-                    className="w-full bg-[#17171F] border border-white/10 rounded-xl p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
+                    className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-white/80 mb-1">
+                  <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">
                     Box Contents (One per line)
                   </label>
                   <textarea
                     rows={3}
                     value={editBoxContentsText}
                     onChange={(e) => setEditBoxContentsText(e.target.value)}
-                    className="w-full bg-[#17171F] border border-white/10 rounded-xl p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
+                    className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
                   />
                 </div>
               </div>
 
               {/* ACTIONS */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10 sticky bottom-0 bg-[#121217] py-2">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10 sticky bottom-0 bg-[#0A0A0D] py-3">
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl text-white/70 hover:text-white text-xs font-medium"
+                  className="px-5 py-2.5 rounded-none text-white/70 hover:text-white font-mono text-xs uppercase tracking-wider"
                 >
-                  Cancel
+                  CANCEL
                 </button>
                 <button
                   type="submit"
                   disabled={isUpdatingPhone}
-                  className="px-8 py-3 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#B38F26] text-black font-bold text-xs hover:brightness-110 transition shadow-xl shadow-[#D4AF37]/20 flex items-center gap-2 disabled:opacity-50"
+                  className="px-8 py-3 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-wider transition border border-[#D4AF37] shadow-xl flex items-center gap-2 disabled:opacity-50"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>{isUpdatingPhone ? "Saving Changes..." : "Save Changes to Storefront"}</span>
+                  <span>{isUpdatingPhone ? "SAVING..." : "COMMIT CHANGES TO STORE"}</span>
                 </button>
               </div>
             </form>
