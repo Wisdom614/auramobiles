@@ -43,6 +43,8 @@ import {
   Check,
   Image as ImageIcon,
   Wrench,
+  Camera,
+  Wand2,
 } from "lucide-react";
 import { formatCFA } from "@/lib/formatters";
 import { Phone, PHONES, StorageVariant } from "@/lib/data/phones";
@@ -119,6 +121,9 @@ export default function AdminDashboardPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [selectedPresetId, setSelectedPresetId] = useState<string>("");
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [isGeneratingWithAI, setIsGeneratingWithAI] = useState(false);
+  const [isPolishingCopy, setIsPolishingCopy] = useState(false);
 
   const INITIAL_NEW_PHONE = {
     name: "",
@@ -325,6 +330,112 @@ export default function AdminDashboardPage() {
       boxContentsText: preset.boxContents.join("\n"),
     });
     showToast(`Auto-filled specs & pricing for ${preset.name}`, "success");
+  };
+
+  // AI Smart Autofill Function
+  const handleAIAutofill = async (promptOverride?: string) => {
+    const target = (promptOverride || aiPrompt || newPhone.name).trim();
+    if (!target) {
+      showToast("Please enter a phone model name (e.g. Samsung S25 Ultra or iPhone 16 Pro)", "info");
+      return;
+    }
+
+    setIsGeneratingWithAI(true);
+    showToast(`AI is researching & populating specs for "${target}"...`, "info");
+
+    try {
+      const res = await fetch("/api/ai/admin-phone-autofill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneName: target, action: "autofill" }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.data) {
+        showToast(data.error || "Could not auto-generate specs.", "error");
+        return;
+      }
+
+      const p = data.data;
+      setNewPhone({
+        name: p.name || target,
+        brand: (p.brand || "Apple") as Phone["brand"],
+        tagline: p.tagline || `${p.name} - Luxury Flagship Edition`,
+        condition: p.condition || "Brand New",
+        warranty: p.warranty || "Official Boutique Warranty",
+        basePrice: Number(p.basePrice) || 650000,
+        originalPrice: Number(p.originalPrice) || Number(p.basePrice) + 50000,
+        thumbnail: p.thumbnail || newPhone.thumbnail,
+        extraImagesText: Array.isArray(p.extraImages) ? p.extraImages.slice(1).join("\n") : "",
+        stockCount: p.stockCount || 6,
+        storageTiers: p.storageTiers && p.storageTiers.length > 0 ? p.storageTiers : [
+          { size: "256GB", price: Number(p.basePrice), stock: 4 },
+          { size: "512GB", price: Number(p.basePrice) + 100000, stock: 2 }
+        ],
+        colorName: p.colorName || "Titanium",
+        colorHex: p.colorHex || "#8A8A8E",
+        screen: p.screen || "6.7\" 120Hz OLED",
+        processor: p.processor || "Flagship Octa-Core Processor",
+        ram: p.ram || "12GB LPDDR5X",
+        rearCamera: p.rearCamera || "50MP Triple Pro Camera Array",
+        frontCamera: p.frontCamera || "32MP HDR Camera",
+        battery: p.battery || "5000 mAh",
+        charging: p.charging || "45W Fast Charging",
+        os: p.os || "Latest Flagship OS",
+        waterResistance: p.waterResistance || "IP68 Certified",
+        highlightsText: Array.isArray(p.highlights) ? p.highlights.join("\n") : "",
+        boxContentsText: Array.isArray(p.boxContents) ? p.boxContents.join("\n") : "",
+      });
+
+      showToast(`✨ AI successfully populated all specs & pricing for ${p.name}!`, "success");
+    } catch (err: any) {
+      console.error("AI Autofill error:", err);
+      showToast("AI Autofill service temporarily unavailable.", "error");
+    } finally {
+      setIsGeneratingWithAI(false);
+    }
+  };
+
+  // AI Polish Copy Function
+  const handleAIPolishCopy = async (isEdit: boolean = false) => {
+    const targetName = isEdit ? editingPhone?.name : newPhone.name;
+    if (!targetName) {
+      showToast("Please provide a phone model name first.", "info");
+      return;
+    }
+
+    setIsPolishingCopy(true);
+    showToast("AI is writing luxury marketing copy...", "info");
+
+    try {
+      const res = await fetch("/api/ai/admin-phone-autofill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneName: targetName, action: "polish_copy" }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.data) {
+        const { tagline, highlights } = data.data;
+        if (isEdit && editingPhone) {
+          setEditingPhone({ ...editingPhone, tagline: tagline || editingPhone.tagline });
+          if (highlights && Array.isArray(highlights)) {
+            setEditHighlightsText(highlights.join("\n"));
+          }
+        } else {
+          setNewPhone((prev) => ({
+            ...prev,
+            tagline: tagline || prev.tagline,
+            highlightsText: Array.isArray(highlights) ? highlights.join("\n") : prev.highlightsText,
+          }));
+        }
+        showToast("✨ AI polished tagline and selling points!", "success");
+      }
+    } catch {
+      showToast("Could not polish copy with AI.", "error");
+    } finally {
+      setIsPolishingCopy(false);
+    }
   };
 
   // Handle Image Upload
@@ -2660,769 +2771,850 @@ export default function AdminDashboardPage() {
         )}
       </main>
 
-      {/* MODAL 1: ADD NEW PHONE (WITH 1-CLICK PRESETS) */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in overflow-y-auto">
-          <div className="relative bg-[#0A0A0D] border border-white/20 rounded-none w-full max-w-3xl p-6 sm:p-8 my-8 max-h-[90vh] overflow-y-auto shadow-2xl">
-            <span className="absolute top-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
-            <span className="absolute top-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
-            <span className="absolute bottom-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
-            <span className="absolute bottom-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+      {/* MODAL 1: ADD NEW PHONE (MOBILE-OPTIMIZED WITH AI AUTOFILL & PRESETS) */}
+          {isAddModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/90 backdrop-blur-md animate-fade-in overflow-y-auto">
+              <div className="relative bg-[#0A0A0D] border border-white/20 rounded-none w-full max-w-3xl p-4 sm:p-8 my-auto sm:my-8 max-h-[96vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl">
+                <span className="absolute top-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+                <span className="absolute top-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+                <span className="absolute bottom-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+                <span className="absolute bottom-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
 
-            <button
-              onClick={() => setIsAddModalOpen(false)}
-              className="absolute top-5 right-5 text-white/50 hover:text-white p-1.5 rounded-none border border-white/10 hover:border-white/30 transition"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-9 h-9 rounded-none bg-black border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
-                <Smartphone className="w-4 h-4" />
-              </div>
-              <div>
-                <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-white">
-                  [ BLUEPRINT // REGISTER FLAGSHIP SMARTPHONE ]
-                </h2>
-                <p className="text-[11px] font-mono text-white/40">
-                  Data committed here synchronizes instantly with client catalog and live specs tables.
-                </p>
-              </div>
-            </div>
-
-            {/* PRESET QUICK-FILL TOOLBAR */}
-            <div className="relative p-4 rounded-none bg-[#0E0E14] border border-[#D4AF37]/40 my-5">
-              <span className="absolute top-1.5 left-1.5 text-[9px] font-mono text-[#D4AF37]/40 select-none">+</span>
-              <span className="absolute top-1.5 right-1.5 text-[9px] font-mono text-[#D4AF37]/40 select-none">+</span>
-
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <label className="text-[11px] font-mono font-bold text-white uppercase tracking-wider">
-                    1-CLICK FLAGSHIP SPEC PRESETS
-                  </label>
-                </div>
-                <span className="text-[10px] text-[#D4AF37] font-mono font-semibold uppercase">
-                  ZERO MANUAL TYPING
-                </span>
-              </div>
-              <p className="text-[11px] font-mono text-white/60 mb-3">
-                Select any flagship model below to auto-populate hardware specs, camera array, battery, storage tiers, and luxury photos.
-              </p>
-              <select
-                value={selectedPresetId}
-                onChange={(e) => handleSelectPreset(e.target.value)}
-                className="w-full bg-black border border-[#D4AF37]/60 rounded-none px-3.5 py-2.5 font-mono text-xs text-[#F3E5AB] font-bold focus:outline-none focus:ring-1 focus:ring-[#D4AF37] cursor-pointer"
-              >
-                <option value="">-- CHOOSE PRESET TO POPULATE SPEC BLUEPRINT --</option>
-                {FLAGSHIP_PRESETS.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} ({p.brand}) • {p.condition} • {formatCFA(p.basePrice)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <form onSubmit={handleCreatePhone} className="space-y-6 font-mono">
-              {/* SECTION 1: PHOTO & GALLERY */}
-              <div className="p-4 rounded-none border border-dashed border-white/20 bg-black/40 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-mono font-bold text-white/80 uppercase tracking-wider flex items-center gap-1.5">
-                    <ImageIcon className="w-3.5 h-3.5 text-[#D4AF37]" />
-                    <span>01 // PRIMARY PHOTO & GALLERY (CUSTOMER VIEW)</span>
-                  </label>
-                  <span className="text-[10px] font-mono text-white/40">Cloudinary Upload or Direct URLs</span>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <div className="w-24 h-24 rounded-none bg-black border border-white/15 p-2 flex items-center justify-center shrink-0 relative overflow-hidden">
-                    <img
-                      src={newPhone.thumbnail || "/placeholder.png"}
-                      alt="Primary Preview"
-                      className="max-h-full max-w-full object-contain"
-                    />
-                  </div>
-
-                  <div className="flex-1 w-full space-y-2">
-                    <label className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none bg-white/5 hover:bg-white/10 text-white text-xs font-mono uppercase tracking-wider cursor-pointer border border-white/20 transition">
-                      <Upload className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      <span>{isUploadingImage ? "UPLOADING TO CLOUDINARY..." : "UPLOAD PRIMARY PHOTO (CLOUDINARY)"}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageFileChange}
-                        disabled={isUploadingImage}
-                        className="hidden"
-                      />
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Or paste primary image URL..."
-                      value={newPhone.thumbnail}
-                      onChange={(e) => setNewPhone({ ...newPhone, thumbnail: e.target.value })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-mono text-white/60 uppercase tracking-wider mb-1">
-                    Additional Gallery Photos (One URL per line — creates customer angle thumbnails)
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={newPhone.extraImagesText}
-                    onChange={(e) => setNewPhone({ ...newPhone, extraImagesText: e.target.value })}
-                    placeholder="https://images.unsplash.com/...&#10;https://images.unsplash.com/..."
-                    className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/80 focus:border-[#D4AF37] focus:outline-none font-mono"
-                  />
-                </div>
-              </div>
-
-              {/* SECTION 2: IDENTITY & PRICING */}
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Model Name *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. iPhone 16 Pro Max"
-                      value={newPhone.name}
-                      onChange={(e) => setNewPhone({ ...newPhone, name: e.target.value })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Brand *</label>
-                    <select
-                      value={newPhone.brand}
-                      onChange={(e) => setNewPhone({ ...newPhone, brand: e.target.value as any })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                    >
-                      <option value="Apple">Apple</option>
-                      <option value="Samsung">Samsung</option>
-                      <option value="Google">Google Pixel</option>
-                      <option value="Xiaomi">Xiaomi</option>
-                      <option value="Tecno">Tecno</option>
-                      <option value="Infinix">Infinix</option>
-                      <option value="OnePlus">OnePlus</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Tagline / Luxury Subtitle</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Apple's Ultimate Flagship with Grade 5 Titanium & A18 Pro"
-                    value={newPhone.tagline}
-                    onChange={(e) => setNewPhone({ ...newPhone, tagline: e.target.value })}
-                    className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Base Price in FCFA *</label>
-                    <input
-                      type="number"
-                      required
-                      step={5000}
-                      value={newPhone.basePrice}
-                      onChange={(e) => setNewPhone({ ...newPhone, basePrice: Number(e.target.value) })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-[#D4AF37] font-bold focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Original Price (Strike-through)</label>
-                    <input
-                      type="number"
-                      step={5000}
-                      value={newPhone.originalPrice}
-                      onChange={(e) => setNewPhone({ ...newPhone, originalPrice: Number(e.target.value) })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white/50 focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Condition</label>
-                    <select
-                      value={newPhone.condition}
-                      onChange={(e) => setNewPhone({ ...newPhone, condition: e.target.value as any })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                    >
-                      <option value="Brand New">Brand New (100% Sealed)</option>
-                      <option value="Certified Refurbished">Certified Pre-Owned</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Warranty Guarantee Text</label>
-                  <input
-                    type="text"
-                    value={newPhone.warranty}
-                    onChange={(e) => setNewPhone({ ...newPhone, warranty: e.target.value })}
-                    className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* SECTION 3: STORAGE VARIANTS & STOCK MANAGER */}
-              <div className="p-4 rounded-none bg-black/50 border border-white/15 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      <span>02 // STORAGE TIERS & STOCK INVENTORY</span>
-                    </h3>
-                    <p className="text-[11px] font-mono text-white/50">
-                      These appear as selectable chips on the product page, dynamically updating customer pricing.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleAddStorageTier}
-                    className="px-3 py-1.5 rounded-none bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-mono uppercase tracking-wider transition"
-                  >
-                    + ADD TIER
-                  </button>
-                </div>
-
-                <div className="space-y-2">
-                  {(newPhone.storageTiers || []).map((tier, idx) => (
-                    <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-black p-2.5 rounded-none border border-white/10">
-                      <div className="col-span-3">
-                        <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Capacity</label>
-                        <input
-                          type="text"
-                          value={tier.size}
-                          onChange={(e) => handleUpdateStorageTier(idx, "size", e.target.value)}
-                          placeholder="e.g. 256GB"
-                          className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-1.5 text-xs text-white font-bold"
-                        />
-                      </div>
-                      <div className="col-span-5">
-                        <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Price (FCFA)</label>
-                        <input
-                          type="number"
-                          step={5000}
-                          value={tier.price}
-                          onChange={(e) => handleUpdateStorageTier(idx, "price", Number(e.target.value))}
-                          className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-1.5 text-xs text-[#D4AF37] font-bold"
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Stock Units</label>
-                        <input
-                          type="number"
-                          value={tier.stock}
-                          onChange={(e) => handleUpdateStorageTier(idx, "stock", Number(e.target.value))}
-                          className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-1.5 text-xs text-white"
-                        />
-                      </div>
-                      <div className="col-span-1 pt-4 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveStorageTier(idx)}
-                          className="text-red-400 hover:text-red-300 p-1"
-                          title="Remove tier"
-                        >
-                          <Trash2 className="w-3.5 h-3.5 mx-auto" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* SECTION 4: REAL HARDWARE SPECIFICATIONS */}
-              <div className="p-4 rounded-none bg-black/50 border border-white/15 space-y-3">
-                <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <Wrench className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>03 // COMPONENT ARCHITECTURE & HARDWARE SPECS</span>
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Processor</label>
-                    <input
-                      type="text"
-                      value={newPhone.processor}
-                      onChange={(e) => setNewPhone({ ...newPhone, processor: e.target.value })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Display Screen</label>
-                    <input
-                      type="text"
-                      value={newPhone.screen}
-                      onChange={(e) => setNewPhone({ ...newPhone, screen: e.target.value })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Rear Camera Array</label>
-                    <input
-                      type="text"
-                      value={newPhone.rearCamera}
-                      onChange={(e) => setNewPhone({ ...newPhone, rearCamera: e.target.value })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Battery Capacity</label>
-                    <input
-                      type="text"
-                      value={newPhone.battery}
-                      onChange={(e) => setNewPhone({ ...newPhone, battery: e.target.value })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">RAM Memory</label>
-                    <input
-                      type="text"
-                      value={newPhone.ram}
-                      onChange={(e) => setNewPhone({ ...newPhone, ram: e.target.value })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Fast Charging & Wireless</label>
-                    <input
-                      type="text"
-                      value={newPhone.charging}
-                      onChange={(e) => setNewPhone({ ...newPhone, charging: e.target.value })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 5: HIGHLIGHTS & BOX CONTENTS */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">
-                    Device Highlights (One bullet per line)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={newPhone.highlightsText}
-                    onChange={(e) => setNewPhone({ ...newPhone, highlightsText: e.target.value })}
-                    className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">
-                    What's In The Box (One item per line)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={newPhone.boxContentsText}
-                    onChange={(e) => setNewPhone({ ...newPhone, boxContentsText: e.target.value })}
-                    className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* SUBMIT ACTION BAR */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10 sticky bottom-0 bg-[#0A0A0D] py-3">
                 <button
-                  type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-5 py-2.5 rounded-none text-white/70 hover:text-white font-mono text-xs uppercase tracking-wider"
+                  className="absolute top-4 right-4 text-white/50 hover:text-white p-2 rounded-none border border-white/10 hover:border-white/30 transition"
+                  title="Close modal"
                 >
-                  CANCEL
+                  <X className="w-4 h-4" />
                 </button>
-                <button
-                  type="submit"
-                  disabled={isUploadingImage}
-                  className="px-8 py-3 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-wider transition border border-[#D4AF37] shadow-xl flex items-center gap-2"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>COMMIT TO INVENTORY</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* MODAL 2: EDIT EXISTING PHONE */}
-      {isEditModalOpen && editingPhone && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in overflow-y-auto">
-          <div className="relative bg-[#0A0A0D] border border-white/20 rounded-none w-full max-w-3xl p-6 sm:p-8 my-8 max-h-[90vh] overflow-y-auto shadow-2xl">
-            <span className="absolute top-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
-            <span className="absolute top-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
-            <span className="absolute bottom-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
-            <span className="absolute bottom-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
-
-            <button
-              onClick={() => setIsEditModalOpen(false)}
-              className="absolute top-5 right-5 text-white/50 hover:text-white p-1.5 rounded-none border border-white/10 hover:border-white/30 transition"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-none bg-black border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
-                  <Edit3 className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-white">
-                    [ EDIT // {editingPhone.name} ]
-                  </h2>
-                  <p className="text-[11px] font-mono text-white/40">
-                    Modifications reflect immediately on customer pages and checkout pricing.
-                  </p>
-                </div>
-              </div>
-
-              <Link
-                href={`/phones/${editingPhone.slug}`}
-                target="_blank"
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-mono uppercase tracking-wider text-white transition"
-              >
-                <Eye className="w-3.5 h-3.5 text-[#D4AF37]" />
-                <span>VIEW LIVE PAGE</span>
-              </Link>
-            </div>
-
-            <form onSubmit={handleSaveEditPhone} className="space-y-6 font-mono">
-              {/* PHOTO SECTION */}
-              <div className="p-4 rounded-none border border-dashed border-white/20 bg-black/40 space-y-3">
-                <label className="text-[11px] font-mono font-bold text-white/80 uppercase tracking-wider flex items-center gap-1.5">
-                  <ImageIcon className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>01 // UPDATE PRIMARY PHOTO & GALLERY ASSETS</span>
-                </label>
-
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <div className="w-24 h-24 rounded-none bg-black border border-white/15 p-2 flex items-center justify-center shrink-0 relative overflow-hidden">
-                    <img
-                      src={editingPhone.images?.[0] || "/placeholder.png"}
-                      alt={editingPhone.name}
-                      className="max-h-full max-w-full object-contain"
-                    />
+                <div className="flex items-center gap-3 mb-1 pr-10">
+                  <div className="w-9 h-9 rounded-none bg-black border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
+                    <Smartphone className="w-4 h-4" />
                   </div>
-
-                  <div className="flex-1 w-full space-y-2">
-                    <label className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-none bg-white/5 hover:bg-white/10 text-white text-xs font-mono uppercase tracking-wider cursor-pointer border border-white/20 transition">
-                      <Upload className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      <span>{isUploadingEditImage ? "UPLOADING..." : "REPLACE PRIMARY IMAGE (CLOUDINARY)"}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleEditImageUpload}
-                        disabled={isUploadingEditImage}
-                        className="hidden"
-                      />
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Or update primary image URL..."
-                      value={editingPhone.images?.[0] || ""}
-                      onChange={(e) =>
-                        setEditingPhone({
-                          ...editingPhone,
-                          images: [e.target.value, ...(editingPhone.images?.slice(1) || [])],
-                        })
-                      }
-                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">
-                    Additional Gallery Photos (One URL per line — creates angle thumbnails for customer)
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={editExtraImagesText}
-                    onChange={(e) => setEditExtraImagesText(e.target.value)}
-                    className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/80 focus:border-[#D4AF37] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* MODEL IDENTITY */}
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Model Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={editingPhone.name}
-                      onChange={(e) => setEditingPhone({ ...editingPhone, name: e.target.value })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-bold"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Brand</label>
-                    <select
-                      value={editingPhone.brand}
-                      onChange={(e) => setEditingPhone({ ...editingPhone, brand: e.target.value as any })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                    >
-                      <option value="Apple">Apple</option>
-                      <option value="Samsung">Samsung</option>
-                      <option value="Google">Google Pixel</option>
-                      <option value="Xiaomi">Xiaomi</option>
-                      <option value="Tecno">Tecno</option>
-                      <option value="Infinix">Infinix</option>
-                      <option value="OnePlus">OnePlus</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Tagline / Subtitle</label>
-                  <input
-                    type="text"
-                    value={editingPhone.tagline}
-                    onChange={(e) => setEditingPhone({ ...editingPhone, tagline: e.target.value })}
-                    className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Base Price in FCFA *</label>
-                    <input
-                      type="number"
-                      required
-                      step={5000}
-                      value={editingPhone.basePrice}
-                      onChange={(e) => setEditingPhone({ ...editingPhone, basePrice: Number(e.target.value) })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-[#D4AF37] font-bold focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Original Price (Strike-through)</label>
-                    <input
-                      type="number"
-                      step={5000}
-                      value={editingPhone.originalPrice || ""}
-                      onChange={(e) => setEditingPhone({ ...editingPhone, originalPrice: e.target.value ? Number(e.target.value) : undefined })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white/50 focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Condition</label>
-                    <select
-                      value={editingPhone.condition}
-                      onChange={(e) => setEditingPhone({ ...editingPhone, condition: e.target.value as any })}
-                      className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                    >
-                      <option value="Brand New">Brand New (Sealed)</option>
-                      <option value="Certified Refurbished">Certified Pre-Owned</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Warranty Guarantee String</label>
-                  <input
-                    type="text"
-                    value={editingPhone.warranty}
-                    onChange={(e) => setEditingPhone({ ...editingPhone, warranty: e.target.value })}
-                    className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* STORAGE TIERS MANAGER */}
-              <div className="p-4 rounded-none bg-black/50 border border-white/15 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      <span>02 // STORAGE TIERS & STOCK UNITS</span>
-                    </h3>
-                    <p className="text-[11px] font-mono text-white/50">
-                      Manage capacities, pricing per size, and units currently in stock.
+                    <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-white">
+                      REGISTER SMARTPHONE INVENTORY
+                    </h2>
+                    <p className="text-[11px] font-mono text-white/40">
+                      Data committed here synchronizes live with client catalog and specs tables.
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleAddEditStorageTier}
-                    className="px-3 py-1.5 rounded-none bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-mono uppercase tracking-wider transition"
-                  >
-                    + ADD STORAGE TIER
-                  </button>
                 </div>
 
-                <div className="space-y-2">
-                  {(editingPhone.storageVariants || []).map((tier, idx) => (
-                    <div key={tier.id || idx} className="grid grid-cols-12 gap-2 items-center bg-black p-2.5 rounded-none border border-white/10">
-                      <div className="col-span-3">
-                        <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Capacity</label>
+                {/* AI SMART SPEC AUTOFILL BAR */}
+                <div className="relative p-4 rounded-none bg-[#0E0E14] border border-[#D4AF37]/50 my-4 space-y-3">
+                  <span className="absolute top-1.5 left-1.5 text-[9px] font-mono text-[#D4AF37]/40 select-none">+</span>
+                  <span className="absolute top-1.5 right-1.5 text-[9px] font-mono text-[#D4AF37]/40 select-none">+</span>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-[#D4AF37] animate-pulse" />
+                      <label className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                        AI SMART SPEC AUTOFILL &amp; PRICING
+                      </label>
+                    </div>
+                    <span className="text-[9px] text-[#D4AF37] font-mono font-bold uppercase tracking-widest">
+                      GEMINI 2.5 INTEGRATED
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="TYPE ANY MODEL (E.G. SAMSUNG S25 ULTRA, TECNO CAMON 30, PIXEL 9 PRO)..."
+                      value={aiPrompt}
+                      onChange={(e) => setAiPrompt(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAIAutofill();
+                        }
+                      }}
+                      className="flex-1 bg-black border border-white/20 rounded-none px-3.5 py-2.5 font-mono text-xs text-white placeholder:text-white/30 focus:border-[#D4AF37] focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleAIAutofill()}
+                      disabled={isGeneratingWithAI}
+                      className="px-5 py-2.5 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-wider border border-[#D4AF37] transition flex items-center justify-center gap-2 shrink-0 disabled:opacity-50"
+                    >
+                      {isGeneratingWithAI ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <span>GENERATING...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>AI AUTOFILL</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Quick Suggestion Chips for Fast 1-Tap Fill */}
+                  <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                    <span className="text-[10px] font-mono text-white/40 uppercase">Quick Suggestions:</span>
+                    {[
+                      "iPhone 16 Pro Max",
+                      "Samsung Galaxy S25 Ultra",
+                      "Google Pixel 9 Pro Fold",
+                      "Tecno Camon 30 Premier 5G",
+                      "Xiaomi 14 Ultra",
+                    ].map((presetName) => (
+                      <button
+                        key={presetName}
+                        type="button"
+                        onClick={() => {
+                          setAiPrompt(presetName);
+                          handleAIAutofill(presetName);
+                        }}
+                        className="px-2 py-0.5 bg-black/60 hover:bg-[#D4AF37]/20 text-white/70 hover:text-[#D4AF37] border border-white/10 hover:border-[#D4AF37]/40 text-[10px] font-mono transition"
+                      >
+                        + {presetName}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* PRESET QUICK-FILL TOOLBAR */}
+                <div className="relative p-3 sm:p-4 rounded-none bg-[#0E0E14] border border-white/10 mb-5">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <Layers className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <label className="text-[11px] font-mono font-bold text-white uppercase tracking-wider">
+                        OR SELECT PRE-CONFIGURED FLAGSHIP PRESET
+                      </label>
+                    </div>
+                  </div>
+                  <select
+                    value={selectedPresetId}
+                    onChange={(e) => handleSelectPreset(e.target.value)}
+                    className="w-full bg-black border border-white/20 rounded-none px-3.5 py-2.5 font-mono text-xs text-white focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                  >
+                    <option value="">-- CHOOSE A FLAGSHIP PRESET --</option>
+                    {FLAGSHIP_PRESETS.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({p.brand}) • {p.condition} • {formatCFA(p.basePrice)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <form onSubmit={handleCreatePhone} className="space-y-6 font-mono">
+                  {/* SECTION 1: PHOTO & GALLERY (WITH MOBILE CAMERA SUPPORT) */}
+                  <div className="p-4 rounded-none border border-dashed border-white/20 bg-black/40 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-mono font-bold text-white/80 uppercase tracking-wider flex items-center gap-1.5">
+                        <ImageIcon className="w-3.5 h-3.5 text-[#D4AF37]" />
+                        <span>01 // PRIMARY PHOTO &amp; GALLERY</span>
+                      </label>
+                      <span className="text-[10px] font-mono text-white/40">Camera, Cloudinary, or URLs</span>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                      <div className="w-24 h-24 rounded-none bg-black border border-white/15 p-2 flex items-center justify-center shrink-0 relative overflow-hidden">
+                        <img
+                          src={newPhone.thumbnail || "/placeholder.png"}
+                          alt="Primary Preview"
+                          className="max-h-full max-w-full object-contain"
+                        />
+                      </div>
+
+                      <div className="flex-1 w-full space-y-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <label className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-none bg-white/5 hover:bg-white/10 text-white text-xs font-mono uppercase tracking-wider cursor-pointer border border-white/20 transition">
+                            <Upload className="w-3.5 h-3.5 text-[#D4AF37]" />
+                            <span>{isUploadingImage ? "UPLOADING..." : "UPLOAD PHOTO"}</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageFileChange}
+                              disabled={isUploadingImage}
+                              className="hidden"
+                            />
+                          </label>
+
+                          <label className="sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-none bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] text-xs font-mono font-bold uppercase tracking-wider cursor-pointer border border-[#D4AF37]/40 transition">
+                            <Camera className="w-3.5 h-3.5" />
+                            <span>SNAP CAMERA</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              capture="environment"
+                              onChange={handleImageFileChange}
+                              disabled={isUploadingImage}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+
                         <input
                           type="text"
-                          value={tier.size}
-                          onChange={(e) => handleUpdateEditStorageTier(idx, "size", e.target.value)}
-                          className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-1.5 text-xs text-white font-bold"
+                          placeholder="Or paste primary image URL..."
+                          value={newPhone.thumbnail}
+                          onChange={(e) => setNewPhone({ ...newPhone, thumbnail: e.target.value })}
+                          className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
                         />
-                      </div>
-                      <div className="col-span-5">
-                        <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Price (FCFA)</label>
-                        <input
-                          type="number"
-                          step={5000}
-                          value={tier.price}
-                          onChange={(e) => handleUpdateEditStorageTier(idx, "price", Number(e.target.value))}
-                          className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-1.5 text-xs text-[#D4AF37] font-bold"
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Stock Units</label>
-                        <input
-                          type="number"
-                          value={tier.stock}
-                          onChange={(e) => handleUpdateEditStorageTier(idx, "stock", Number(e.target.value))}
-                          className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-1.5 text-xs text-white"
-                        />
-                      </div>
-                      <div className="col-span-1 pt-4 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveEditStorageTier(idx)}
-                          className="text-red-400 hover:text-red-300 p-1"
-                          title="Remove tier"
-                        >
-                          <Trash2 className="w-3.5 h-3.5 mx-auto" />
-                        </button>
                       </div>
                     </div>
-                  ))}
-                </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-white/60 uppercase tracking-wider mb-1">
+                        Additional Gallery Photos (One URL per line — creates client angle thumbnails)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={newPhone.extraImagesText}
+                        onChange={(e) => setNewPhone({ ...newPhone, extraImagesText: e.target.value })}
+                        placeholder="https://images.unsplash.com/...&#10;https://images.unsplash.com/..."
+                        className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/80 focus:border-[#D4AF37] focus:outline-none font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  {/* SECTION 2: IDENTITY & PRICING */}
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Model Name *</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. iPhone 16 Pro Max"
+                          value={newPhone.name}
+                          onChange={(e) => setNewPhone({ ...newPhone, name: e.target.value })}
+                          className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-bold"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Brand *</label>
+                        <select
+                          value={newPhone.brand}
+                          onChange={(e) => setNewPhone({ ...newPhone, brand: e.target.value as any })}
+                          className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                        >
+                          <option value="Apple">Apple</option>
+                          <option value="Samsung">Samsung</option>
+                          <option value="Google">Google Pixel</option>
+                          <option value="Xiaomi">Xiaomi</option>
+                          <option value="Tecno">Tecno</option>
+                          <option value="Infinix">Infinix</option>
+                          <option value="OnePlus">OnePlus</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-[10px] font-mono text-white/70 uppercase tracking-wider">Tagline / Luxury Subtitle</label>
+                        <button
+                          type="button"
+                          onClick={() => handleAIPolishCopy(false)}
+                          disabled={isPolishingCopy || !newPhone.name}
+                          className="text-[10px] font-mono text-[#D4AF37] hover:underline flex items-center gap-1 disabled:opacity-40"
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          <span>{isPolishingCopy ? "POLISHING..." : "✨ AI POLISH COPY"}</span>
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="e.g. Apple's Ultimate Flagship with Grade 5 Titanium & A18 Pro"
+                        value={newPhone.tagline}
+                        onChange={(e) => setNewPhone({ ...newPhone, tagline: e.target.value })}
+                        className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* SECTION 3: STORAGE VARIANTS & STOCK MANAGER (MOBILE-RESPONSIVE) */}
+                  <div className="p-4 rounded-none bg-black/50 border border-white/15 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                          <Layers className="w-3.5 h-3.5 text-[#D4AF37]" />
+                          <span>02 // STORAGE TIERS &amp; STOCK INVENTORY</span>
+                        </h3>
+                        <p className="text-[11px] font-mono text-white/50">
+                          Appear as selectable chips on storefront, dynamically updating customer pricing.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleAddStorageTier}
+                        className="px-3 py-1.5 rounded-none bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-mono uppercase tracking-wider transition self-start sm:self-auto"
+                      >
+                        + ADD TIER
+                      </button>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      {(newPhone.storageTiers || []).map((tier, idx) => (
+                        <div key={idx} className="flex flex-col sm:grid sm:grid-cols-12 gap-2.5 bg-black p-3 rounded-none border border-white/10">
+                          <div className="sm:col-span-3">
+                            <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Capacity</label>
+                            <input
+                              type="text"
+                              value={tier.size}
+                              onChange={(e) => handleUpdateStorageTier(idx, "size", e.target.value)}
+                              placeholder="e.g. 256GB"
+                              className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-2 text-xs text-white font-bold"
+                            />
+                          </div>
+                          <div className="sm:col-span-5">
+                            <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Price in FCFA</label>
+                            <input
+                              type="number"
+                              step={5000}
+                              value={tier.price}
+                              onChange={(e) => handleUpdateStorageTier(idx, "price", Number(e.target.value))}
+                              className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-2 text-xs text-[#D4AF37] font-bold"
+                            />
+                          </div>
+                          <div className="sm:col-span-3">
+                            <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Stock Units</label>
+                            <input
+                              type="number"
+                              value={tier.stock}
+                              onChange={(e) => handleUpdateStorageTier(idx, "stock", Number(e.target.value))}
+                              className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-2 text-xs text-white"
+                            />
+                          </div>
+                          <div className="sm:col-span-1 pt-1 sm:pt-4 flex justify-end sm:justify-center">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveStorageTier(idx)}
+                              className="text-red-400 hover:text-red-300 p-1.5 border border-red-500/20 sm:border-0 bg-red-950/30 sm:bg-transparent rounded-none text-xs flex items-center gap-1"
+                              title="Remove tier"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span className="sm:hidden text-[10px] font-mono">Remove Tier</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* SECTION 4: HARDWARE SPECIFICATIONS */}
+                  <div className="p-4 rounded-none bg-black/50 border border-white/15 space-y-3">
+                    <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                      <Wrench className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>03 // COMPONENT ARCHITECTURE &amp; HARDWARE SPECS</span>
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Processor</label>
+                        <input
+                          type="text"
+                          value={newPhone.processor}
+                          onChange={(e) => setNewPhone({ ...newPhone, processor: e.target.value })}
+                          className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Display Screen</label>
+                        <input
+                          type="text"
+                          value={newPhone.screen}
+                          onChange={(e) => setNewPhone({ ...newPhone, screen: e.target.value })}
+                          className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Rear Camera Array</label>
+                        <input
+                          type="text"
+                          value={newPhone.rearCamera}
+                          onChange={(e) => setNewPhone({ ...newPhone, rearCamera: e.target.value })}
+                          className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Battery Capacity</label>
+                        <input
+                          type="text"
+                          value={newPhone.battery}
+                          onChange={(e) => setNewPhone({ ...newPhone, battery: e.target.value })}
+                          className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">RAM Memory</label>
+                        <input
+                          type="text"
+                          value={newPhone.ram}
+                          onChange={(e) => setNewPhone({ ...newPhone, ram: e.target.value })}
+                          className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Fast Charging &amp; Wireless</label>
+                        <input
+                          type="text"
+                          value={newPhone.charging}
+                          onChange={(e) => setNewPhone({ ...newPhone, charging: e.target.value })}
+                          className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECTION 5: HIGHLIGHTS & BOX CONTENTS */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-[10px] font-mono text-white/60 uppercase">
+                          Device Highlights (One per line)
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => handleAIPolishCopy(false)}
+                          disabled={isPolishingCopy || !newPhone.name}
+                          className="text-[10px] font-mono text-[#D4AF37] hover:underline flex items-center gap-1 disabled:opacity-40"
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          <span>AI POLISH</span>
+                        </button>
+                      </div>
+                      <textarea
+                        rows={3}
+                        value={newPhone.highlightsText}
+                        onChange={(e) => setNewPhone({ ...newPhone, highlightsText: e.target.value })}
+                        className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">
+                        What&apos;s In The Box (One item per line)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={newPhone.boxContentsText}
+                        onChange={(e) => setNewPhone({ ...newPhone, boxContentsText: e.target.value })}
+                        className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* SUBMIT ACTION BAR */}
+                  <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10 sticky bottom-0 bg-[#0A0A0D] py-3">
+                    <button
+                      type="button"
+                      onClick={() => setIsAddModalOpen(false)}
+                      className="px-5 py-2.5 rounded-none text-white/70 hover:text-white font-mono text-xs uppercase tracking-wider"
+                    >
+                      CANCEL
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isUploadingImage}
+                      className="px-8 py-3 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-wider transition border border-[#D4AF37] shadow-xl flex items-center gap-2"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>COMMIT TO INVENTORY</span>
+                    </button>
+                  </div>
+                </form>
               </div>
+            </div>
+          )}
 
-              {/* HARDWARE SPECS */}
-              <div className="p-4 rounded-none bg-black/50 border border-white/15 space-y-3">
-                <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <Wrench className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>03 // HARDWARE SPECIFICATIONS</span>
-                </h3>
+          {/* MODAL 2: EDIT EXISTING PHONE (MOBILE-RESPONSIVE WITH AI COPY POLISH) */}
+          {isEditModalOpen && editingPhone && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/90 backdrop-blur-md animate-fade-in overflow-y-auto">
+              <div className="relative bg-[#0A0A0D] border border-white/20 rounded-none w-full max-w-3xl p-4 sm:p-8 my-auto sm:my-8 max-h-[96vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl">
+                <span className="absolute top-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+                <span className="absolute top-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+                <span className="absolute bottom-2 left-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
+                <span className="absolute bottom-2 right-2 text-[10px] font-mono text-[#D4AF37]/40 select-none">+</span>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Processor</label>
-                    <input
-                      type="text"
-                      value={editingPhone.specs?.processor || ""}
-                      onChange={(e) =>
-                        setEditingPhone({
-                          ...editingPhone,
-                          specs: { ...editingPhone.specs, processor: e.target.value },
-                        })
-                      }
-                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Screen / Display</label>
-                    <input
-                      type="text"
-                      value={editingPhone.specs?.screen || ""}
-                      onChange={(e) =>
-                        setEditingPhone({
-                          ...editingPhone,
-                          specs: { ...editingPhone.specs, screen: e.target.value },
-                        })
-                      }
-                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Rear Camera</label>
-                    <input
-                      type="text"
-                      value={editingPhone.specs?.rearCamera || ""}
-                      onChange={(e) =>
-                        setEditingPhone({
-                          ...editingPhone,
-                          specs: { ...editingPhone.specs, rearCamera: e.target.value },
-                        })
-                      }
-                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Battery</label>
-                    <input
-                      type="text"
-                      value={editingPhone.specs?.battery || ""}
-                      onChange={(e) =>
-                        setEditingPhone({
-                          ...editingPhone,
-                          specs: { ...editingPhone.specs, battery: e.target.value },
-                        })
-                      }
-                      className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* HIGHLIGHTS & BOX CONTENTS */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">
-                    Device Highlights (One per line)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={editHighlightsText}
-                    onChange={(e) => setEditHighlightsText(e.target.value)}
-                    className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">
-                    Box Contents (One per line)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={editBoxContentsText}
-                    onChange={(e) => setEditBoxContentsText(e.target.value)}
-                    className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* ACTIONS */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10 sticky bottom-0 bg-[#0A0A0D] py-3">
                 <button
-                  type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="px-5 py-2.5 rounded-none text-white/70 hover:text-white font-mono text-xs uppercase tracking-wider"
+                  className="absolute top-4 right-4 text-white/50 hover:text-white p-2 rounded-none border border-white/10 hover:border-white/30 transition"
+                  title="Close modal"
                 >
-                  CANCEL
+                  <X className="w-4 h-4" />
                 </button>
-                <button
-                  type="submit"
-                  disabled={isUpdatingPhone}
-                  className="px-8 py-3 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-wider transition border border-[#D4AF37] shadow-xl flex items-center gap-2 disabled:opacity-50"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>{isUpdatingPhone ? "SAVING..." : "COMMIT CHANGES TO STORE"}</span>
-                </button>
+
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10 pr-10">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-none bg-black border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
+                      <Edit3 className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-white">
+                        EDIT // {editingPhone.name}
+                      </h2>
+                      <p className="text-[11px] font-mono text-white/40">
+                        Modifications reflect immediately on customer pages and checkout pricing.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={`/phones/${editingPhone.slug}`}
+                    target="_blank"
+                    className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-mono uppercase tracking-wider text-white transition"
+                  >
+                    <Eye className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <span>VIEW LIVE PAGE</span>
+                  </Link>
+                </div>
+
+                <form onSubmit={handleSaveEditPhone} className="space-y-6 font-mono">
+                  {/* PHOTO SECTION */}
+                  <div className="p-4 rounded-none border border-dashed border-white/20 bg-black/40 space-y-3">
+                    <label className="text-[11px] font-mono font-bold text-white/80 uppercase tracking-wider flex items-center gap-1.5">
+                      <ImageIcon className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>01 // UPDATE PRIMARY PHOTO &amp; GALLERY ASSETS</span>
+                    </label>
+
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                      <div className="w-24 h-24 rounded-none bg-black border border-white/15 p-2 flex items-center justify-center shrink-0 relative overflow-hidden">
+                        <img
+                          src={editingPhone.images?.[0] || "/placeholder.png"}
+                          alt={editingPhone.name}
+                          className="max-h-full max-w-full object-contain"
+                        />
+                      </div>
+
+                      <div className="flex-1 w-full space-y-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <label className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-none bg-white/5 hover:bg-white/10 text-white text-xs font-mono uppercase tracking-wider cursor-pointer border border-white/20 transition">
+                            <Upload className="w-3.5 h-3.5 text-[#D4AF37]" />
+                            <span>{isUploadingEditImage ? "UPLOADING..." : "REPLACE PHOTO"}</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleEditImageUpload}
+                              disabled={isUploadingEditImage}
+                              className="hidden"
+                            />
+                          </label>
+
+                          <label className="sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-none bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] text-xs font-mono font-bold uppercase tracking-wider cursor-pointer border border-[#D4AF37]/40 transition">
+                            <Camera className="w-3.5 h-3.5" />
+                            <span>CAMERA</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              capture="environment"
+                              onChange={handleEditImageUpload}
+                              disabled={isUploadingEditImage}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+
+                        <input
+                          type="text"
+                          placeholder="Or update primary image URL..."
+                          value={editingPhone.images?.[0] || ""}
+                          onChange={(e) =>
+                            setEditingPhone({
+                              ...editingPhone,
+                              images: [e.target.value, ...(editingPhone.images?.slice(1) || [])],
+                            })
+                          }
+                          className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">
+                        Additional Gallery Photos (One URL per line — creates angle thumbnails for customer)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={editExtraImagesText}
+                        onChange={(e) => setEditExtraImagesText(e.target.value)}
+                        className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/80 focus:border-[#D4AF37] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* MODEL IDENTITY */}
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Model Name *</label>
+                        <input
+                          type="text"
+                          required
+                          value={editingPhone.name}
+                          onChange={(e) => setEditingPhone({ ...editingPhone, name: e.target.value })}
+                          className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-bold"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">Brand</label>
+                        <select
+                          value={editingPhone.brand}
+                          onChange={(e) => setEditingPhone({ ...editingPhone, brand: e.target.value as any })}
+                          className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                        >
+                          <option value="Apple">Apple</option>
+                          <option value="Samsung">Samsung</option>
+                          <option value="Google">Google Pixel</option>
+                          <option value="Xiaomi">Xiaomi</option>
+                          <option value="Tecno">Tecno</option>
+                          <option value="Infinix">Infinix</option>
+                          <option value="OnePlus">OnePlus</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-[10px] font-mono text-white/70 uppercase tracking-wider">Tagline / Subtitle</label>
+                        <button
+                          type="button"
+                          onClick={() => handleAIPolishCopy(true)}
+                          disabled={isPolishingCopy || !editingPhone.name}
+                          className="text-[10px] font-mono text-[#D4AF37] hover:underline flex items-center gap-1 disabled:opacity-40"
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          <span>{isPolishingCopy ? "POLISHING..." : "✨ AI POLISH"}</span>
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={editingPhone.tagline}
+                        onChange={(e) => setEditingPhone({ ...editingPhone, tagline: e.target.value })}
+                        className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* STORAGE VARIANTS */}
+                  <div className="p-4 rounded-none bg-black/50 border border-white/15 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                          <Layers className="w-3.5 h-3.5 text-[#D4AF37]" />
+                          <span>02 // STORAGE TIERS &amp; LIVE STOCK</span>
+                        </h3>
+                        <p className="text-[11px] font-mono text-white/50">Edit capacities, prices, and stock units for each tier.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!editingPhone) return;
+                          const currentTiers = editingPhone.storageVariants || [];
+                          setEditingPhone({
+                            ...editingPhone,
+                            storageVariants: [
+                              ...currentTiers,
+                              {
+                                id: `${editingPhone.id}-s${currentTiers.length + 1}`,
+                                size: "512GB",
+                                price: Number(editingPhone.basePrice) + 100000,
+                                stock: 4,
+                              },
+                            ],
+                          });
+                        }}
+                        className="px-3 py-1.5 rounded-none bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-mono uppercase tracking-wider transition self-start sm:self-auto"
+                      >
+                        + ADD TIER
+                      </button>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      {(editingPhone.storageVariants || []).map((tier, idx) => (
+                        <div key={tier.id || idx} className="flex flex-col sm:grid sm:grid-cols-12 gap-2.5 bg-black p-3 rounded-none border border-white/10">
+                          <div className="sm:col-span-3">
+                            <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Capacity</label>
+                            <input
+                              type="text"
+                              value={tier.size}
+                              onChange={(e) => {
+                                const updated = [...(editingPhone.storageVariants || [])];
+                                updated[idx] = { ...updated[idx], size: e.target.value };
+                                setEditingPhone({ ...editingPhone, storageVariants: updated });
+                              }}
+                              className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-2 text-xs text-white font-bold"
+                            />
+                          </div>
+                          <div className="sm:col-span-5">
+                            <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Price in FCFA</label>
+                            <input
+                              type="number"
+                              step={5000}
+                              value={tier.price}
+                              onChange={(e) => {
+                                const updated = [...(editingPhone.storageVariants || [])];
+                                updated[idx] = { ...updated[idx], price: Number(e.target.value) };
+                                setEditingPhone({ ...editingPhone, storageVariants: updated });
+                              }}
+                              className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-2 text-xs text-[#D4AF37] font-bold"
+                            />
+                          </div>
+                          <div className="sm:col-span-3">
+                            <label className="block text-[9px] font-mono text-white/40 uppercase mb-0.5">Stock Units</label>
+                            <input
+                              type="number"
+                              value={tier.stock}
+                              onChange={(e) => {
+                                const updated = [...(editingPhone.storageVariants || [])];
+                                updated[idx] = { ...updated[idx], stock: Number(e.target.value) };
+                                setEditingPhone({ ...editingPhone, storageVariants: updated });
+                              }}
+                              className="w-full bg-[#0A0A0D] border border-white/15 rounded-none px-2.5 py-2 text-xs text-white"
+                            />
+                          </div>
+                          <div className="sm:col-span-1 pt-1 sm:pt-4 flex justify-end sm:justify-center">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = (editingPhone.storageVariants || []).filter((_, i) => i !== idx);
+                                setEditingPhone({ ...editingPhone, storageVariants: updated });
+                              }}
+                              className="text-red-400 hover:text-red-300 p-1.5 border border-red-500/20 sm:border-0 bg-red-950/30 sm:bg-transparent rounded-none text-xs flex items-center gap-1"
+                              title="Remove tier"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span className="sm:hidden text-[10px] font-mono">Remove Tier</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* HARDWARE SPECS */}
+                  <div className="p-4 rounded-none bg-black/50 border border-white/15 space-y-3">
+                    <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                      <Wrench className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>03 // UPDATE HARDWARE SPECIFICATIONS</span>
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Processor</label>
+                        <input
+                          type="text"
+                          value={editingPhone.specs?.processor || ""}
+                          onChange={(e) =>
+                            setEditingPhone({
+                              ...editingPhone,
+                              specs: { ...editingPhone.specs, processor: e.target.value },
+                            })
+                          }
+                          className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Display Screen</label>
+                        <input
+                          type="text"
+                          value={editingPhone.specs?.screen || ""}
+                          onChange={(e) =>
+                            setEditingPhone({
+                              ...editingPhone,
+                              specs: { ...editingPhone.specs, screen: e.target.value },
+                            })
+                          }
+                          className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Rear Camera</label>
+                        <input
+                          type="text"
+                          value={editingPhone.specs?.rearCamera || ""}
+                          onChange={(e) =>
+                            setEditingPhone({
+                              ...editingPhone,
+                              specs: { ...editingPhone.specs, rearCamera: e.target.value },
+                            })
+                          }
+                          className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">Battery</label>
+                        <input
+                          type="text"
+                          value={editingPhone.specs?.battery || ""}
+                          onChange={(e) =>
+                            setEditingPhone({
+                              ...editingPhone,
+                              specs: { ...editingPhone.specs, battery: e.target.value },
+                            })
+                          }
+                          className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* HIGHLIGHTS & BOX CONTENTS */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-[10px] font-mono text-white/60 uppercase">
+                          Device Highlights (One per line)
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => handleAIPolishCopy(true)}
+                          disabled={isPolishingCopy || !editingPhone.name}
+                          className="text-[10px] font-mono text-[#D4AF37] hover:underline flex items-center gap-1 disabled:opacity-40"
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          <span>AI POLISH</span>
+                        </button>
+                      </div>
+                      <textarea
+                        rows={3}
+                        value={editHighlightsText}
+                        onChange={(e) => setEditHighlightsText(e.target.value)}
+                        className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-white/60 uppercase mb-1">
+                        Box Contents (One per line)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={editBoxContentsText}
+                        onChange={(e) => setEditBoxContentsText(e.target.value)}
+                        className="w-full bg-black border border-white/15 rounded-none p-3 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* ACTIONS */}
+                  <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10 sticky bottom-0 bg-[#0A0A0D] py-3">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditModalOpen(false)}
+                      className="px-5 py-2.5 rounded-none text-white/70 hover:text-white font-mono text-xs uppercase tracking-wider"
+                    >
+                      CANCEL
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isUpdatingPhone}
+                      className="px-8 py-3 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-wider transition border border-[#D4AF37] shadow-xl flex items-center gap-2 disabled:opacity-50"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>{isUpdatingPhone ? "SAVING..." : "COMMIT CHANGES TO STORE"}</span>
+                    </button>
+                  </div>
+                </form>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+          )}
 
       {/* MODAL 3: COMPLETE ORDER DETAILS */}
       {selectedOrder && (
@@ -3974,6 +4166,20 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       )}
+      {/* MOBILE FLOATING ACTION BUTTON (1-TAP INVENTORY CREATION) */}
+      <button
+        type="button"
+        onClick={() => {
+          setSelectedPresetId("");
+          setNewPhone(INITIAL_NEW_PHONE);
+          setIsAddModalOpen(true);
+        }}
+        className="fixed bottom-6 right-6 sm:hidden z-40 w-14 h-14 bg-[#D4AF37] hover:bg-[#F3E5AB] text-black border border-[#D4AF37] shadow-2xl flex items-center justify-center active:scale-95 transition"
+        title="Add Phone to Inventory"
+        aria-label="Add Phone to Inventory"
+      >
+        <Plus className="w-6 h-6 stroke-[2.5]" />
+      </button>
     </div>
   );
 }
