@@ -1,5 +1,5 @@
 -- ====================================================================
--- INSTANT SUPER ADMIN CREATION & EMAIL CONFIRMATION VIA SQL
+-- AURA LUXE MOBILE - INSTANT SUPER ADMIN INITIALIZATION & AUTH LINK
 -- Run this in your Supabase Dashboard -> SQL Editor
 -- ====================================================================
 
@@ -72,5 +72,6 @@ AND NOT EXISTS (
 
 -- 5. Ensure super_admin authorization record in public.admin_users:
 INSERT INTO public.admin_users (email, role, full_name, created_by)
-VALUES ('wisdombesong123@gmail.com', 'super_admin', 'Wisdom Besong', 'system')
-ON CONFLICT (email) DO NOTHING;
+VALUES ('wisdombesong123@gmail.com', 'super_admin', 'Wisdom Besong (Owner)', 'system')
+ON CONFLICT (email) DO UPDATE 
+SET role = 'super_admin', full_name = 'Wisdom Besong (Owner)';

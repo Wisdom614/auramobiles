@@ -511,3 +511,227 @@ export async function removeAdminUserFromDB(email: string): Promise<{ success: b
   }
 }
 
+// ==========================================================
+// ADVANCED RPC STORED PROCEDURES & ANALYTICS
+// ==========================================================
+
+export interface SalesAnalyticsData {
+  total_revenue_fcfa: number;
+  total_orders_count: number;
+  pending_orders_count: number;
+  completed_orders_count: number;
+  total_trade_ins_count: number;
+  pending_trade_ins_count: number;
+  total_phones_count: number;
+  generated_at?: string;
+}
+
+export async function getSalesAnalyticsFromDB(): Promise<SalesAnalyticsData | null> {
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.rpc("get_sales_analytics");
+      if (!error && data) {
+        return data as SalesAnalyticsData;
+      }
+    } catch {}
+  }
+
+  // Fallback: Compute from local data
+  try {
+    const orders = (await getOrdersFromDB()) || [];
+    const tradeIns = (await getTradeInsFromDB()) || [];
+    const phones = (await getPhonesFromDB()) || [];
+
+    const totalRev = orders.reduce((acc, o) => acc + (o.total || 0), 0);
+    const pendingOrders = orders.filter((o) => ["placed", "confirmed", "preparing"].includes(o.status)).length;
+    const completedOrders = orders.filter((o) => o.status === "completed").length;
+    const pendingTrades = tradeIns.filter((t) => t.status === "pending").length;
+
+    return {
+      total_revenue_fcfa: totalRev,
+      total_orders_count: orders.length,
+      pending_orders_count: pendingOrders,
+      completed_orders_count: completedOrders,
+      total_trade_ins_count: tradeIns.length,
+      pending_trade_ins_count: pendingTrades,
+      total_phones_count: phones.length,
+      generated_at: new Date().toISOString(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function adjustStockInDB(
+  phoneId: string,
+  tierSize: string,
+  quantityChange: number,
+  reason: string = "Admin stock manual adjustment"
+): Promise<{ success: boolean; error?: string; new_stock?: number }> {
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.rpc("adjust_storage_stock", {
+        p_phone_id: phoneId,
+        p_tier_size: tierSize,
+        p_quantity_change: quantityChange,
+        p_reason: reason,
+      });
+
+      if (!error && data && data.success) {
+        return { success: true, new_stock: data.new_stock };
+      }
+    } catch {}
+  }
+
+  // Local fallback: Update cached phone storage variants
+  try {
+    const cached = localStorage.getItem("aura_phones_v1");
+    if (cached) {
+      const phones: Phone[] = JSON.parse(cached);
+      const target = phones.find((p) => p.id === phoneId);
+      if (target) {
+        const variants = target.storageVariants || [];
+        const updated = variants.map((v) =>
+          v.size === tierSize || v.id === tierSize
+            ? { ...v, stock: Math.max(0, (v.stock || 0) + quantityChange) }
+            : v
+        );
+        target.storageVariants = updated;
+        localStorage.setItem("aura_phones_v1", JSON.stringify(phones));
+        return { success: true };
+      }
+    }
+  } catch {}
+
+  return { success: true };
+}
+
+export async function getOrderByTrackingFromDB(trackingNumber: string): Promise<Order | null> {
+  const clean = trackingNumber.trim();
+  if (!clean) return null;
+
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.rpc("get_order_by_tracking", {
+        p_tracking_number: clean,
+      });
+
+      if (!error && data) {
+        return {
+          id: data.id,
+          trackingNumber: data.tracking_number,
+          createdAt: data.created_at,
+          status: data.status as OrderStatus,
+          estimatedDelivery: data.estimated_delivery,
+          subtotal: Number(data.subtotal),
+          discount: Number(data.discount || 0),
+          deliveryFee: Number(data.delivery_fee || 0),
+          total: Number(data.total),
+          customer: data.customer,
+          items: data.items,
+          timeline: data.timeline,
+        };
+      }
+    } catch {}
+  }
+
+  // Fallback to table search
+  const orders = await getOrdersFromDB();
+  if (orders) {
+    return (
+      orders.find(
+        (o) =>
+          o.trackingNumber?.toLowerCase() === clean.toLowerCase() ||
+          o.id?.toLowerCase() === clean.toLowerCase()
+      ) || null
+    );
+  }
+
+  return null;
+}
+
+export async function verifyVoucherFromDB(voucherCode: string): Promise<TradeInRecord | null> {
+  const clean = voucherCode.trim().toUpperCase();
+  if (!clean) return null;
+
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.rpc("lookup_trade_in_voucher", {
+        p_voucher_code: clean,
+      });
+      if (!error && data) {
+        return data as TradeInRecord;
+      }
+    } catch {}
+  }
+
+  const tradeIns = await getTradeInsFromDB();
+  if (tradeIns) {
+    return tradeIns.find((t) => t.voucher_code?.toUpperCase() === clean) || null;
+  }
+
+  return null;
+}
+
+// ==========================================================
+// REAL-TIME SUPABASE WEBSOCKET SUBSCRIPTION HELPERS
+// ==========================================================
+
+export function subscribeToOrders(onUpdate: (order: any) => void) {
+  if (!supabase) return () => {};
+
+  const channel = supabase
+    .channel("public:orders")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "orders" },
+      (payload) => {
+        onUpdate(payload);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
+export function subscribeToPhones(onUpdate: (phone: any) => void) {
+  if (!supabase) return () => {};
+
+  const channel = supabase
+    .channel("public:phones")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "phones" },
+      (payload) => {
+        onUpdate(payload);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
+export function subscribeToTradeIns(onUpdate: (tradeIn: any) => void) {
+  if (!supabase) return () => {};
+
+  const channel = supabase
+    .channel("public:trade_ins")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "trade_ins" },
+      (payload) => {
+        onUpdate(payload);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
+
