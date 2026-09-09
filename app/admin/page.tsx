@@ -99,9 +99,16 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: "success" | "error" | "info" } | null>(null);
 
-  // Search & Filter
+  // Search & Filter State
   const [phoneSearch, setPhoneSearch] = useState("");
+  const [phoneBrandFilter, setPhoneBrandFilter] = useState("all");
+  const [phoneStockFilter, setPhoneStockFilter] = useState<"all" | "in_stock" | "low_stock" | "out_of_stock">("all");
+
   const [orderSearch, setOrderSearch] = useState("");
+  const [orderStatusFilter, setOrderStatusFilter] = useState<"all" | OrderStatus>("all");
+
+  const [tradeInSearch, setTradeInSearch] = useState("");
+  const [tradeInStatusFilter, setTradeInStatusFilter] = useState<"all" | TradeInRecord["status"]>("all");
 
   // Order & Trade-in Detailed View Modal State
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -604,6 +611,70 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Quick Inline Stock Adjust (+1 or -1)
+  const handleQuickStockAdjust = async (phone: Phone, delta: number) => {
+    if (!phone.storageVariants || phone.storageVariants.length === 0) return;
+    const currentPrimary = phone.storageVariants[0];
+    const newStock = Math.max(0, (currentPrimary.stock || 0) + delta);
+    const updatedVariants = phone.storageVariants.map((v, i) =>
+      i === 0 ? { ...v, stock: newStock } : v
+    );
+    const updatedPhone = { ...phone, storageVariants: updatedVariants };
+
+    setPhones((prev) => prev.map((p) => (p.id === phone.id ? updatedPhone : p)));
+    if (supabase) {
+      await updatePhoneInDB(phone.id, updatedPhone);
+    }
+    showToast(`${phone.name} (${currentPrimary.size}) stock updated: ${newStock} units`);
+  };
+
+  // WhatsApp Message Link Generators
+  const getOrderWhatsAppUrl = (
+    order: Order,
+    type: "general" | "confirmed" | "delivering" | "completed" = "general"
+  ) => {
+    const cleanPhone = order.customer.phone.replace(/[^0-9]/g, "");
+    const itemsSummary = order.items.map((i) => `${i.quantity}x ${i.name} (${i.storage})`).join(", ");
+    let text = "";
+
+    switch (type) {
+      case "confirmed":
+        text = `Hello ${order.customer.fullName}, your AURA Luxe Mobile order #${order.id} for ${itemsSummary} has been CONFIRMED.\n\nTotal: ${formatCFA(order.total)}\nCity: ${order.customer.city}\nTracking: ${order.trackingNumber}\n\nOur concierge team is preparing your package for dispatch.`;
+        break;
+      case "delivering":
+        text = `Hello ${order.customer.fullName}, your AURA Luxe Mobile order #${order.id} (${itemsSummary}) is now OUT FOR DELIVERY to ${order.customer.address}, ${order.customer.city}.\n\nTracking: ${order.trackingNumber}\nEstimated Arrival: ${order.estimatedDelivery || "Today"}\nAmount to Pay: ${formatCFA(order.total)} (${order.customer.paymentMethod.replace("_", " ").toUpperCase()})\n\nPlease be available to receive your package.`;
+        break;
+      case "completed":
+        text = `Hello ${order.customer.fullName}, your AURA Luxe Mobile order #${order.id} has been delivered successfully!\n\nThank you for choosing AURA Luxe Mobile. Enjoy your new flagship smartphone!`;
+        break;
+      default:
+        text = `Hello ${order.customer.fullName}, this is AURA Luxe Mobile concierge desk regarding your Order #${order.id} (${itemsSummary}). Total: ${formatCFA(order.total)}. How can we assist you today?`;
+    }
+
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+  };
+
+  const getTradeInWhatsAppUrl = (
+    tradeIn: TradeInRecord,
+    type: "general" | "approved" | "completed" = "general"
+  ) => {
+    const cleanPhone = tradeIn.phone.replace(/[^0-9]/g, "");
+    let text = "";
+
+    switch (type) {
+      case "approved":
+        text = `Hello ${tradeIn.client_name}, your phone trade-in appraisal for ${tradeIn.brand} ${tradeIn.model} (${tradeIn.condition}) has been APPROVED!\n\nGuaranteed Valuation: ${formatCFA(tradeIn.valuation_fcfa)}\nVoucher Code: *${tradeIn.voucher_code}*\nStore / City: ${tradeIn.city}\n\nThis 7-day price lock voucher is active now. Visit our ${tradeIn.city} showroom or present it to our delivery concierge to deduct from your new smartphone purchase.`;
+        break;
+      case "completed":
+        text = `Hello ${tradeIn.client_name}, your trade-in exchange for ${tradeIn.brand} ${tradeIn.model} (Voucher: ${tradeIn.voucher_code}) has been marked as COMPLETED.\n\nThank you for choosing AURA Luxe Mobile!`;
+        break;
+      default:
+        text = `Hello ${tradeIn.client_name}, this is AURA Luxe Mobile regarding your Trade-In request #${tradeIn.id} for the ${tradeIn.brand} ${tradeIn.model}. Estimated valuation: ${formatCFA(tradeIn.valuation_fcfa)}. Voucher code: ${tradeIn.voucher_code}.`;
+    }
+
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+  };
+
   // Delete Phone
   const handleDeletePhone = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to remove "${name}" from inventory?`)) return;
@@ -774,27 +845,39 @@ export default function AdminDashboardPage() {
   // Access Denied Screen (Logged in but email is not on admin roster)
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center p-6 text-center text-white">
-        <div className="w-16 h-16 rounded-2xl bg-red-950/60 border border-red-500/40 text-red-400 flex items-center justify-center mb-4">
-          <AlertCircle className="w-8 h-8" />
-        </div>
-        <h1 className="text-xl font-bold mb-2">Access Restricted</h1>
-        <p className="text-xs text-white/60 max-w-md mb-6 leading-relaxed">
-          The account <strong className="text-white">{currentUserEmail}</strong> is not recognized as an authorized AURA Luxe boutique administrator.
-        </p>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleSignOut}
-            className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-semibold text-white border border-white/20 transition"
-          >
-            Sign Out & Switch Account
-          </button>
-          <Link
-            href="/"
-            className="px-5 py-2.5 rounded-xl bg-[#D4AF37] text-black text-xs font-bold transition"
-          >
-            Return to Storefront
-          </Link>
+      <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center p-6 text-center text-white font-sans">
+        <div className="relative bg-[#0E0E12] border border-white/15 p-8 max-w-md w-full">
+          <span className="absolute top-2 left-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
+          <span className="absolute top-2 right-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
+          <span className="absolute bottom-2 left-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
+          <span className="absolute bottom-2 right-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
+
+          <div className="w-14 h-14 bg-red-950/60 border border-red-500/40 text-red-400 flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-7 h-7" />
+          </div>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-red-400 block mb-1">
+            [ ERROR // RESTRICTED ACCESS ]
+          </span>
+          <h1 className="text-lg font-bold tracking-tight text-white uppercase mb-2">
+            Access Unauthorized
+          </h1>
+          <p className="text-xs text-zinc-400 mb-6 font-mono leading-relaxed">
+            The account <strong className="text-white">{currentUserEmail}</strong> is not recognized on the authorized AURA Luxe administrator roster.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <button
+              onClick={handleSignOut}
+              className="w-full sm:w-1/2 py-2.5 bg-white/10 hover:bg-white/15 text-xs font-mono uppercase tracking-wider text-white border border-white/20 transition cursor-pointer"
+            >
+              [ SWITCH ACCOUNT ]
+            </button>
+            <Link
+              href="/"
+              className="w-full sm:w-1/2 py-2.5 bg-[#D4AF37] hover:bg-[#F3E5AB] text-black text-xs font-mono font-bold uppercase tracking-wider transition text-center"
+            >
+              [ STOREFRONT ]
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -811,19 +894,43 @@ export default function AdminDashboardPage() {
   ).length;
   const pendingTradeInsCount = tradeIns.filter((t) => t.status === "pending").length;
 
-  const filteredPhones = phones.filter(
-    (p) =>
+  const filteredPhones = phones.filter((p) => {
+    const matchesQuery =
       p.name.toLowerCase().includes(phoneSearch.toLowerCase()) ||
-      p.brand.toLowerCase().includes(phoneSearch.toLowerCase())
-  );
+      p.brand.toLowerCase().includes(phoneSearch.toLowerCase());
+    const matchesBrand = phoneBrandFilter === "all" || p.brand.toLowerCase() === phoneBrandFilter.toLowerCase();
+    const totalStock = p.storageVariants.reduce((sum, v) => sum + v.stock, 0);
+    const matchesStock =
+      phoneStockFilter === "all"
+        ? true
+        : phoneStockFilter === "in_stock"
+        ? totalStock > 0
+        : phoneStockFilter === "low_stock"
+        ? totalStock > 0 && totalStock <= 3
+        : totalStock === 0;
+    return matchesQuery && matchesBrand && matchesStock;
+  });
 
-  const filteredOrders = orders.filter(
-    (o) =>
+  const filteredOrders = orders.filter((o) => {
+    const matchesQuery =
       o.id.toLowerCase().includes(orderSearch.toLowerCase()) ||
       o.customer.fullName.toLowerCase().includes(orderSearch.toLowerCase()) ||
       o.customer.phone.toLowerCase().includes(orderSearch.toLowerCase()) ||
-      o.customer.city.toLowerCase().includes(orderSearch.toLowerCase())
-  );
+      o.customer.city.toLowerCase().includes(orderSearch.toLowerCase());
+    const matchesStatus = orderStatusFilter === "all" || o.status === orderStatusFilter;
+    return matchesQuery && matchesStatus;
+  });
+
+  const filteredTradeIns = tradeIns.filter((t) => {
+    const matchesQuery =
+      t.id.toLowerCase().includes(tradeInSearch.toLowerCase()) ||
+      t.client_name.toLowerCase().includes(tradeInSearch.toLowerCase()) ||
+      t.phone.toLowerCase().includes(tradeInSearch.toLowerCase()) ||
+      t.model.toLowerCase().includes(tradeInSearch.toLowerCase()) ||
+      t.voucher_code.toLowerCase().includes(tradeInSearch.toLowerCase());
+    const matchesStatus = tradeInStatusFilter === "all" || t.status === tradeInStatusFilter;
+    return matchesQuery && matchesStatus;
+  });
 
   return (
     <div className="min-h-screen bg-[#070709] text-white">
@@ -1176,22 +1283,61 @@ export default function AdminDashboardPage() {
         {/* TAB 2: INVENTORY MANAGEMENT */}
         {activeTab === "inventory" && (
           <div className="space-y-6 animate-fade-in">
-            {/* Search and count bar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="relative w-full sm:w-80">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
-                <input
-                  type="text"
-                  placeholder="FILTER BY BRAND OR MODEL..."
-                  value={phoneSearch}
-                  onChange={(e) => setPhoneSearch(e.target.value)}
-                  className="w-full bg-[#0A0A0D] border border-white/15 rounded-none pl-10 pr-4 py-2.5 font-mono text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#D4AF37]"
-                />
+            {/* Search and multi-filter toolbar */}
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-[#0A0A0D] border border-white/10 p-4">
+              <div className="flex flex-col sm:flex-row items-center gap-3 flex-1">
+                {/* Text Search */}
+                <div className="relative w-full sm:w-72">
+                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+                  <input
+                    type="text"
+                    placeholder="SEARCH MODEL OR KEYWORD..."
+                    value={phoneSearch}
+                    onChange={(e) => setPhoneSearch(e.target.value)}
+                    className="w-full bg-black border border-white/15 rounded-none pl-10 pr-4 py-2 font-mono text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#D4AF37]"
+                  />
+                </div>
+
+                {/* Brand Filter */}
+                <select
+                  value={phoneBrandFilter}
+                  onChange={(e) => setPhoneBrandFilter(e.target.value)}
+                  className="w-full sm:w-44 bg-black border border-white/15 rounded-none px-3 py-2 font-mono text-xs text-white focus:outline-none focus:border-[#D4AF37]"
+                >
+                  <option value="all">ALL BRANDS</option>
+                  <option value="Apple">Apple</option>
+                  <option value="Samsung">Samsung</option>
+                  <option value="Google">Google Pixel</option>
+                  <option value="Xiaomi">Xiaomi</option>
+                  <option value="Tecno">Tecno</option>
+                  <option value="Infinix">Infinix</option>
+                  <option value="OnePlus">OnePlus</option>
+                </select>
               </div>
 
-              <div className="text-xs font-mono text-white/50 tracking-wider">
-                INDEX COUNT: <strong className="text-white">{filteredPhones.length}</strong> /{" "}
-                {phones.length} HARDWARE UNITS
+              {/* Stock Status Filter Chips */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                {(
+                  [
+                    { id: "all", label: "ALL UNITS" },
+                    { id: "in_stock", label: "IN STOCK" },
+                    { id: "low_stock", label: "LOW STOCK (≤3)" },
+                    { id: "out_of_stock", label: "OUT OF STOCK" },
+                  ] as const
+                ).map((chip) => (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    onClick={() => setPhoneStockFilter(chip.id)}
+                    className={`px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider transition border shrink-0 ${
+                      phoneStockFilter === chip.id
+                        ? "bg-[#D4AF37] text-black font-bold border-[#D4AF37]"
+                        : "bg-black/60 text-white/60 hover:text-white border-white/10 hover:border-white/20"
+                    }`}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -1209,7 +1355,7 @@ export default function AdminDashboardPage() {
                       <th className="py-3.5 px-4 font-medium">DEVICE MODEL</th>
                       <th className="py-3.5 px-4 font-medium">CONDITION</th>
                       <th className="py-3.5 px-4 font-medium">BASE PRICE (FCFA)</th>
-                      <th className="py-3.5 px-4 font-medium">STOCK STATUS</th>
+                      <th className="py-3.5 px-4 font-medium">STOCK & QUICK COUNTER</th>
                       <th className="py-3.5 px-4 font-medium text-right">ACTIONS</th>
                     </tr>
                   </thead>
@@ -1217,6 +1363,7 @@ export default function AdminDashboardPage() {
                     {filteredPhones.map((phone) => {
                       const totalStock = phone.storageVariants.reduce((sum, v) => sum + v.stock, 0);
                       const inStock = totalStock > 0;
+                      const isLowStock = totalStock > 0 && totalStock <= 3;
 
                       return (
                         <tr key={phone.id} className="hover:bg-white/[0.02] transition">
@@ -1256,21 +1403,61 @@ export default function AdminDashboardPage() {
                           </td>
 
                           <td className="py-3.5 px-4">
-                            <button
-                              onClick={() => handleToggleStock(phone)}
-                              className={`flex items-center gap-2 px-2.5 py-1 rounded-none text-[10px] font-mono uppercase tracking-wider border transition ${
-                                inStock
-                                  ? "bg-emerald-950/40 text-emerald-400 border-emerald-500/30 hover:bg-emerald-950/60"
-                                  : "bg-red-950/40 text-red-400 border-red-500/30 hover:bg-red-950/60"
-                              }`}
-                            >
+                            <div className="flex items-center gap-2">
+                              {/* Stock Health Badge */}
                               <span
-                                className={`w-1.5 h-1.5 rounded-none ${
-                                  inStock ? "bg-emerald-400" : "bg-red-400"
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider border ${
+                                  !inStock
+                                    ? "bg-red-950/40 text-red-400 border-red-500/30"
+                                    : isLowStock
+                                    ? "bg-amber-950/40 text-amber-400 border-amber-500/30"
+                                    : "bg-emerald-950/40 text-emerald-400 border-emerald-500/30"
                                 }`}
-                              />
-                              <span>{inStock ? `IN STOCK (${totalStock})` : "OUT OF STOCK"}</span>
-                            </button>
+                              >
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-none ${
+                                    !inStock ? "bg-red-400" : isLowStock ? "bg-amber-400" : "bg-emerald-400"
+                                  }`}
+                                />
+                                <span>
+                                  {!inStock ? "OUT OF STOCK" : isLowStock ? `LOW (${totalStock})` : `IN STOCK (${totalStock})`}
+                                </span>
+                              </span>
+
+                              {/* Quick Inline Adjusters (+ / -) */}
+                              <div className="flex items-center border border-white/15 bg-black">
+                                <button
+                                  type="button"
+                                  onClick={() => handleQuickStockAdjust(phone, -1)}
+                                  disabled={totalStock <= 0}
+                                  className="px-2 py-0.5 text-white/70 hover:text-white hover:bg-white/10 disabled:opacity-30 transition font-bold"
+                                  title="Decrease stock by 1 unit"
+                                >
+                                  -
+                                </button>
+                                <span className="px-2 py-0.5 text-[11px] text-white/90 border-x border-white/10">
+                                  {phone.storageVariants[0]?.stock || 0}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleQuickStockAdjust(phone, 1)}
+                                  className="px-2 py-0.5 text-[#D4AF37] hover:text-[#F3E5AB] hover:bg-white/10 transition font-bold"
+                                  title="Increase stock by 1 unit"
+                                >
+                                  +
+                                </button>
+                              </div>
+
+                              {/* Stock Toggle Button */}
+                              <button
+                                type="button"
+                                onClick={() => handleToggleStock(phone)}
+                                className="px-2 py-1 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/10 text-[9px] uppercase tracking-wider transition"
+                                title={inStock ? "Mark as zero stock" : "Restore 5 units"}
+                              >
+                                {inStock ? "CLEAR" : "RESTORE"}
+                              </button>
+                            </div>
                           </td>
 
                           <td className="py-3.5 px-4 text-right">
@@ -1312,21 +1499,44 @@ export default function AdminDashboardPage() {
         {/* TAB 3: ORDERS MANAGEMENT */}
         {activeTab === "orders" && (
           <div className="space-y-6 animate-fade-in">
-            {/* Search Bar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="relative w-full sm:w-80">
+            {/* Search and status filter toolbar */}
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-[#0A0A0D] border border-white/10 p-4">
+              <div className="relative w-full lg:w-80">
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
                 <input
                   type="text"
-                  placeholder="FILTER ORDER ID, CLIENT, PHONE..."
+                  placeholder="FILTER ORDER ID, CLIENT, PHONE, CITY..."
                   value={orderSearch}
                   onChange={(e) => setOrderSearch(e.target.value)}
-                  className="w-full bg-[#0A0A0D] border border-white/15 rounded-none pl-10 pr-4 py-2.5 font-mono text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full bg-black border border-white/15 rounded-none pl-10 pr-4 py-2 font-mono text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#D4AF37]"
                 />
               </div>
 
-              <div className="text-xs font-mono text-white/50 tracking-wider">
-                TOTAL ORDERS LOGGED: <strong className="text-white">{orders.length}</strong>
+              {/* Order Status Filter Chips */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                {(
+                  [
+                    { id: "all", label: "ALL ORDERS" },
+                    { id: "placed", label: "PLACED" },
+                    { id: "confirmed", label: "CONFIRMED" },
+                    { id: "preparing", label: "PREPARING" },
+                    { id: "delivering", label: "DELIVERING" },
+                    { id: "completed", label: "COMPLETED" },
+                  ] as const
+                ).map((chip) => (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    onClick={() => setOrderStatusFilter(chip.id)}
+                    className={`px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider transition border shrink-0 ${
+                      orderStatusFilter === chip.id
+                        ? "bg-[#D4AF37] text-black font-bold border-[#D4AF37]"
+                        : "bg-black/60 text-white/60 hover:text-white border-white/10 hover:border-white/20"
+                    }`}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -1345,97 +1555,112 @@ export default function AdminDashboardPage() {
                       <th className="py-3.5 px-4 font-medium">CLIENT & CONTACT</th>
                       <th className="py-3.5 px-4 font-medium">ORDERED ITEMS</th>
                       <th className="py-3.5 px-4 font-medium">TOTAL (FCFA)</th>
-                      <th className="py-3.5 px-4 font-medium">STATUS</th>
-                      <th className="py-3.5 px-4 font-medium text-right">ACTIONS</th>
+                      <th className="py-3.5 px-4 font-medium">STATUS WORKFLOW</th>
+                      <th className="py-3.5 px-4 font-medium text-right">DISPATCH ACTIONS</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 font-mono text-xs">
-                    {filteredOrders.map((order) => {
-                      const cleanPhone = order.customer.phone.replace(/[^0-9]/g, "");
-                      const waLink = `https://wa.me/${cleanPhone}?text=Hello%20${encodeURIComponent(
-                        order.customer.fullName
-                      )},%20this%20is%20AURA%20Luxe%20Mobile%20regarding%20your%20Order%20${order.id}.`;
+                    {filteredOrders.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-8 text-center text-white/40 font-mono">
+                          NO ORDERS MATCHING ACTIVE FILTER
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredOrders.map((order) => {
+                        const contextualWaUrl = getOrderWhatsAppUrl(
+                          order,
+                          order.status === "confirmed"
+                            ? "confirmed"
+                            : order.status === "delivering"
+                            ? "delivering"
+                            : order.status === "completed"
+                            ? "completed"
+                            : "general"
+                        );
 
-                      return (
-                        <tr
-                          key={order.id}
-                          onClick={() => setSelectedOrder(order)}
-                          className="hover:bg-white/[0.03] transition cursor-pointer group"
-                        >
-                          <td className="py-3.5 px-4">
-                            <div className="font-mono font-bold text-[#D4AF37] group-hover:underline">{order.id}</div>
-                            <div className="text-[11px] text-white/40">
-                              {new Date(order.createdAt).toLocaleDateString("en-GB", {
-                                day: "numeric",
-                                month: "short",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </div>
-                          </td>
+                        return (
+                          <tr
+                            key={order.id}
+                            onClick={() => setSelectedOrder(order)}
+                            className="hover:bg-white/[0.03] transition cursor-pointer group"
+                          >
+                            <td className="py-3.5 px-4">
+                              <div className="font-mono font-bold text-[#D4AF37] group-hover:underline">{order.id}</div>
+                              <div className="text-[11px] text-white/40">
+                                {new Date(order.createdAt).toLocaleDateString("en-GB", {
+                                  day: "numeric",
+                                  month: "short",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </div>
+                            </td>
 
-                          <td className="py-3.5 px-4">
-                            <div className="font-medium text-white">{order.customer.fullName}</div>
-                            <div className="text-[11px] text-white/60">{order.customer.phone}</div>
-                            <div className="text-[11px] text-white/40 uppercase">{order.customer.city}</div>
-                          </td>
+                            <td className="py-3.5 px-4">
+                              <div className="font-medium text-white">{order.customer.fullName}</div>
+                              <div className="text-[11px] text-white/60">{order.customer.phone}</div>
+                              <div className="text-[11px] text-white/40 uppercase">{order.customer.city}</div>
+                            </td>
 
-                          <td className="py-3.5 px-4">
-                            <div className="space-y-1">
-                              {order.items.map((it, idx) => (
-                                <div key={idx} className="text-[11px] text-white/80">
-                                  {it.quantity}x {it.name} ({it.storage})
-                                </div>
-                              ))}
-                            </div>
-                          </td>
+                            <td className="py-3.5 px-4">
+                              <div className="space-y-1">
+                                {order.items.map((it, idx) => (
+                                  <div key={idx} className="text-[11px] text-white/80">
+                                    {it.quantity}x {it.name} ({it.storage})
+                                  </div>
+                                ))}
+                              </div>
+                            </td>
 
-                          <td className="py-3.5 px-4">
-                            <div className="font-bold text-white">{formatCFA(order.total)}</div>
-                            <div className="text-[10px] text-white/50 uppercase tracking-wider">
-                              {order.customer.paymentMethod.replace("_", " ")}
-                            </div>
-                          </td>
+                            <td className="py-3.5 px-4">
+                              <div className="font-bold text-white">{formatCFA(order.total)}</div>
+                              <div className="text-[10px] text-white/50 uppercase tracking-wider">
+                                {order.customer.paymentMethod.replace("_", " ")}
+                              </div>
+                            </td>
 
-                          <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
-                            <select
-                              value={order.status}
-                              onChange={(e) => handleOrderStatusChange(order.id, e.target.value as any)}
-                              className="bg-black border border-white/20 text-white rounded-none px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wider focus:border-[#D4AF37] focus:outline-none"
-                            >
-                              <option value="placed">Placed (Received)</option>
-                              <option value="confirmed">Confirmed</option>
-                              <option value="preparing">Preparing Package</option>
-                              <option value="delivering">Out for Delivery</option>
-                              <option value="completed">Completed</option>
-                            </select>
-                          </td>
-
-                          <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end gap-2">
-                              <button
-                                type="button"
-                                onClick={() => setSelectedOrder(order)}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-white/5 hover:bg-white/10 text-white border border-white/15 font-mono text-[11px] uppercase tracking-wider transition"
-                                title="View Complete Order Details"
+                            <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
+                              <select
+                                value={order.status}
+                                onChange={(e) => handleOrderStatusChange(order.id, e.target.value as any)}
+                                className="bg-black border border-white/20 text-white rounded-none px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wider focus:border-[#D4AF37] focus:outline-none"
                               >
-                                <Eye className="w-3.5 h-3.5 text-[#D4AF37]" />
-                                <span>Details</span>
-                              </button>
-                              <a
-                                href={waLink}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#25D366] border border-[#25D366]/40 font-mono text-[11px] uppercase tracking-wider font-bold transition"
-                              >
-                                <MessageCircle className="w-3.5 h-3.5" />
-                                <span>WhatsApp</span>
-                              </a>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                                <option value="placed">Placed (Received)</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="preparing">Preparing Package</option>
+                                <option value="delivering">Out for Delivery</option>
+                                <option value="completed">Completed</option>
+                              </select>
+                            </td>
+
+                            <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedOrder(order)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-white/5 hover:bg-white/10 text-white border border-white/15 font-mono text-[11px] uppercase tracking-wider transition"
+                                  title="View Complete Order Details"
+                                >
+                                  <Eye className="w-3.5 h-3.5 text-[#D4AF37]" />
+                                  <span>Details</span>
+                                </button>
+                                <a
+                                  href={contextualWaUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#25D366] border border-[#25D366]/40 font-mono text-[11px] uppercase tracking-wider font-bold transition"
+                                  title="Send Pre-filled Customer WhatsApp"
+                                >
+                                  <MessageCircle className="w-3.5 h-3.5" />
+                                  <span>WhatsApp</span>
+                                </a>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -1446,6 +1671,47 @@ export default function AdminDashboardPage() {
         {/* TAB 4: TRADE-INS APPRAISALS */}
         {activeTab === "trade-ins" && (
           <div className="space-y-6 animate-fade-in">
+            {/* Search and status filter toolbar */}
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-[#0A0A0D] border border-white/10 p-4">
+              <div className="relative w-full lg:w-80">
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+                <input
+                  type="text"
+                  placeholder="FILTER CLIENT, PHONE, MODEL, VOUCHER..."
+                  value={tradeInSearch}
+                  onChange={(e) => setTradeInSearch(e.target.value)}
+                  className="w-full bg-black border border-white/15 rounded-none pl-10 pr-4 py-2 font-mono text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#D4AF37]"
+                />
+              </div>
+
+              {/* Trade-In Status Filter Chips */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                {(
+                  [
+                    { id: "all", label: "ALL APPRAISALS" },
+                    { id: "pending", label: "PENDING" },
+                    { id: "approved", label: "APPROVED" },
+                    { id: "completed", label: "COMPLETED" },
+                    { id: "rejected", label: "REJECTED" },
+                  ] as const
+                ).map((chip) => (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    onClick={() => setTradeInStatusFilter(chip.id)}
+                    className={`px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider transition border shrink-0 ${
+                      tradeInStatusFilter === chip.id
+                        ? "bg-[#D4AF37] text-black font-bold border-[#D4AF37]"
+                        : "bg-black/60 text-white/60 hover:text-white border-white/10 hover:border-white/20"
+                    }`}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Trade-Ins Table */}
             <div className="relative bg-[#0A0A0D] border border-white/10 rounded-none overflow-hidden">
               <span className="absolute top-2 left-2 text-[10px] font-mono text-white/20 select-none">+</span>
               <span className="absolute top-2 right-2 text-[10px] font-mono text-white/20 select-none">+</span>
@@ -1462,74 +1728,81 @@ export default function AdminDashboardPage() {
                       <th className="py-3.5 px-4 font-medium">CONDITION</th>
                       <th className="py-3.5 px-4 font-medium">VOUCHER VALUE</th>
                       <th className="py-3.5 px-4 font-medium">STATUS</th>
-                      <th className="py-3.5 px-4 font-medium text-right">ACTIONS</th>
+                      <th className="py-3.5 px-4 font-medium text-right">DISPATCH ACTIONS</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 font-mono text-xs">
-                    {tradeIns.map((item) => {
-                      const cleanPhone = item.phone.replace(/[^0-9]/g, "");
-                      const waLink = `https://wa.me/${cleanPhone}?text=Hello%20${encodeURIComponent(
-                        item.client_name
-                      )},%20this%20is%20AURA%20Luxe%20Mobile%20regarding%20your%20Trade-In%20Appraisal%20for%20the%20${encodeURIComponent(
-                        item.model
-                      )}%20(Voucher:%20${item.voucher_code}).`;
+                    {filteredTradeIns.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-8 text-center text-white/40 font-mono">
+                          NO SWAP REQUESTS MATCHING ACTIVE FILTER
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredTradeIns.map((item) => {
+                        const contextualWaUrl = getTradeInWhatsAppUrl(
+                          item,
+                          item.status === "approved" ? "approved" : item.status === "completed" ? "completed" : "general"
+                        );
 
-                      return (
-                        <tr
-                          key={item.id}
-                          onClick={() => setSelectedTradeIn(item)}
-                          className="hover:bg-white/[0.03] transition cursor-pointer group"
-                        >
-                          <td className="py-3.5 px-4 font-mono font-bold text-[#D4AF37] group-hover:underline">{item.id}</td>
-                          <td className="py-3.5 px-4">
-                            <div className="font-medium text-white">{item.client_name}</div>
-                            <div className="text-[11px] text-white/60">{item.phone}</div>
-                            <div className="text-[11px] text-white/40 uppercase">{item.city}</div>
-                          </td>
-                          <td className="py-3.5 px-4 font-semibold text-white">
-                            {item.brand} {item.model}
-                          </td>
-                          <td className="py-3.5 px-4 text-[11px] text-white/80">{item.condition}</td>
-                          <td className="py-3.5 px-4 font-bold text-emerald-400">
-                            {formatCFA(item.valuation_fcfa)}
-                          </td>
-                          <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
-                            <select
-                              value={item.status}
-                              onChange={(e) => handleTradeInStatusChange(item.id, e.target.value as any)}
-                              className="bg-black border border-white/20 text-white rounded-none px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wider focus:border-[#D4AF37] focus:outline-none"
-                            >
-                              <option value="pending">Pending</option>
-                              <option value="approved">Approved</option>
-                              <option value="completed">Completed</option>
-                              <option value="rejected">Rejected</option>
-                            </select>
-                          </td>
-                          <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end gap-2">
-                              <button
-                                type="button"
-                                onClick={() => setSelectedTradeIn(item)}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-white/5 hover:bg-white/10 text-white border border-white/15 font-mono text-[11px] uppercase tracking-wider transition"
-                                title="View Complete Swap Details"
+                        return (
+                          <tr
+                            key={item.id}
+                            onClick={() => setSelectedTradeIn(item)}
+                            className="hover:bg-white/[0.03] transition cursor-pointer group"
+                          >
+                            <td className="py-3.5 px-4 font-mono font-bold text-[#D4AF37] group-hover:underline">{item.id}</td>
+                            <td className="py-3.5 px-4">
+                              <div className="font-medium text-white">{item.client_name}</div>
+                              <div className="text-[11px] text-white/60">{item.phone}</div>
+                              <div className="text-[11px] text-white/40 uppercase">{item.city}</div>
+                            </td>
+                            <td className="py-3.5 px-4 font-semibold text-white">
+                              {item.brand} {item.model}
+                            </td>
+                            <td className="py-3.5 px-4 text-[11px] text-white/80">{item.condition}</td>
+                            <td className="py-3.5 px-4 font-bold text-emerald-400">
+                              {formatCFA(item.valuation_fcfa)}
+                            </td>
+                            <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
+                              <select
+                                value={item.status}
+                                onChange={(e) => handleTradeInStatusChange(item.id, e.target.value as any)}
+                                className="bg-black border border-white/20 text-white rounded-none px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wider focus:border-[#D4AF37] focus:outline-none"
                               >
-                                <Eye className="w-3.5 h-3.5 text-[#D4AF37]" />
-                                <span>Details</span>
-                              </button>
-                              <a
-                                href={waLink}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-none bg-[#25D366]/15 text-[#25D366] border border-[#25D366]/40 font-mono text-[11px] uppercase tracking-wider font-bold hover:bg-[#25D366]/25 transition"
-                              >
-                                <MessageCircle className="w-3.5 h-3.5" />
-                                <span>Offer</span>
-                              </a>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="completed">Completed</option>
+                                <option value="rejected">Rejected</option>
+                              </select>
+                            </td>
+                            <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedTradeIn(item)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-white/5 hover:bg-white/10 text-white border border-white/15 font-mono text-[11px] uppercase tracking-wider transition"
+                                  title="View Complete Swap Details"
+                                >
+                                  <Eye className="w-3.5 h-3.5 text-[#D4AF37]" />
+                                  <span>Details</span>
+                                </button>
+                                <a
+                                  href={contextualWaUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-none bg-[#25D366]/15 text-[#25D366] border border-[#25D366]/40 font-mono text-[11px] uppercase tracking-wider font-bold hover:bg-[#25D366]/25 transition"
+                                  title="Send Voucher / Reply on WhatsApp"
+                                >
+                                  <MessageCircle className="w-3.5 h-3.5" />
+                                  <span>Offer</span>
+                                </a>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -3208,37 +3481,69 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-white/10">
-              <button
-                type="button"
-                onClick={() => setSelectedOrder(null)}
-                className="px-4 py-2.5 rounded-none text-white/60 hover:text-white border border-white/10 hover:border-white/30 text-xs uppercase"
-              >
-                [ CLOSE MANIFEST ]
-              </button>
+            {/* Action Buttons & 1-Click WhatsApp Shortcuts */}
+            <div className="space-y-4 pt-4 border-t border-white/10">
+              {/* Fast WhatsApp Dispatch Presets */}
+              <div className="p-3 bg-black border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <span className="text-[10px] text-[#D4AF37] uppercase tracking-widest font-bold flex items-center gap-1.5">
+                  <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>1-CLICK CUSTOMER WHATSAPP TEMPLATES:</span>
+                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <a
+                    href={getOrderWhatsAppUrl(selectedOrder, "confirmed")}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-2.5 py-1 text-[10px] bg-white/5 hover:bg-white/10 text-white border border-white/15 hover:border-[#D4AF37] uppercase transition"
+                  >
+                    CONFIRMED NOTICE
+                  </a>
+                  <a
+                    href={getOrderWhatsAppUrl(selectedOrder, "delivering")}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-2.5 py-1 text-[10px] bg-blue-950/40 hover:bg-blue-900/60 text-blue-300 border border-blue-500/30 uppercase transition"
+                  >
+                    OUT FOR DELIVERY
+                  </a>
+                  <a
+                    href={getOrderWhatsAppUrl(selectedOrder, "completed")}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-2.5 py-1 text-[10px] bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-500/30 uppercase transition"
+                  >
+                    DELIVERED RECEIPT
+                  </a>
+                </div>
+              </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <button
                   type="button"
-                  onClick={() => window.print()}
-                  className="px-4 py-2.5 rounded-none bg-white/5 hover:bg-white/10 text-white border border-white/15 text-xs uppercase transition"
+                  onClick={() => setSelectedOrder(null)}
+                  className="px-4 py-2.5 rounded-none text-white/60 hover:text-white border border-white/10 hover:border-white/30 text-xs uppercase"
                 >
-                  [ PRINT RECEIPT ]
+                  [ CLOSE MANIFEST ]
                 </button>
-                <a
-                  href={`https://wa.me/${selectedOrder.customer.phone.replace(/[^0-9]/g, "")}?text=Hello%20${encodeURIComponent(
-                    selectedOrder.customer.fullName
-                  )},%20this%20is%20AURA%20Luxe%20Mobile%20regarding%20your%20Order%20${selectedOrder.id}.%20Total:%20${formatCFA(
-                    selectedOrder.total
-                  )}.`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-5 py-2.5 rounded-none bg-[#25D366] hover:bg-[#20bd5a] text-black font-bold text-xs uppercase flex items-center gap-2 transition"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>[ WHATSAPP DISPATCH ]</span>
-                </a>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="px-4 py-2.5 rounded-none bg-white/5 hover:bg-white/10 text-white border border-white/15 text-xs uppercase transition"
+                  >
+                    [ PRINT RECEIPT ]
+                  </button>
+                  <a
+                    href={getOrderWhatsAppUrl(selectedOrder, "general")}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-5 py-2.5 rounded-none bg-[#25D366] hover:bg-[#20bd5a] text-black font-bold text-xs uppercase flex items-center gap-2 transition"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>[ WHATSAPP CLIENT ]</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -3418,36 +3723,64 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-white/10">
-              <button
-                type="button"
-                onClick={() => setSelectedTradeIn(null)}
-                className="px-4 py-2.5 rounded-none text-white/60 hover:text-white border border-white/10 hover:border-white/30 text-xs uppercase"
-              >
-                [ CLOSE ]
-              </button>
+            <div className="space-y-4 pt-4 border-t border-white/10">
+              {/* Quick WhatsApp Dispatch Presets */}
+              <div className="p-3 bg-black border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <span className="text-[10px] text-[#D4AF37] uppercase tracking-widest font-bold flex items-center gap-1.5">
+                  <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>1-CLICK VOUCHER WHATSAPP ACTIONS:</span>
+                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await handleTradeInStatusChange(selectedTradeIn.id, "approved");
+                      window.open(getTradeInWhatsAppUrl(selectedTradeIn, "approved"), "_blank");
+                    }}
+                    className="px-2.5 py-1 text-[10px] bg-emerald-950/50 hover:bg-emerald-900/70 text-emerald-300 border border-emerald-500/40 uppercase transition font-bold"
+                  >
+                    APPROVE & SEND VOUCHER
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await handleTradeInStatusChange(selectedTradeIn.id, "completed");
+                      window.open(getTradeInWhatsAppUrl(selectedTradeIn, "completed"), "_blank");
+                    }}
+                    className="px-2.5 py-1 text-[10px] bg-white/5 hover:bg-white/10 text-white border border-white/15 uppercase transition"
+                  >
+                    MARK EXCHANGED & SEND THANKS
+                  </button>
+                </div>
+              </div>
 
-              <div className="flex items-center gap-2">
-                <a
-                  href={`tel:${selectedTradeIn.phone}`}
-                  className="px-4 py-2.5 rounded-none bg-white/5 hover:bg-white/10 text-white border border-white/15 text-xs uppercase transition flex items-center gap-1.5"
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTradeIn(null)}
+                  className="px-4 py-2.5 rounded-none text-white/60 hover:text-white border border-white/10 hover:border-white/30 text-xs uppercase"
                 >
-                  <PhoneCall className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>[ CALL ]</span>
-                </a>
-                <a
-                  href={`https://wa.me/${selectedTradeIn.phone.replace(/[^0-9]/g, "")}?text=Hello%20${encodeURIComponent(
-                    selectedTradeIn.client_name
-                  )},%20this%20is%20AURA%20Luxe%20Mobile%20regarding%20your%20Trade-In%20Appraisal%20for%20the%20${encodeURIComponent(
-                    selectedTradeIn.model
-                  )}%20(Voucher:%20${selectedTradeIn.voucher_code}).`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-5 py-2.5 rounded-none bg-[#25D366] hover:bg-[#20bd5a] text-black font-bold text-xs uppercase flex items-center gap-2 transition"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>[ WHATSAPP CLIENT ]</span>
-                </a>
+                  [ CLOSE ]
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`tel:${selectedTradeIn.phone}`}
+                    className="px-4 py-2.5 rounded-none bg-white/5 hover:bg-white/10 text-white border border-white/15 text-xs uppercase transition flex items-center gap-1.5"
+                  >
+                    <PhoneCall className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <span>[ CALL CLIENT ]</span>
+                  </a>
+                  <a
+                    href={getTradeInWhatsAppUrl(selectedTradeIn, "general")}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-5 py-2.5 rounded-none bg-[#25D366] hover:bg-[#20bd5a] text-black font-bold text-xs uppercase flex items-center gap-2 transition"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>[ WHATSAPP CLIENT ]</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
