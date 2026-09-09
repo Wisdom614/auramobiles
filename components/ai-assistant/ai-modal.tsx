@@ -17,6 +17,65 @@ import { PHONES, Phone } from "@/lib/data/phones";
 import { formatCFA } from "@/lib/formatters";
 import { getPhonesFromDB } from "@/lib/supabase/client";
 
+function FormattedMessageContent({ text, isUser }: { text: string; isUser: boolean }) {
+  if (isUser) {
+    return <p className="text-[13px] text-zinc-100 leading-relaxed font-sans">{text}</p>;
+  }
+
+  // Parse lines for assistant
+  const lines = text.split("\n");
+
+  const formatInline = (str: string) => {
+    // Split by **bold** markers
+    const parts = str.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        const content = part.slice(2, -2);
+        const isPrice = content.toLowerCase().includes("fcfa");
+        return (
+          <strong
+            key={i}
+            className={`font-bold ${isPrice ? "text-[#D4AF37]" : "text-white"}`}
+          >
+            {content}
+          </strong>
+        );
+      }
+      return part;
+    });
+  };
+
+  return (
+    <div className="space-y-1.5 text-[13px] text-zinc-200 font-sans leading-relaxed">
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return <div key={idx} className="h-1" />;
+        }
+
+        // Check if line is a bullet point (starts with •, -, or *)
+        const isBullet = /^[•\-\*]\s+/.test(trimmed) || /^\d+\.\s+/.test(trimmed);
+
+        if (isBullet) {
+          const bulletContent = trimmed.replace(/^[•\-\*]\s+/, "").replace(/^\d+\.\s+/, "");
+          return (
+            <div key={idx} className="flex items-start gap-2 pl-0.5 text-zinc-200">
+              <span className="text-[#D4AF37] font-bold shrink-0 mt-0.5 select-none">•</span>
+              <span className="flex-1">{formatInline(bulletContent)}</span>
+            </div>
+          );
+        }
+
+        return (
+          <p key={idx} className="text-zinc-200">
+            {formatInline(trimmed)}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export function AiModal() {
   const { isAiOpen, setIsAiOpen, messages, sendMessage, quickPrompts, isTyping } = useAi();
   const { addItem } = useCart();
@@ -87,14 +146,14 @@ export function AiModal() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-                  [ AI // NEURAL CONCIERGE ]
+                  AURA AI Assistant
                 </span>
-                <span className="px-1.5 py-0.2 rounded-none text-[8px] bg-[#D4AF37]/10 text-[#D4AF37] font-mono border border-[#D4AF37]/30 uppercase">
-                  ONLINE v2.4
+                <span className="px-1.5 py-0.2 rounded-none text-[8px] bg-[#D4AF37]/10 text-[#D4AF37] font-mono border border-[#D4AF37]/30 uppercase font-semibold">
+                  Online
                 </span>
               </div>
-              <p className="text-[10px] text-zinc-400 font-mono tracking-tight">
-                REAL-TIME SPEC ADVISORY & BOUTIQUE GUIDANCE
+              <p className="text-[10px] text-zinc-400 font-sans tracking-tight">
+                Smartphone Recommendations &amp; FCFA Budget Advisor
               </p>
             </div>
           </div>
@@ -141,17 +200,17 @@ export function AiModal() {
                 }`}
               >
                 <div className="flex items-center justify-between pb-1 border-b border-white/5 font-mono text-[9px] text-zinc-400 uppercase tracking-widest">
-                  <span>{msg.sender === "user" ? "[ CLIENT ]" : "[ AURA NEURAL CORE ]"}</span>
+                  <span>{msg.sender === "user" ? "You" : "AURA Assistant"}</span>
                   <span>{msg.timestamp}</span>
                 </div>
 
-                <p className="leading-relaxed whitespace-pre-wrap text-[12px]">{msg.text}</p>
+                <FormattedMessageContent text={msg.text} isUser={msg.sender === "user"} />
 
                 {/* Embedded Phone Cards */}
                 {msg.recommendedPhoneIds && msg.recommendedPhoneIds.length > 0 && (
                   <div className="pt-2 space-y-2 border-t border-white/10">
-                    <p className="text-[10px] text-[#D4AF37] uppercase font-mono tracking-widest">
-                      RECOMMENDED SPEC MATCHES:
+                    <p className="text-[10px] text-[#D4AF37] uppercase font-mono tracking-widest font-bold">
+                      Recommended Phones:
                     </p>
                     <div className="space-y-2">
                       {msg.recommendedPhoneIds.map((phoneId) => {
@@ -203,7 +262,7 @@ export function AiModal() {
                                   )
                                 }
                                 className="p-1.5 rounded-none border border-[#D4AF37]/40 hover:border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black transition-colors"
-                                title="Add to Bag"
+                                title="Add to Cart"
                               >
                                 <ShoppingBag className="w-3 h-3" />
                               </button>
@@ -224,7 +283,7 @@ export function AiModal() {
               </div>
               <div className="rounded-none p-3 border bg-black/90 border-[#D4AF37]/30 text-zinc-300 font-mono text-[11px] flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-[#D4AF37] animate-pulse"></span>
-                <span className="text-[#D4AF37] font-bold">[ CONSULTING HARDWARE ARCHIVE... ]</span>
+                <span className="text-[#D4AF37] font-semibold">Finding the best phones for you...</span>
               </div>
             </div>
           )}
@@ -233,8 +292,8 @@ export function AiModal() {
 
         {/* Quick Prompts Carousel */}
         <div className="px-3.5 py-2.5 border-t border-white/10 bg-black/60">
-          <p className="text-[9px] text-zinc-400 uppercase tracking-widest mb-1.5 font-mono">
-            [ QUERY // QUICK_SELECT ]:
+          <p className="text-[9px] text-zinc-400 uppercase tracking-widest mb-1.5 font-mono font-semibold">
+            Suggested Questions:
           </p>
           <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
             {quickPrompts.map((prompt) => (

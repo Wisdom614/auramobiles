@@ -23,17 +23,17 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: "welcome-1",
     sender: "assistant",
-    text: "Welcome to AURA Luxe Mobile Concierge. I am your personal smartphone advisor. How can I assist your selection today?",
+    text: "Hello! I am your AURA smartphone advisor.\n\nTell me your **budget in FCFA**, brand preference, or what you're looking for (e.g. best camera, long battery life).",
     recommendedPhoneIds: ["iphone-16-pro-max", "samsung-galaxy-s24-ultra"],
     timestamp: "Just now",
   },
 ];
 
 const QUICK_PROMPTS = [
-  "I have 250,000 FCFA. Which phone has the best camera?",
-  "Compare the Galaxy S24 Ultra and iPhone 16 Pro Max.",
-  "Show me phones with 2-day battery life.",
-  "What is the best certified refurbished phone?",
+  "Best camera phone under 300,000 FCFA?",
+  "Compare S24 Ultra vs iPhone 16 Pro Max",
+  "Phones with long battery life (5,000mAh+)",
+  "How does Phone Swap / Trade-In work?",
 ];
 
 const AiContext = createContext<AiContextType | undefined>(undefined);
@@ -95,7 +95,7 @@ export function AiProvider({ children }: { children: React.ReactNode }) {
       const fallbackMsg: ChatMessage = {
         id: `ai-${Date.now()}`,
         sender: "assistant",
-        text: "Our VIP showroom in Buea, Molyko stocks sealed flagships and certified refurbished units with official boutique warranties and express nationwide delivery. You can also chat directly with our human specialists on WhatsApp (+237 699 44 21 00).",
+        text: "We stock sealed flagships and pre-owned phones in Buea with 24h delivery nationwide.\n\nFor instant stock confirmation, you can also chat with us directly on WhatsApp (+237 699 44 21 00).",
         recommendedPhoneIds: ["iphone-16-pro-max", "samsung-galaxy-s24-ultra"],
         timestamp: new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" }).format(new Date()),
       };

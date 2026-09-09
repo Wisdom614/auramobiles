@@ -52,7 +52,7 @@ export function generateOrderReceiptHtml(order: Order, storefrontUrl: string = "
                       ++ AURA LUXE MOBILE
                     </span>
                     <div style="font-family: monospace; font-size: 9px; letter-spacing: 1.5px; color: #D4AF37; margin-top: 3px;">
-                      [ ACQUISITION MANIFEST // VERIFIED OFFICIAL ]
+                      OFFICIAL ORDER RECEIPT
                     </div>
                   </td>
                   <td align="right">
@@ -69,13 +69,13 @@ export function generateOrderReceiptHtml(order: Order, storefrontUrl: string = "
           <tr>
             <td style="padding: 25px 25px 15px 25px;">
               <div style="font-family: monospace; font-size: 11px; color: #D4AF37; letter-spacing: 1px; margin-bottom: 6px;">
-                CONFIRMATION OF ACQUISITION
+                ORDER CONFIRMATION
               </div>
               <h1 style="margin: 0; font-size: 20px; font-weight: 800; color: #FFFFFF; text-transform: uppercase; letter-spacing: -0.5px;">
                 Thank you for your order, ${customer.fullName}.
               </h1>
               <p style="font-size: 13px; line-height: 1.6; color: #A1A1AA; margin: 10px 0 0 0;">
-                Your smartphone acquisition has been securely logged at our showroom in Buea, Molyko. Our dispatch specialists are preparing your sealed hardware manifest.
+                Your order has been safely received by our team at our Buea showroom in Molyko. We are carefully packaging your brand new sealed phone for fast delivery.
               </p>
             </td>
           </tr>
@@ -96,10 +96,10 @@ export function generateOrderReceiptHtml(order: Order, storefrontUrl: string = "
                     </td>
                     <td style="vertical-align: top;">
                       <div style="font-family: monospace; font-size: 9px; color: #71717A; text-transform: uppercase; letter-spacing: 1px;">
-                        ESTIMATED DISPATCH
+                        ESTIMATED DELIVERY
                       </div>
                       <div style="font-family: monospace; font-size: 12px; color: #FFFFFF; margin-top: 3px;">
-                        ${order.estimatedDelivery || "Next-Day Express (Cameroon)"}
+                        ${order.estimatedDelivery || "Next-Day Delivery across Cameroon"}
                       </div>
                     </td>
                   </tr>
@@ -112,7 +112,7 @@ export function generateOrderReceiptHtml(order: Order, storefrontUrl: string = "
           <tr>
             <td style="padding: 0 25px;">
               <div style="font-family: monospace; font-size: 10px; color: #71717A; text-transform: uppercase; letter-spacing: 1.5px; border-bottom: 1px solid #27272A; padding-bottom: 6px;">
-                ACQUIRED HARDWARE SPECIFICATIONS
+                ORDERED ITEMS
               </div>
               <table width="100%" cellspacing="0" cellpadding="0" style="margin-top: 5px;">
                 ${itemsHtml}
@@ -131,13 +131,13 @@ export function generateOrderReceiptHtml(order: Order, storefrontUrl: string = "
                 <tr>
                   <td style="padding: 4px 0; color: #88888F;">Delivery Fee (${customer.deliveryMethod.replace("_", " ").toUpperCase()}):</td>
                   <td style="padding: 4px 0; text-align: right; color: #FFFFFF;">
-                    ${order.deliveryFee === 0 ? "FREE (COMPLIMENTARY)" : `${order.deliveryFee.toLocaleString()} FCFA`}
+                    ${order.deliveryFee === 0 ? "FREE" : `${order.deliveryFee.toLocaleString()} FCFA`}
                   </td>
                 </tr>
                 ${
                   order.discount && order.discount > 0
                     ? `<tr>
-                    <td style="padding: 4px 0; color: #10B981;">Boutique Discount:</td>
+                    <td style="padding: 4px 0; color: #10B981;">Discount:</td>
                     <td style="padding: 4px 0; text-align: right; color: #10B981;">-${order.discount.toLocaleString()} FCFA</td>
                   </tr>`
                     : ""
@@ -157,7 +157,7 @@ export function generateOrderReceiptHtml(order: Order, storefrontUrl: string = "
             <td style="padding: 0 25px 25px 25px;">
               <div style="background-color: #121217; border: 1px solid #222226; padding: 15px; font-family: monospace; font-size: 11px;">
                 <div style="color: #D4AF37; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">
-                  [ DESTINATION & RECIPIENT ]
+                  [ RECIPIENT &amp; DELIVERY ADDRESS ]
                 </div>
                 <div style="color: #FFFFFF; font-weight: bold;">${customer.fullName} (${customer.phone})</div>
                 <div style="color: #A1A1AA; margin-top: 2px;">${customer.address}, ${customer.city}, Cameroon</div>
@@ -170,10 +170,10 @@ export function generateOrderReceiptHtml(order: Order, storefrontUrl: string = "
           <tr>
             <td style="padding: 0 25px 30px 25px; text-align: center;">
               <a href="${trackingUrl}" style="display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #D4AF37 0%, #AA8C2C 100%); color: #000000; font-family: monospace; font-weight: 900; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; text-decoration: none;">
-                TRACK YOUR ORDER MANIFEST →
+                TRACK YOUR ORDER STATUS →
               </a>
               <div style="margin-top: 15px; font-size: 11px; color: #71717A;">
-                Questions? Message our VIP Concierge on WhatsApp at <a href="https://wa.me/237699442100" style="color: #D4AF37; text-decoration: none;">+237 699 44 21 00</a>
+                Questions? Message our support team on WhatsApp at <a href="https://wa.me/237699442100" style="color: #D4AF37; text-decoration: none;">+237 699 44 21 00</a>
               </div>
             </td>
           </tr>

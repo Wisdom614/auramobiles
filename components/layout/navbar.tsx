@@ -115,11 +115,11 @@ export function Navbar() {
   };
 
   const navLinks = [
-    { name: "Storefront", href: "/" },
-    { name: "Phones", href: "/phones" },
-    { name: "Trade-In & Swap", href: "/trade-in" },
+    { name: "Home", href: "/" },
+    { name: "All Phones", href: "/phones" },
+    { name: "Swap / Trade-In", href: "/trade-in" },
     { name: "Special Deals", href: "/phones?deal=true" },
-    { name: "Support", href: "/support" },
+    { name: "Showroom & Support", href: "/support" },
   ];
 
   return (
@@ -130,25 +130,25 @@ export function Navbar() {
           <div className="flex items-center gap-1.5 text-zinc-300">
             <Truck className="w-3.5 h-3.5 text-[#D4AF37]" />
             <span className="text-[10.5px] sm:text-xs">
-              Free express delivery over FCFA {settings.freeDeliveryThreshold.toLocaleString()}
+              📍 Showroom: Checkpoint, Molyko, Buea • Nationwide Delivery across Cameroon
             </span>
           </div>
 
           <div className="hidden sm:flex items-center gap-2 text-zinc-300">
             <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
             <span className="text-[10.5px] sm:text-xs uppercase">
-              100% Sealed Hardware <span className="text-zinc-600">|</span> Official Boutique Warranty
+              100% Original Sealed Phones <span className="text-zinc-600">|</span> 6–12 Month Warranty
             </span>
           </div>
 
           <div className="hidden md:flex items-center gap-1.5 text-zinc-300">
             <Tag className="w-3.5 h-3.5 text-[#D4AF37]" />
-            <span className="text-[10.5px] sm:text-xs uppercase">{settings.announcementText}</span>
+            <span className="text-[10.5px] sm:text-xs">Pay on Delivery Available in Buea & Douala</span>
           </div>
         </div>
       </div>
 
-      {/* 2. MAIN HEADER - ARCHITECTURAL LUXURY NAVIGATION */}
+      {/* 2. MAIN HEADER - LUXURY CLEAN NAVIGATION */}
       <header
         className={`sticky top-0 z-40 transition-all duration-300 ${
           scrolled
@@ -158,11 +158,9 @@ export function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           
-          {/* Left: Brand Identity / Geometric Monogram Logo & Wordmark */}
+          {/* Left: Brand Logo & Name */}
           <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group select-none">
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-none bg-black border border-[#D4AF37]/50 shadow-md group-hover:border-[#D4AF37] transition-all shrink-0 flex items-center justify-center p-0.5 relative">
-              <span className="absolute -top-0.5 -left-0.5 text-[#D4AF37] font-mono text-[7px] leading-none">+</span>
-              <span className="absolute -bottom-0.5 -right-0.5 text-[#D4AF37] font-mono text-[7px] leading-none">+</span>
               <img
                 src="/aura-monogram.jpg"
                 alt="AURA"
@@ -180,14 +178,14 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-7 text-sm font-mono">
+          <nav className="hidden lg:flex items-center gap-7 text-sm font-sans">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative py-1 text-xs tracking-wider uppercase transition-all ${
+                  className={`relative py-1 text-xs tracking-wider uppercase font-semibold transition-all ${
                     isActive
                       ? "text-[#D4AF37] font-bold"
                       : "text-zinc-300 hover:text-white"
@@ -202,7 +200,7 @@ export function Navbar() {
             })}
           </nav>
 
-          {/* Right Utility Actions: Ergonomic placement on both mobile & desktop */}
+          {/* Right Utility Actions */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 font-mono">
             {/* Search Trigger */}
             <button
@@ -213,7 +211,7 @@ export function Navbar() {
               <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
 
-            {/* Wishlist Icon (Desktop only) */}
+            {/* Wishlist Icon */}
             <Link
               href="/wishlist"
               aria-label="Wishlist"
@@ -227,7 +225,7 @@ export function Navbar() {
               )}
             </Link>
 
-            {/* Account Icon (Desktop only) */}
+            {/* Account Icon */}
             <Link
               href={user || profile ? "/account" : "/account/login"}
               aria-label={user || profile ? "My Account" : "Sign In"}
@@ -238,19 +236,22 @@ export function Navbar() {
                   <span className="w-4 h-4 bg-[#D4AF37] text-black font-mono font-bold text-[9px] flex items-center justify-center rounded-none">
                     {(profile?.fullName || user?.email || "U").charAt(0).toUpperCase()}
                   </span>
-                  <span className="text-[11px] font-medium text-zinc-200 max-w-[80px] truncate hidden md:inline">
-                    {profile?.fullName ? profile.fullName.split(" ")[0] : "VIP"}
+                  <span className="text-[11px] font-medium text-zinc-200 max-w-[80px] truncate hidden md:inline font-sans">
+                    {profile?.fullName ? profile.fullName.split(" ")[0] : "Account"}
                   </span>
                 </div>
               ) : (
-                <User className="w-4 h-4" />
+                <div className="flex items-center gap-1.5">
+                  <User className="w-4 h-4" />
+                  <span className="text-[11px] hidden md:inline font-sans">Sign In</span>
+                </div>
               )}
             </Link>
 
-            {/* Cart / Bag Button */}
+            {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
-              aria-label="Open Cart"
+              aria-label="Open Shopping Cart"
               className="relative w-8 h-8 sm:w-9 sm:h-9 border border-white/10 hover:border-[#D4AF37]/60 text-zinc-200 hover:text-[#D4AF37] flex items-center justify-center transition-colors rounded-none cursor-pointer bg-white/5"
             >
               <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37]" />
@@ -261,7 +262,7 @@ export function Navbar() {
               )}
             </button>
 
-            {/* Mobile Menu Trigger (On the right for easy thumb access) */}
+            {/* Mobile Menu Trigger */}
             <button
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="Open navigation menu"
@@ -274,7 +275,7 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* 3. REFINED MOBILE SLIDE-OUT MENU DRAWER */}
+      {/* 3. MOBILE SLIDE-OUT MENU DRAWER */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden font-sans">
           {/* Backdrop */}
@@ -301,7 +302,7 @@ export function Navbar() {
                     AURA
                   </span>
                   <span className="text-[8px] font-mono tracking-widest text-[#D4AF37] uppercase -mt-0.5 block">
-                    DIRECTORY
+                    LUXE MOBILE
                   </span>
                 </div>
               </div>
@@ -318,10 +319,10 @@ export function Navbar() {
             {/* Scrollable Content inside drawer */}
             <div className="flex-1 overflow-y-auto p-4 space-y-5">
               
-              {/* Primary Navigation Directory */}
-              <div className="space-y-1 font-mono text-xs">
-                <span className="text-[9px] text-zinc-500 uppercase tracking-widest block mb-2 font-bold">
-                  [ PRIMARY DIRECTORY ]
+              {/* Primary Navigation */}
+              <div className="space-y-1 text-xs">
+                <span className="text-[10px] text-zinc-400 uppercase tracking-wider block mb-2 font-bold font-mono">
+                  Menu
                 </span>
                 {navLinks.map((link, idx) => {
                   const isActive = pathname === link.href;
@@ -340,12 +341,12 @@ export function Navbar() {
                         <span className="text-[10px] text-zinc-500 font-mono">
                           0{idx + 1}
                         </span>
-                        <span className="uppercase tracking-wider">
+                        <span className="uppercase tracking-wider font-semibold">
                           {link.name}
                         </span>
                       </div>
                       {link.href === "/trade-in" && (
-                        <span className="px-1.5 py-0.2 bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 text-[9px] font-bold uppercase">
+                        <span className="px-1.5 py-0.5 bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 text-[9px] font-bold uppercase">
                           SWAP
                         </span>
                       )}
@@ -354,10 +355,10 @@ export function Navbar() {
                 })}
               </div>
 
-              {/* Hardware Brand Rack */}
-              <div className="space-y-2 font-mono text-xs">
-                <span className="text-[9px] text-zinc-500 uppercase tracking-widest block font-bold">
-                  [ HARDWARE ARCHIVE BY BRAND ]
+              {/* Shop by Brand */}
+              <div className="space-y-2 text-xs">
+                <span className="text-[10px] text-zinc-400 uppercase tracking-wider block font-bold font-mono">
+                  Shop by Brand
                 </span>
                 <div className="grid grid-cols-2 gap-1.5">
                   {BRANDS.slice(0, 6).map((brand) => (
@@ -370,18 +371,18 @@ export function Navbar() {
                       <span className="text-[11px] font-bold text-white group-hover:text-[#D4AF37] transition-colors block truncate uppercase">
                         {brand.name}
                       </span>
-                      <span className="text-[9px] text-zinc-500 block mt-0.5">
-                        {brand.count} Models
+                      <span className="text-[9px] text-zinc-500 block mt-0.5 font-mono">
+                        {brand.count} Phones
                       </span>
                     </Link>
                   ))}
                 </div>
               </div>
 
-              {/* VIP Client Bay */}
-              <div className="space-y-2 font-mono text-xs pt-2 border-t border-white/10">
-                <span className="text-[9px] text-zinc-500 uppercase tracking-widest block font-bold">
-                  [ CLIENT BAY ]
+              {/* User Account */}
+              <div className="space-y-2 text-xs pt-2 border-t border-white/10">
+                <span className="text-[10px] text-zinc-400 uppercase tracking-wider block font-bold font-mono">
+                  Your Account
                 </span>
                 {user || profile ? (
                   <div className="p-3 bg-[#121217] border border-[#D4AF37]/30 space-y-2 rounded-none">
@@ -391,10 +392,10 @@ export function Navbar() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <span className="text-xs font-bold text-white truncate block">
-                          {profile?.fullName || "AURA VIP Client"}
+                          {profile?.fullName || "AURA Client"}
                         </span>
                         <span className="text-[9px] text-[#D4AF37] block font-mono">
-                          Black Card Member
+                          Verified Profile
                         </span>
                       </div>
                     </div>
@@ -402,14 +403,14 @@ export function Navbar() {
                       <Link
                         href="/account"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="py-1.5 px-2 bg-white/5 border border-white/10 hover:border-white/20 text-center text-[10px] text-zinc-200 uppercase"
+                        className="py-1.5 px-2 bg-white/5 border border-white/10 hover:border-white/20 text-center text-[10px] text-zinc-200 uppercase font-semibold"
                       >
-                        Account
+                        Dashboard
                       </Link>
                       <Link
                         href="/wishlist"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="py-1.5 px-2 bg-white/5 border border-white/10 hover:border-white/20 text-center text-[10px] text-zinc-200 uppercase"
+                        className="py-1.5 px-2 bg-white/5 border border-white/10 hover:border-white/20 text-center text-[10px] text-zinc-200 uppercase font-semibold"
                       >
                         Wishlist ({wishlistCount})
                       </Link>
@@ -437,21 +438,21 @@ export function Navbar() {
 
             </div>
 
-            {/* Bottom Showroom Info & WhatsApp Concierge */}
-            <div className="p-4 border-t border-white/10 bg-[#121217] space-y-2 font-mono text-[11px]">
+            {/* Bottom Showroom Info & WhatsApp */}
+            <div className="p-4 border-t border-white/10 bg-[#121217] space-y-2 text-[11px]">
               <a
                 href={`https://wa.me/${settings.whatsappCleanNumber || "237699442100"}?text=${encodeURIComponent(
-                  "Hello AURA, I am browsing your mobile storefront and need concierge assistance."
+                  "Hello AURA, I am browsing your phones and need assistance."
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-2.5 bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-emerald-900/50 transition-all rounded-none"
               >
                 <PhoneCall className="w-3.5 h-3.5" />
-                <span>WhatsApp Concierge (1-Tap)</span>
+                <span>Chat on WhatsApp (Instant Reply)</span>
               </a>
-              <p className="text-[9px] text-zinc-500 text-center uppercase">
-                [ BUEA, MOLYKO • DELIVERS NATIONWIDE ]
+              <p className="text-[9.5px] text-zinc-400 text-center">
+                📍 Showroom at Checkpoint, Molyko, Buea
               </p>
             </div>
 
@@ -459,7 +460,7 @@ export function Navbar() {
         </div>
       )}
 
-      {/* 4. FOOLPROOF SEARCH OVERLAY */}
+      {/* 4. FAST SEARCH OVERLAY */}
       {isSearchOpen && (
         <div className="fixed inset-0 z-50 bg-[#09090B]/95 backdrop-blur-xl flex flex-col animate-in fade-in duration-150 font-sans">
           {/* Top Search Input Bar */}
@@ -470,7 +471,7 @@ export function Navbar() {
               <button
                 onClick={closeSearch}
                 aria-label="Close search"
-                className="p-2 border border-white/10 hover:border-white/30 text-zinc-300 hover:text-white rounded-none transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer font-mono"
+                className="p-2 border border-white/10 hover:border-white/30 text-zinc-300 hover:text-white rounded-none transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4 text-[#D4AF37]" />
                 <span className="text-xs font-semibold hidden sm:inline text-zinc-300">Back</span>
@@ -483,8 +484,8 @@ export function Navbar() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search iPhone, Galaxy, Xiaomi, Tecno..."
-                  className="w-full bg-[#181820] border border-white/15 focus:border-[#D4AF37] rounded-none py-2 sm:py-2.5 pl-3 pr-10 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none transition-colors font-mono"
+                  placeholder="Search iPhone, Samsung, Tecno, Xiaomi, Infinix..."
+                  className="w-full bg-[#181820] border border-white/15 focus:border-[#D4AF37] rounded-none py-2 sm:py-2.5 pl-3 pr-10 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none transition-colors font-sans"
                 />
                 {searchQuery && (
                   <button
@@ -501,7 +502,7 @@ export function Navbar() {
               {/* Cancel Button */}
               <button
                 onClick={closeSearch}
-                className="px-3 py-2 text-xs font-mono uppercase font-bold text-[#D4AF37] hover:text-amber-200 shrink-0 cursor-pointer"
+                className="px-3 py-2 text-xs uppercase font-bold text-[#D4AF37] hover:text-amber-200 shrink-0 cursor-pointer"
               >
                 Cancel
               </button>
@@ -512,12 +513,13 @@ export function Navbar() {
           <div className="flex-1 overflow-y-auto px-4 py-6 max-w-3xl w-full mx-auto">
             {searchQuery.trim() === "" ? (
               <div className="space-y-4">
-                <p className="text-xs font-mono uppercase tracking-wider text-zinc-400">
-                  [ POPULAR SEARCHES ]
+                <p className="text-xs uppercase tracking-wider text-zinc-400 font-bold font-mono">
+                  Popular Searches
                 </p>
-                <div className="flex flex-wrap gap-2 font-mono text-xs">
+                <div className="flex flex-wrap gap-2 text-xs">
                   {[
                     "iPhone 16 Pro Max",
+                    "iPhone 13",
                     "Galaxy S24 Ultra",
                     "Tecno Camon 30",
                     "Infinix GT 20 Pro",
@@ -536,8 +538,8 @@ export function Navbar() {
               </div>
             ) : filteredSearchPhones.length > 0 ? (
               <div className="space-y-3">
-                <p className="text-xs font-mono uppercase tracking-wider text-zinc-400">
-                  [ MATCHING SMARTPHONES ({filteredSearchPhones.length}) ]
+                <p className="text-xs uppercase tracking-wider text-zinc-400 font-bold font-mono">
+                  Matching Phones ({filteredSearchPhones.length})
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {filteredSearchPhones.map((phone) => (
@@ -545,9 +547,8 @@ export function Navbar() {
                       key={phone.id}
                       href={`/phones/${phone.slug}`}
                       onClick={closeSearch}
-                      className="flex items-center gap-3 p-3 bg-[#121217] border border-white/10 hover:border-[#D4AF37]/50 transition-all rounded-none group relative"
+                      className="flex items-center gap-3 p-3 bg-[#121217] border border-white/10 hover:border-[#D4AF37]/50 transition-all rounded-none group"
                     >
-                      <span className="absolute -top-0.5 -left-0.5 text-[#D4AF37] font-mono text-[7px]">+</span>
                       <div className="w-12 h-14 bg-black border border-white/10 p-1 flex items-center justify-center shrink-0">
                         <img
                           src={phone.images[0]}
@@ -571,9 +572,9 @@ export function Navbar() {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-12 text-zinc-500 font-mono text-xs">
-                <p className="text-sm text-white uppercase">[ NO SMARTPHONES FOUND ]</p>
-                <p className="text-xs text-zinc-400 mt-1">Try searching for Apple, Samsung, Tecno, or Infinix</p>
+              <div className="text-center py-12 text-zinc-500 text-xs">
+                <p className="text-sm text-white uppercase font-bold">No Phones Found</p>
+                <p className="text-xs text-zinc-400 mt-1">Try searching for Apple, Samsung, Tecno, Xiaomi, or Infinix</p>
               </div>
             )}
           </div>

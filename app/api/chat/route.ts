@@ -57,28 +57,18 @@ export async function POST(req: NextRequest) {
       highlights: p.highlights?.slice(0, 3) || [],
     }));
 
-    const systemPrompt = `You are the AURA Luxe Mobile VIP Neural Concierge — an ultra-sophisticated, authoritative smartphone specialist for AURA Luxe Mobile, Cameroon's premier luxury smartphone & phone swap boutique.
+    const systemPrompt = `You are the AURA Luxe Mobile Assistant — a friendly, expert smartphone advisor for AURA Luxe Mobile in Cameroon (Showroom at Check Point, Molyko, Buea; nationwide 24h delivery).
 
-STORE LOCATION & LOGISTICS:
-- Physical Showroom & Inspection Vault: Buea, Molyko (Cameroon).
-- Delivery: Express courier nationwide across Cameroon (Same-day in Buea, next-day express to Douala, Yaoundé, Bafoussam, Kribi, Bamenda, Garoua, etc.).
-- Warranty: Official Boutique Warranty on all units (Factory sealed for Brand New, 65-point certified lab hardware guarantee for Certified Refurbished).
-- Phone Swap / Trade-In: Clients can trade in existing phones for instant store credit or cash top-up towards any flagship.
-
-YOUR PERSONALITY & TONE:
-- Sophisticated, polite, precise, and tech-savvy.
-- Speak in simple, elegant English. Format specs clearly using bold text, concise bullet points, and pricing strictly in FCFA (e.g. 245,000 FCFA).
-- When asked for recommendations, always match user budget and lifestyle needs (photography, endurance, gaming, executive presence).
-- Ground all recommendations directly in the live boutique inventory provided below.
-
-LIVE BOUTIQUE INVENTORY DATA (Grounding Catalog):
-${JSON.stringify(catalogSummary, null, 2)}
-
-OUTPUT FORMAT RULES:
-- Provide an insightful, beautifully formatted recommendation response in Markdown.
-- At the very end of your response, on a new line, include this exact tag containing the IDs of 1 to 3 best matching phones from the inventory data above:
+CRITICAL RESPONSE LENGTH & FORMATTING RULES:
+1. BE SHORT, CRISP, AND BRIEF: Keep your response under 2–4 short bullet points or 2–3 concise sentences. Never write long essays or large walls of text.
+2. Direct to the point: Answer the user's question immediately with clear recommendations and key specs (Camera, Battery, Processor).
+3. Prices strictly in FCFA (e.g., 245,000 FCFA).
+4. Use clean Markdown formatting with bolding (**Phone Name**) and bullet points (•).
+5. At the very end of your response, on a new line, include this exact tag with 1 to 3 matching phone IDs from the inventory:
 [RECOMMENDATIONS: id1, id2]
-Example: [RECOMMENDATIONS: iphone-16-pro-max, samsung-galaxy-s24-ultra]`;
+
+LIVE STORE INVENTORY:
+${JSON.stringify(catalogSummary, null, 2)}`;
 
     const apiKey = process.env.GEMINI_API_KEY;
 
@@ -113,7 +103,7 @@ Example: [RECOMMENDATIONS: iphone-16-pro-max, samsung-galaxy-s24-ultra]`;
           contents: formattedContents,
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 2048,
+            maxOutputTokens: 350,
           },
         }),
       });
@@ -131,7 +121,7 @@ Example: [RECOMMENDATIONS: iphone-16-pro-max, samsung-galaxy-s24-ultra]`;
             contents: formattedContents,
             generationConfig: {
               temperature: 0.7,
-              maxOutputTokens: 2048,
+              maxOutputTokens: 350,
             },
           }),
         });
@@ -197,7 +187,7 @@ Example: [RECOMMENDATIONS: iphone-16-pro-max, samsung-galaxy-s24-ultra]`;
   }
 }
 
-// Curated heuristic fallback if Gemini API is unreachable or unconfigured
+// Curated concise heuristic fallback
 function getFallbackResponse(query: string, catalog: Phone[]) {
   const lower = query.toLowerCase();
   let responseText = "";
@@ -211,14 +201,14 @@ function getFallbackResponse(query: string, catalog: Phone[]) {
     lower.includes("under 300")
   ) {
     responseText =
-      "For a budget under 300,000 FCFA, our top recommendation is the **Samsung Galaxy A55 5G** (245,000 FCFA). It features an aluminum frame, 50MP OIS camera, and a 5,000 mAh battery with official boutique warranty.\n\nIf you prefer iOS, the **Certified Refurbished iPhone 13 128GB** (320,000 FCFA) offers flagship A15 Bionic performance and cinematic 4K video capture.\n\nBoth are available at our Buea, Molyko showroom with express delivery nationwide across Cameroon.";
+      "Here are our best options under 300,000 FCFA:\n\n• **Samsung Galaxy A55 5G** (245,000 FCFA) — 50MP OIS camera, AMOLED 120Hz display & 5,000mAh battery.\n• **iPhone 13 128GB** (320,000 FCFA, Pre-Owned) — A15 Bionic chip & 4K cinematic video.\n\nBoth available in Buea with nationwide 24h delivery.";
     recs = ["samsung-galaxy-a55", "iphone-13-128gb"];
   } else if (
     lower.includes("compare") ||
     (lower.includes("s24") && lower.includes("iphone"))
   ) {
     responseText =
-      "### Flagship Comparison: Galaxy S24 Ultra vs. iPhone 16 Pro Max\n\n• **Samsung Galaxy S24 Ultra** (850,000 FCFA):\n  - 200MP Quad Telephoto Camera system with 100x Space Zoom\n  - Built-in S-Pen stylus and anti-reflective Gorilla Armor glass\n  - Snapdragon 8 Gen 3 for Galaxy with 7 years of Android updates\n\n• **Apple iPhone 16 Pro Max** (980,000 FCFA):\n  - Grade 5 Aerospace Titanium with tactile Camera Control button\n  - A18 Pro silicon with Apple Intelligence architecture\n  - 4K 120 fps Dolby Vision recording with Studio-quality mics\n\n**Verdict**: Select the S24 Ultra for productive multitasking and note-taking; select the iPhone 16 Pro Max for video creation and long-term resale value.";
+      "• **Galaxy S24 Ultra** (850,000 FCFA): 200MP camera, 100x zoom, built-in S-Pen, and 7 years of Android updates.\n• **iPhone 16 Pro Max** (980,000 FCFA): A18 Pro chip, 4K 120fps Dolby Vision, and industry-leading battery life.\n\n**Tip**: Choose S24 Ultra for productivity & zoom; choose iPhone 16 Pro Max for video recording & resale value.";
     recs = ["iphone-16-pro-max", "samsung-galaxy-s24-ultra"];
   } else if (
     lower.includes("battery") ||
@@ -226,7 +216,7 @@ function getFallbackResponse(query: string, catalog: Phone[]) {
     lower.includes("charge")
   ) {
     responseText =
-      "For class-leading battery endurance in Cameroon, we recommend:\n\n1. **OnePlus 12 5G** (5,400 mAh + 100W SUPERVOOC charging from 1% to 100% in 26 minutes).\n2. **Samsung Galaxy S24 Ultra** (5,000 mAh, easily yields 1.5 to 2 days of mixed usage).\n3. **iPhone 16 Pro Max** (Delivers up to 33 hours continuous video playback, the longest battery life in iPhone history).\n\nAll units come sealed with official boutique warranty.";
+      "Top battery champions in our store:\n\n• **OnePlus 12 5G** (5,400mAh + 100W charging in 26 mins)\n• **Galaxy S24 Ultra** (5,000mAh, solid 2-day battery)\n• **iPhone 16 Pro Max** (Up to 33h video playback)\n\nAll sealed with 12-month warranty.";
     recs = ["oneplus-12", "samsung-galaxy-s24-ultra", "iphone-16-pro-max"];
   } else if (
     lower.includes("camera") ||
@@ -234,7 +224,7 @@ function getFallbackResponse(query: string, catalog: Phone[]) {
     lower.includes("video")
   ) {
     responseText =
-      "For mobile photography, these flagships lead the industry:\n\n• **Xiaomi 14 Ultra** (680,000 FCFA): Co-engineered with Leica, featuring a true 1-inch variable aperture sensor and Quad 50MP cameras.\n• **Google Pixel 9 Pro** (690,000 FCFA): Unrivaled computational photography, Night Sight Video, and Tensor G4 Magic Editor.\n• **iPhone 16 Pro Max** (980,000 FCFA): The uncontested benchmark for 4K 120fps video capture.";
+      "Best camera smartphones right now:\n\n• **Xiaomi 14 Ultra** (680,000 FCFA) — Leica 1-inch sensor, 50MP Quad.\n• **Google Pixel 9 Pro** (690,000 FCFA) — Best computational photo & Night Sight.\n• **iPhone 16 Pro Max** (980,000 FCFA) — Benchmark 4K 120fps video.";
     recs = ["xiaomi-14-ultra", "google-pixel-9-pro", "iphone-16-pro-max"];
   } else if (
     lower.includes("swap") ||
@@ -242,12 +232,12 @@ function getFallbackResponse(query: string, catalog: Phone[]) {
     lower.includes("exchange")
   ) {
     responseText =
-      "AURA provides guaranteed **Phone Swap & Trade-In Services**:\n\n1. Use our online **Trade-In Appraiser** (`/trade-in`) to select your device and calculate instant valuation.\n2. Receive your unique Trade-In Voucher Code.\n3. Bring your phone to our Buea, Molyko showroom or dispatch it via our nationwide courier.\n4. Apply your credit immediately to upgrade to any sealed flagship!";
+      "You can easily swap your current phone:\n\n1. Select your phone on our **Swap Page** (`/trade-in`).\n2. Get an instant valuation.\n3. Pay only the difference to get your new sealed phone!\n\nAvailable in our Buea showroom or via courier.";
     recs = ["iphone-16-pro-max", "samsung-galaxy-s24-ultra"];
   } else {
     responseText =
-      "Welcome to AURA Luxe Mobile. Our showroom in Buea, Molyko stocks sealed flagships and certified pre-owned smartphones with official boutique warranties and express delivery nationwide.\n\nTell me your desired budget in FCFA, preferred brand (Apple, Samsung, Google, Xiaomi, OnePlus), or primary usage focus (camera, gaming, battery endurance) to receive tailored luxury recommendations.";
-    recs = catalog.slice(0, 3).map((p) => p.id);
+      "Welcome to AURA Luxe Mobile! We stock 100% genuine sealed & certified pre-owned phones in Buea with nationwide delivery.\n\nTell me your **budget in FCFA**, preferred brand, or favorite feature (camera, gaming, battery) to get a quick recommendation.";
+    recs = catalog.slice(0, 2).map((p) => p.id);
   }
 
   return {

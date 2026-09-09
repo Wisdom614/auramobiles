@@ -42,11 +42,15 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
             alt={phone.name}
             className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
           />
-          {phone.condition === "Certified Refurbished" && (
-            <span className="absolute top-2 left-2 px-2 py-0.5 rounded-none text-[10px] font-semibold bg-emerald-950/90 text-emerald-300 border border-emerald-500/30">
-              Pre-Owned
-            </span>
-          )}
+          <span
+            className={`absolute top-2 left-2 px-2 py-0.5 rounded-none text-[9.5px] font-bold uppercase tracking-wider font-mono ${
+              phone.condition === "Certified Refurbished"
+                ? "bg-amber-950/90 text-amber-300 border border-amber-500/30"
+                : "bg-emerald-950/90 text-emerald-300 border border-emerald-500/30"
+            }`}
+          >
+            {phone.condition === "Certified Refurbished" ? "Clean Pre-Owned" : "Brand New Sealed"}
+          </span>
         </Link>
 
         {/* Info */}
@@ -61,7 +65,7 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
           </Link>
           <p className="text-xs text-zinc-400 line-clamp-1">{phone.tagline}</p>
           <div className="flex items-center justify-center sm:justify-start gap-2 pt-1">
-            <span className="w-1.5 h-1.5 rounded-none bg-emerald-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
             <span className="text-[11px] text-emerald-400 font-medium font-mono">In Stock • Official Warranty</span>
           </div>
         </div>
@@ -69,7 +73,7 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
         {/* Price & Primary CTA */}
         <div className="w-full sm:w-48 sm:border-l sm:border-white/10 sm:pl-6 flex flex-col items-center sm:items-end gap-3 shrink-0">
           <div className="text-center sm:text-right">
-            <span className="text-xs text-zinc-400 block font-mono">Price</span>
+            <span className="text-xs text-zinc-400 block font-mono">Official Price</span>
             <span className="text-lg font-black text-[#D4AF37] font-mono">
               {formatCFA(phone.basePrice)}
             </span>
@@ -103,14 +107,18 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
   // Grid Layout (Default: Mobile-First, Clean & Compact, Straight Edges)
   return (
     <div className="group rounded-none bg-[#121217] border border-white/10 hover:border-[#D4AF37]/60 hover:shadow-xl hover:shadow-black/50 transition-all duration-200 flex flex-col justify-between overflow-hidden relative">
-      {/* Condition Badge (Only if Pre-Owned) */}
-      {phone.condition === "Certified Refurbished" && (
-        <div className="absolute top-2.5 left-2.5 z-10">
-          <span className="px-2 py-0.5 rounded-none text-[10px] font-bold uppercase tracking-wider bg-emerald-950/90 text-emerald-300 border border-emerald-500/30 font-mono">
-            Pre-Owned
-          </span>
-        </div>
-      )}
+      {/* Condition Badge */}
+      <div className="absolute top-2.5 left-2.5 z-10">
+        <span
+          className={`px-2 py-0.5 rounded-none text-[9.5px] font-bold uppercase tracking-wider font-mono ${
+            phone.condition === "Certified Refurbished"
+              ? "bg-amber-950/90 text-amber-300 border border-amber-500/30"
+              : "bg-emerald-950/90 text-emerald-300 border border-emerald-500/30"
+          }`}
+        >
+          {phone.condition === "Certified Refurbished" ? "Pre-Owned" : "Brand New"}
+        </span>
+      </div>
 
       {/* Product Image Link */}
       <Link
@@ -148,7 +156,7 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
           </div>
         </div>
 
-        {/* Big Obvious Primary "Add to Cart" Button */}
+        {/* Primary "Add to Cart" Button */}
         <button
           onClick={handleQuickAdd}
           aria-label={`Add ${phone.name} to cart`}
@@ -161,7 +169,7 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
           {isAddedToast ? (
             <>
               <Check className="w-4 h-4 stroke-[3]" />
-              <span>Added!</span>
+              <span>Added to Cart</span>
             </>
           ) : (
             <>

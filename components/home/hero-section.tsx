@@ -33,29 +33,29 @@ interface HeroSlide {
 const HERO_SLIDES: HeroSlide[] = [
   {
     id: "iphone-16-pro-max",
-    tag: "LATEST ARRIVALS // APEX TIER",
+    tag: "🔥 NEW ARRIVAL • FACTORY SEALED",
     titleWhite: "iPhone 16 Pro Max",
     titleGold: "Bigger. Brighter. Better.",
     description:
-      "Precision-forged grade 5 titanium enclosure powered by the 3nm A18 Pro silicon. Studio-grade 48MP Fusion optics and extended battery life.",
+      "Grade 5 titanium design powered by the Apple A18 Pro chip. 48MP Fusion camera with 4K 120fps Dolby Vision and all-day battery life.",
     brand: "Apple",
     model: "iPhone 16 Pro Max",
     price: 980000,
     image: "/hero-iphone.jpg",
     primaryLink: "/phones/iphone-16-pro-max",
     chips: [
-      { icon: Cpu, label: "A18 Pro Silicon" },
-      { icon: Camera, label: "48MP Fusion Optics" },
-      { icon: BatteryCharging, label: "All-Day Endurance" },
+      { icon: Cpu, label: "A18 Pro Chip" },
+      { icon: Camera, label: "48MP Camera" },
+      { icon: BatteryCharging, label: "All-Day Battery" },
     ],
   },
   {
     id: "samsung-galaxy-s24-ultra",
-    tag: "GALAXY AI FLAGSHIP // TITANIUM",
+    tag: "⚡ TOP FLAGSHIP • GALAXY AI",
     titleWhite: "Galaxy S24 Ultra",
     titleGold: "Power. Precision. Intelligence.",
     description:
-      "Titanium armor chassis integrated with Galaxy AI workflow intelligence. 200MP Quad Telephoto sensor suite and embedded low-latency S-Pen.",
+      "Titanium frame with built-in Galaxy AI and S-Pen. 200MP Quad camera with 100x zoom and Snapdragon 8 Gen 3 speed.",
     brand: "Samsung",
     model: "Galaxy S24 Ultra",
     price: 850000,
@@ -101,16 +101,16 @@ export function HeroSection() {
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 relative z-10">
         
-        {/* Frame Telemetry Bar */}
-        <div className="flex items-center justify-between pb-4 mb-6 border-b border-white/10 text-[10px] font-mono uppercase tracking-widest text-zinc-400">
+        {/* Top Trust Bar */}
+        <div className="flex items-center justify-between pb-4 mb-6 border-b border-white/10 text-[10.5px] font-mono uppercase tracking-wider text-zinc-400">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-[#D4AF37] animate-pulse"></span>
-            <span className="text-white font-bold">[ CENTRAL DISPATCH VAULT // READY ]</span>
+            <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse"></span>
+            <span className="text-white font-bold">📍 Buea Showroom: Checkpoint, Molyko</span>
             <span className="text-zinc-600 hidden sm:inline">|</span>
-            <span className="text-[#D4AF37] hidden sm:inline">100% GENUINE HARDWARE</span>
+            <span className="text-[#D4AF37] hidden sm:inline">100% Original Sealed Phones</span>
           </div>
           <div className="flex items-center gap-3">
-            <span>[ FRAME 0{currentSlide + 1} / 0{HERO_SLIDES.length} ]</span>
+            <span className="text-zinc-400">Nationwide 24h Express Delivery</span>
           </div>
         </div>
 
@@ -121,7 +121,7 @@ export function HeroSection() {
           <div className="lg:col-span-6 space-y-6 text-left">
             
             {/* Tag */}
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-white/5 border border-white/10 text-[#D4AF37] text-[10px] font-mono uppercase tracking-widest">
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-white/5 border border-white/10 text-[#D4AF37] text-[10px] font-mono uppercase tracking-wider font-bold">
               <span>{slide.tag}</span>
             </div>
 
@@ -136,11 +136,11 @@ export function HeroSection() {
             </div>
 
             {/* Description */}
-            <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed max-w-xl">
+            <p className="text-zinc-300 text-xs sm:text-sm leading-relaxed max-w-xl">
               {slide.description}
             </p>
 
-            {/* Concise Product Highlights Pills with 0px radius */}
+            {/* Concise Product Highlights Pills */}
             <div className="flex flex-wrap items-center gap-2 pt-1 font-mono">
               {slide.chips.map((chip, i) => {
                 const Icon = chip.icon;
@@ -156,23 +156,23 @@ export function HeroSection() {
               })}
             </div>
 
-            {/* Architectural Tactical Buttons */}
+            {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-3">
               <Link
                 href={slide.primaryLink}
                 className="w-full sm:w-auto px-6 sm:px-7 py-3.5 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-widest flex items-center justify-center gap-2.5 hover:opacity-95 transition cursor-pointer"
               >
                 <ShoppingBag className="w-4 h-4 text-black stroke-[2.5]" />
-                <span>ACQUIRE HARDWARE</span>
+                <span>Shop This Phone</span>
                 <ArrowRight className="w-3.5 h-3.5 stroke-[3]" />
               </Link>
 
               <Link
                 href="/trade-in"
-                className="w-full sm:w-auto px-5 sm:px-6 py-3.5 bg-[#121217] hover:bg-[#16161D] text-white border border-white/15 hover:border-[#D4AF37]/60 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition font-mono"
+                className="w-full sm:w-auto px-5 sm:px-6 py-3.5 bg-[#121217] hover:bg-[#16161D] text-white border border-white/15 hover:border-[#D4AF37]/60 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition"
               >
                 <RefreshCw className="w-3.5 h-3.5 text-[#D4AF37]" />
-                <span>[ INITIATE PHONE SWAP ]</span>
+                <span>Swap Your Old Phone</span>
               </Link>
             </div>
 
@@ -181,14 +181,8 @@ export function HeroSection() {
           {/* Right Product Visual Canvas (Cols 7-12) */}
           <div className="lg:col-span-6 relative flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-5 w-full">
             
-            {/* Viewfinder Framed Phone Image Showcase */}
+            {/* Framed Phone Image Showcase */}
             <div className="relative w-full max-w-md lg:max-w-lg aspect-[16/11] sm:aspect-[4/3] bg-[#0E0E12] border border-white/15 overflow-hidden group">
-              {/* Viewfinder crosshairs */}
-              <span className="absolute top-2 left-2 text-[#D4AF37] font-mono text-xs select-none z-20">+</span>
-              <span className="absolute top-2 right-2 text-[#D4AF37] font-mono text-xs select-none z-20">+</span>
-              <span className="absolute bottom-2 left-2 text-[#D4AF37] font-mono text-xs select-none z-20">+</span>
-              <span className="absolute bottom-2 right-2 text-[#D4AF37] font-mono text-xs select-none z-20">+</span>
-
               <img
                 src={slide.image}
                 alt={slide.model}
@@ -196,9 +190,9 @@ export function HeroSection() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
 
-              {/* Viewfinder bottom corner watermark */}
-              <div className="absolute bottom-3 left-3 text-[9px] font-mono text-white/50 tracking-widest uppercase pointer-events-none">
-                VERIFIED SEALED UNIT // CAMEROON STOCK
+              {/* Watermark badge */}
+              <div className="absolute bottom-3 left-3 text-[10px] font-mono text-zinc-300 tracking-wider uppercase pointer-events-none">
+                ✓ 100% Original Sealed • In Stock
               </div>
             </div>
 
@@ -206,13 +200,13 @@ export function HeroSection() {
             <div className="w-full sm:w-auto sm:absolute sm:right-2 sm:bottom-4 text-left bg-[#0E0E12]/95 border border-[#D4AF37]/50 p-4 sm:p-5 shadow-2xl shrink-0 font-mono relative">
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#D4AF37]"></span>
               <span className="text-[10px] text-[#D4AF37] font-bold block uppercase tracking-wider">
-                [ FACTORY SEALED ]
+                Brand New Sealed
               </span>
               <span className="text-xs font-bold text-white block mt-1 uppercase">
                 {slide.brand} • {slide.model}
               </span>
-              <span className="text-[10px] text-zinc-500 uppercase tracking-widest block mt-2">
-                ACQUISITION PRICE:
+              <span className="text-[10px] text-zinc-400 uppercase tracking-wider block mt-2">
+                Official Price:
               </span>
               <span className="text-lg sm:text-xl font-black text-[#D4AF37] block mt-0.5">
                 {formatCFA(slide.price)}
@@ -223,7 +217,7 @@ export function HeroSection() {
 
         </div>
 
-        {/* Carousel Navigation Bar (Teenage Engineering Style) */}
+        {/* Carousel Navigation Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-8 sm:pt-10 border-t border-white/10 mt-8">
           {/* Step buttons */}
           <div className="flex flex-wrap items-center gap-2">
@@ -232,13 +226,13 @@ export function HeroSection() {
                 key={s.id}
                 onClick={() => setCurrentSlide(idx)}
                 aria-label={`Go to slide ${idx + 1}`}
-                className={`px-3 py-1 text-[11px] font-mono font-bold tracking-wider transition-all cursor-pointer border ${
+                className={`px-3 py-1.5 text-[11px] font-mono font-bold tracking-wider transition-all cursor-pointer border ${
                   currentSlide === idx
                     ? "bg-[#D4AF37] text-black border-[#D4AF37]"
                     : "bg-[#121217] text-zinc-400 border-white/10 hover:text-white hover:border-white/30"
                 }`}
               >
-                0{idx + 1} // {s.brand.toUpperCase()}
+                0{idx + 1} • {s.model}
               </button>
             ))}
           </div>

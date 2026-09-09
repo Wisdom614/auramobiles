@@ -76,34 +76,24 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center text-center px-4 py-20 relative">
+      <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center text-center px-4 py-20 relative font-sans">
         <div className="max-w-md w-full border border-white/10 bg-[#0E0E12] p-8 sm:p-10 relative">
-          {/* Viewfinder crosshairs */}
-          <span className="absolute top-2 left-2 text-zinc-600 font-mono text-xs select-none">+</span>
-          <span className="absolute top-2 right-2 text-zinc-600 font-mono text-xs select-none">+</span>
-          <span className="absolute bottom-2 left-2 text-zinc-600 font-mono text-xs select-none">+</span>
-          <span className="absolute bottom-2 right-2 text-zinc-600 font-mono text-xs select-none">+</span>
-
           <div className="w-14 h-14 bg-black border border-white/15 flex items-center justify-center mx-auto mb-5 text-[#D4AF37]">
             <ShoppingBag className="w-6 h-6" />
           </div>
 
-          <div className="inline-block px-2.5 py-0.5 bg-white/5 border border-white/10 text-[10px] font-mono text-[#D4AF37] uppercase tracking-widest mb-3">
-            [ STATUS // MANIFEST EMPTY ]
-          </div>
-
-          <h1 className="text-xl font-bold text-white uppercase tracking-wider mb-2">
-            Acquisition Bag is Empty
+          <h1 className="text-xl font-bold text-white uppercase tracking-wider mb-2 font-sans">
+            Your Cart is Empty
           </h1>
           <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-            Select a verified flagship device from our curated vault collection before completing acquisition.
+            You haven&apos;t added any phones to your cart yet. Explore our genuine sealed collection with warranty.
           </p>
 
           <Link
             href="/phones"
             className="w-full inline-block py-3.5 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-widest hover:opacity-95 transition"
           >
-            Access Boutique Vault
+            Browse All Phones
           </Link>
         </div>
       </div>
@@ -126,9 +116,9 @@ export default function CheckoutPage() {
         ? "Showroom Pickup — Buea, Molyko Hub"
         : `${deliveryOption.toUpperCase()} - ${address || "Address to confirm via call"}`;
 
-    const text = `Hello ${settings.storeName}, I want to confirm my order:\n\n*Customer:* ${fullName || "Client"}\n*Phone:* ${phoneNum || "Via WhatsApp"}\n*Delivery:* ${deliveryText}\n*Payment:* ${
-      paymentMethod === "cod" ? "Cash on Delivery (Inspection First)" : paymentMethod === "mtn" ? "MTN MoMo" : "Orange Money"
-    }\n\n*Items:*\n${itemList}\n\n*Total:* ${formatCFA(total)}\n\nPlease proceed with order dispatch.`;
+    const text = `Hello ${settings.storeName}, I want to place an order:\n\n*Customer:* ${fullName || "Client"}\n*Phone:* ${phoneNum || "Via WhatsApp"}\n*Delivery:* ${deliveryText}\n*Payment:* ${
+      paymentMethod === "cod" ? "Pay on Delivery (Inspect First)" : paymentMethod === "mtn" ? "MTN MoMo" : "Orange Money"
+    }\n\n*Items Ordered:*\n${itemList}\n\n*Total Amount:* ${formatCFA(total)}\n\nPlease confirm availability and dispatch.`;
 
     const waNum = settings.whatsappCleanNumber || "237699442100";
     window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(text)}`, "_blank");
@@ -137,7 +127,7 @@ export default function CheckoutPage() {
   const handlePlaceOrder = (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName.trim() || !phoneNum.trim()) {
-      alert("Please provide your Name and WhatsApp phone number.");
+      alert("Please enter your Full Name and WhatsApp phone number.");
       return;
     }
 
@@ -206,7 +196,7 @@ export default function CheckoutPage() {
       console.warn("Background order email trigger warning:", emailErr);
     });
 
-    // Step progression provides clear visual feedback to reassure user
+    // Step progression gives clear feedback to reassure user
     setTimeout(() => setSubmissionStep(2), 500);
     setTimeout(() => setSubmissionStep(3), 1100);
     setTimeout(() => {
@@ -216,59 +206,59 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-zinc-100 py-8 sm:py-12">
+    <div className="min-h-screen bg-[#09090B] text-zinc-100 py-8 sm:py-12 font-sans">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         
-        {/* Top Header Protocol Bar */}
+        {/* Top Header Bar */}
         <div className="mb-6 pb-4 border-b border-white/10 flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37]">
-                [ PROTOCOL // ACQUISITION CHECKOUT ]
+              <span className="text-[10.5px] font-mono uppercase tracking-wider text-[#D4AF37] font-bold">
+                SECURE CHECKOUT
               </span>
-              <span className="w-1.5 h-1.5 bg-[#D4AF37]"></span>
-              <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">
-                DISPATCH SECURE
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span className="text-[10px] font-mono text-zinc-400">
+                CAMEROON DELIVERY
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white uppercase font-sans">
-              Confirm Purchase & Delivery
+              Complete Your Order
             </h1>
           </div>
           <Link
             href="/phones"
             className="text-xs font-mono text-zinc-400 hover:text-[#D4AF37] flex items-center gap-1 transition"
           >
-            <span>[ ← RETURN TO COLLECTION ]</span>
+            <span>← Back to All Phones</span>
           </Link>
         </div>
 
-        {/* VIP Account Notification Bar */}
+        {/* Profile Status Bar */}
         {profile ? (
           <div className="mb-6 p-3.5 bg-[#121217] border border-[#D4AF37]/40 flex flex-wrap items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2.5 text-zinc-200 font-mono">
+            <div className="flex items-center gap-2.5 text-zinc-200">
               <Sparkles className="w-4 h-4 text-[#D4AF37] shrink-0" />
               <span>
-                AUTHENTICATED VIP CLIENT: <strong className="text-white">{profile.fullName || profile.email}</strong>
+                Ordering as: <strong className="text-white">{profile.fullName || profile.email}</strong>
               </span>
             </div>
             <Link
               href="/account"
-              className="text-[#D4AF37] hover:underline font-mono text-[11px] uppercase tracking-wider"
+              className="text-[#D4AF37] hover:underline text-[11px] uppercase tracking-wider font-semibold"
             >
-              [ EDIT SAVED PROFILE → ]
+              Edit Profile →
             </Link>
           </div>
         ) : (
           <div className="mb-6 p-3.5 bg-[#121217] border border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
-            <span className="text-zinc-400 font-mono text-[11px]">
-              HAVE AN AURA VIP ACCOUNT? SIGN IN FOR RAPID 1-TAP CHECKOUT & ORDER HISTORY.
+            <span className="text-zinc-400 text-[11px]">
+              Already have an account? Sign in for fast auto-fill and past order tracking.
             </span>
             <Link
               href="/account/login?redirect=/checkout"
-              className="text-[#D4AF37] hover:underline font-mono text-[11px] font-bold uppercase tracking-wider"
+              className="text-[#D4AF37] hover:underline text-[11px] font-bold uppercase tracking-wider"
             >
-              [ SIGN IN / VIP LOGIN → ]
+              Sign In →
             </Link>
           </div>
         )}
@@ -278,42 +268,39 @@ export default function CheckoutPage() {
           {/* Main Form (7 Cols) */}
           <div className="lg:col-span-7 space-y-5">
             
-            {/* STEP 01: Contact & Identity */}
+            {/* STEP 01: Contact Information */}
             <div className="p-5 sm:p-6 bg-[#0E0E12] border border-white/10 relative">
-              <span className="absolute top-2 left-2 text-zinc-600 font-mono text-[10px] select-none">+</span>
-              <span className="absolute top-2 right-2 text-zinc-600 font-mono text-[10px] select-none">+</span>
-
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-[#D4AF37]" />
-                  <h2 className="text-xs font-bold uppercase tracking-widest text-white font-mono">
-                    [ STEP 01 // IDENTITY & CONTACT ]
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-white font-mono">
+                    Step 1: Contact Information
                   </h2>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-500 uppercase">REQUIRED</span>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase">Required</span>
               </div>
 
               <div className="space-y-4 text-xs">
                 <div>
-                  <label className="block text-zinc-400 mb-1.5 font-mono text-[11px] uppercase tracking-wider">
-                    Full Legal Name <span className="text-[#D4AF37]">*</span>
+                  <label className="block text-zinc-300 mb-1.5 text-[11px] uppercase tracking-wider font-semibold">
+                    Your Full Name <span className="text-[#D4AF37]">*</span>
                   </label>
                   <input
                     type="text"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. Jean-Paul Mbarga"
+                    placeholder="e.g. Wisdom Besong"
                     className="w-full bg-black border border-white/15 px-3.5 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#D4AF37] transition font-sans"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-zinc-400 mb-1.5 font-mono text-[11px] uppercase tracking-wider">
-                    WhatsApp & Phone Coordinate <span className="text-[#D4AF37]">*</span>
+                  <label className="block text-zinc-300 mb-1.5 text-[11px] uppercase tracking-wider font-semibold">
+                    WhatsApp &amp; Phone Number <span className="text-[#D4AF37]">*</span>
                   </label>
                   <div className="flex">
-                    <div className="bg-[#16161D] border border-white/15 border-r-0 px-3.5 py-3 text-xs font-mono text-[#D4AF37] flex items-center">
+                    <div className="bg-[#16161D] border border-white/15 border-r-0 px-3.5 py-3 text-xs font-mono text-[#D4AF37] flex items-center font-bold">
                       +237
                     </div>
                     <input
@@ -325,36 +312,33 @@ export default function CheckoutPage() {
                       className="w-full bg-black border border-white/15 px-3.5 py-3 text-sm text-white placeholder-zinc-600 font-mono focus:outline-none focus:border-[#D4AF37] transition"
                     />
                   </div>
-                  <span className="text-[10px] font-mono text-zinc-500 mt-1.5 block">
-                    Our concierge verifies this number prior to hardware vault release.
+                  <span className="text-[10.5px] text-zinc-400 mt-1.5 block">
+                    Our dispatch manager will WhatsApp or call you to confirm before sending the courier.
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* STEP 02: Logistics & Fulfillment */}
+            {/* STEP 02: Delivery Location */}
             <div className="p-5 sm:p-6 bg-[#0E0E12] border border-white/10 relative">
-              <span className="absolute top-2 left-2 text-zinc-600 font-mono text-[10px] select-none">+</span>
-              <span className="absolute top-2 right-2 text-zinc-600 font-mono text-[10px] select-none">+</span>
-
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-[#D4AF37]" />
-                  <h2 className="text-xs font-bold uppercase tracking-widest text-white font-mono">
-                    [ STEP 02 // LOGISTICS & FULFILLMENT ]
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-white font-mono">
+                    Step 2: Delivery Location
                   </h2>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-500 uppercase">CAMEROON</span>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase">Cameroon</span>
               </div>
 
-              {/* Modular Location Selector */}
+              {/* Location Selector */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-4">
                 {[
-                  { id: "buea", label: "BUEA", sub: "SAME DAY (1-2H)", fee: "1,500 F" },
-                  { id: "pickup", label: "MOLYKO HUB", sub: "SHOWROOM PICKUP", fee: "FREE" },
-                  { id: "douala", label: "DOUALA", sub: "NATIONWIDE (24H)", fee: "3,500 F" },
-                  { id: "yaounde", label: "YAOUNDÉ", sub: "NATIONWIDE (24H)", fee: "3,500 F" },
-                  { id: "nationwide", label: "OTHER TOWNS", sub: "NATIONWIDE 24-48H", fee: "3,500 F" },
+                  { id: "buea", label: "BUEA", sub: "Same-Day (1-2h)", fee: "1,500 FCFA" },
+                  { id: "pickup", label: "MOLYKO HUB", sub: "Showroom Pick-Up", fee: "FREE" },
+                  { id: "douala", label: "DOUALA", sub: "Express (24h)", fee: "3,500 FCFA" },
+                  { id: "yaounde", label: "YAOUNDÉ", sub: "Express (24h)", fee: "3,500 FCFA" },
+                  { id: "nationwide", label: "OTHER TOWNS", sub: "Courier (24-48h)", fee: "3,500 FCFA" },
                 ].map((opt) => (
                   <button
                     key={opt.id}
@@ -385,66 +369,63 @@ export default function CheckoutPage() {
               {/* Delivery Address or Showroom Pickup Notice */}
               {deliveryOption !== "pickup" ? (
                 <div>
-                  <label className="block text-zinc-400 font-mono text-[11px] uppercase tracking-wider mb-1.5">
-                    Delivery Landmark / Quarter / Residence
+                  <label className="block text-zinc-300 text-[11px] uppercase tracking-wider mb-1.5 font-semibold">
+                    Delivery Address / Quarter / Landmark
                   </label>
                   <input
                     type="text"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    placeholder="e.g. Molyko, UB Junction, Buea, or Bonapriso, Douala"
+                    placeholder="e.g. Molyko Checkpoint, Buea or Akwa, Douala"
                     className="w-full bg-black border border-white/15 px-3.5 py-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#D4AF37] transition font-sans"
                   />
-                  <span className="text-[10px] font-mono text-zinc-500 mt-1 block">
-                    Couriers call your phone coordinate upon departure from local hub.
+                  <span className="text-[10.5px] text-zinc-400 mt-1 block">
+                    Our courier will call your phone number when approaching your address.
                   </span>
                 </div>
               ) : (
                 <div className="p-4 bg-black border border-[#D4AF37]/30 text-xs">
                   <div className="flex items-center gap-2 font-mono text-[#D4AF37] font-bold text-xs uppercase mb-1">
                     <Store className="w-3.5 h-3.5" />
-                    <span>SHOWROOM BOUTIQUE COLLECTION:</span>
+                    <span>Free Showroom Pick-Up in Buea:</span>
                   </div>
                   <p className="text-[11px] text-zinc-300 leading-relaxed font-sans">
-                    AURA Flagship Showroom: Check Point, Molyko, Buea. Unit prepared and sealed within 30 minutes after placement.
+                    AURA Flagship Showroom: Checkpoint, Molyko, Buea. Your sealed phone will be ready for testing and pickup in 30 minutes.
                   </p>
                 </div>
               )}
             </div>
 
-            {/* STEP 03: Settlement Channel */}
+            {/* STEP 03: Payment Method */}
             <div className="p-5 sm:p-6 bg-[#0E0E12] border border-white/10 relative">
-              <span className="absolute top-2 left-2 text-zinc-600 font-mono text-[10px] select-none">+</span>
-              <span className="absolute top-2 right-2 text-zinc-600 font-mono text-[10px] select-none">+</span>
-
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
                 <div className="flex items-center gap-2">
                   <Banknote className="w-4 h-4 text-[#D4AF37]" />
-                  <h2 className="text-xs font-bold uppercase tracking-widest text-white font-mono">
-                    [ STEP 03 // SETTLEMENT CHANNEL ]
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-white font-mono">
+                    Step 3: Payment Method
                   </h2>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-500 uppercase">SAFE PAYMENT</span>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase">Safe Payment</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 {[
                   {
                     id: "cod",
-                    title: "Cash on Inspection",
-                    desc: "Pay in cash after in-person unsealing & verification",
+                    title: "Pay on Delivery",
+                    desc: "Inspect & test the phone first, then pay the courier.",
                     badge: "RECOMMENDED",
                   },
                   {
                     id: "mtn",
                     title: "MTN MoMo",
-                    desc: settings.mtnMomoNumber || "Dial *126# upon arrival of courier",
+                    desc: settings.mtnMomoNumber || "Pay via MTN Mobile Money (*126#)",
                     badge: "MOBILE MONEY",
                   },
                   {
                     id: "orange",
                     title: "Orange Money",
-                    desc: settings.orangeMoneyNumber || "Dial #150# upon arrival of courier",
+                    desc: settings.orangeMoneyNumber || "Pay via Orange Money (#150#)",
                     badge: "MOBILE MONEY",
                   },
                 ].map((pay) => (
@@ -459,7 +440,7 @@ export default function CheckoutPage() {
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[9px] font-mono text-[#D4AF37] uppercase tracking-wider">
+                      <span className="text-[9px] font-mono text-[#D4AF37] uppercase tracking-wider font-bold">
                         {pay.badge}
                       </span>
                       {paymentMethod === pay.id && (
@@ -467,7 +448,7 @@ export default function CheckoutPage() {
                       )}
                     </div>
                     <span className="text-xs font-bold text-white block font-sans">{pay.title}</span>
-                    <span className="text-[10px] text-zinc-500 block mt-1 leading-snug">
+                    <span className="text-[10.5px] text-zinc-400 block mt-1 leading-snug">
                       {pay.desc}
                     </span>
                   </button>
@@ -477,26 +458,21 @@ export default function CheckoutPage() {
 
           </div>
 
-          {/* Right Column: Order Manifest & Confirmation (5 Cols) */}
+          {/* Right Column: Order Summary (5 Cols) */}
           <div className="lg:col-span-5 space-y-4">
             <div className="p-5 sm:p-6 bg-[#0E0E12] border border-white/10 lg:sticky lg:top-24 relative">
-              <span className="absolute top-2 left-2 text-zinc-600 font-mono text-[10px] select-none">+</span>
-              <span className="absolute top-2 right-2 text-zinc-600 font-mono text-[10px] select-none">+</span>
-              <span className="absolute bottom-2 left-2 text-zinc-600 font-mono text-[10px] select-none">+</span>
-              <span className="absolute bottom-2 right-2 text-zinc-600 font-mono text-[10px] select-none">+</span>
-
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
                 <div className="flex items-center gap-2">
                   <FileCheck className="w-4 h-4 text-[#D4AF37]" />
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-white font-mono">
-                    [ MANIFEST // {items.length} {items.length === 1 ? "DEVICE" : "DEVICES"} ]
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-white font-mono">
+                    Order Summary ({items.length} {items.length === 1 ? "phone" : "phones"})
                   </h3>
                 </div>
                 <Link
                   href="/phones"
                   className="text-[10px] font-mono text-[#D4AF37] hover:underline uppercase"
                 >
-                  [ EDIT ]
+                  Edit Cart
                 </Link>
               </div>
 
@@ -517,7 +493,7 @@ export default function CheckoutPage() {
                         {it.selectedStorage.size} • {it.selectedColor.name}
                       </span>
                       <span className="text-[10px] font-mono text-zinc-500 block">
-                        QTY: {it.quantity}
+                        Qty: {it.quantity}
                       </span>
                     </div>
                     <div className="text-right">
@@ -529,21 +505,21 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
-              {/* Cost Calculation Sheet */}
+              {/* Cost Breakdown */}
               <div className="pt-4 border-t border-white/10 space-y-2 text-xs font-mono">
                 <div className="flex justify-between text-zinc-400">
-                  <span>[ SUBTOTAL ]</span>
+                  <span>Subtotal</span>
                   <span className="text-zinc-200">{formatCFA(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-zinc-400">
-                  <span>[ FULFILLMENT & LOGISTICS ]</span>
+                  <span>Delivery Fee</span>
                   <span className="text-zinc-200">
                     {deliveryFee === 0 ? "FREE" : formatCFA(deliveryFee)}
                   </span>
                 </div>
                 <div className="flex justify-between items-baseline pt-3 border-t border-white/15">
                   <span className="font-bold text-white text-xs uppercase tracking-wider">
-                    [ TOTAL DUE ]
+                    Total Amount
                   </span>
                   <span className="text-xl font-black text-[#D4AF37]">
                     {formatCFA(total)}
@@ -551,19 +527,19 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* High-Impact Architectural Command Triggers */}
+              {/* Action Buttons */}
               <div className="space-y-2.5 pt-5">
                 {/* Primary Button */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-4 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:opacity-95 transition min-h-[48px] cursor-pointer disabled:opacity-50"
+                  className="w-full py-4 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:opacity-95 transition min-h-[48px] cursor-pointer disabled:opacity-50 font-sans"
                 >
                   {isSubmitting ? (
-                    <span className="font-mono">INITIALIZING ACQUISITION...</span>
+                    <span className="font-mono">Confirming Order...</span>
                   ) : (
                     <>
-                      <span>AUTHORIZE ORDER / DISPATCH REQUEST</span>
+                      <span>Confirm Order (Pay on Delivery)</span>
                       <ArrowRight className="w-4 h-4 stroke-[2.5]" />
                     </>
                   )}
@@ -573,21 +549,21 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={handleWhatsAppOrder}
-                  className="w-full py-3.5 bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/40 text-emerald-400 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition min-h-[44px] cursor-pointer font-mono"
+                  className="w-full py-3.5 bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/40 text-emerald-400 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition min-h-[44px] cursor-pointer font-sans"
                 >
                   <MessageCircle className="w-4 h-4 text-emerald-400" />
-                  <span>CONFIRM DIRECT VIA WHATSAPP (1-TAP)</span>
+                  <span>Order via WhatsApp (1-Tap)</span>
                 </button>
               </div>
 
-              {/* Guarantees Blueprint Strip */}
-              <div className="pt-4 border-t border-white/10 mt-4 text-[10px] font-mono text-zinc-400 space-y-1.5">
+              {/* Guarantees */}
+              <div className="pt-4 border-t border-white/10 mt-4 text-[10.5px] text-zinc-400 space-y-1">
                 <div className="flex items-center gap-1.5 text-emerald-400">
                   <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                  <span className="font-semibold uppercase">[ 100% GENUINE HARDWARE • BOUTIQUE WARRANTY ]</span>
+                  <span className="font-semibold uppercase font-mono">100% Original Sealed • Official Warranty</span>
                 </div>
                 <p className="text-zinc-500 text-[10px]">
-                  Physical inspection permitted prior to payment upon hand delivery.
+                  You can inspect the sealed package before paying the courier.
                 </p>
               </div>
 
@@ -598,18 +574,12 @@ export default function CheckoutPage() {
 
       </div>
 
-      {/* Interactive Acquisition Processing Modal */}
+      {/* Order Processing Modal */}
       {isSubmitting && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 select-none font-sans animate-in fade-in duration-200">
           <div className="w-full max-w-md bg-[#0E0E12] border border-[#D4AF37] p-6 sm:p-8 relative shadow-2xl">
-            {/* Viewfinder crosshairs */}
-            <span className="absolute top-2 left-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
-            <span className="absolute top-2 right-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
-            <span className="absolute bottom-2 left-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
-            <span className="absolute bottom-2 right-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
-
             <div className="space-y-5 text-center">
-              {/* Spinning gold radar indicator */}
+              {/* Spinning gold indicator */}
               <div className="w-14 h-14 bg-black border border-white/20 flex items-center justify-center mx-auto relative">
                 <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent animate-spin"></div>
                 <span className="absolute text-[8px] font-mono font-bold text-[#D4AF37]">
@@ -618,11 +588,11 @@ export default function CheckoutPage() {
               </div>
 
               <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37] block">
-                  [ EXECUTING ACQUISITION PROTOCOL ]
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[#D4AF37] font-bold block">
+                  PROCESSING ORDER
                 </span>
-                <h3 className="text-base font-bold text-white uppercase tracking-wider font-mono mt-1">
-                  Authorizing Order Placement
+                <h3 className="text-base font-bold text-white uppercase tracking-wider font-sans mt-1">
+                  Confirming Your Phone Order
                 </h3>
               </div>
 
@@ -643,8 +613,8 @@ export default function CheckoutPage() {
                       : "bg-black border-white/5 text-zinc-600"
                   }`}
                 >
-                  <span className="text-[#D4AF37] font-bold">01 //</span>
-                  <span>Allocating Sealed Unit from Boutique Vault...</span>
+                  <span className="text-[#D4AF37] font-bold">01 •</span>
+                  <span>Reserving sealed phone in Buea Showroom...</span>
                 </div>
 
                 <div
@@ -654,8 +624,8 @@ export default function CheckoutPage() {
                       : "bg-black border-white/5 text-zinc-600"
                   }`}
                 >
-                  <span className="text-[#D4AF37] font-bold">02 //</span>
-                  <span>Generating Order Ref & Serial Registry...</span>
+                  <span className="text-[#D4AF37] font-bold">02 •</span>
+                  <span>Generating Order Receipt & Warranty Code...</span>
                 </div>
 
                 <div
@@ -665,13 +635,13 @@ export default function CheckoutPage() {
                       : "bg-black border-white/5 text-zinc-600"
                   }`}
                 >
-                  <span className="text-[#D4AF37] font-bold">03 //</span>
-                  <span>Routing Dispatch to Regional Courier Hub...</span>
+                  <span className="text-[#D4AF37] font-bold">03 •</span>
+                  <span>Assigning Courier for Delivery Dispatch...</span>
                 </div>
               </div>
 
-              <p className="text-[10px] font-mono text-zinc-500">
-                Please hold. Preparing your order manifest & receipt...
+              <p className="text-[10px] text-zinc-400">
+                Please hold. Preparing your order receipt...
               </p>
             </div>
           </div>

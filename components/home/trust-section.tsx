@@ -19,33 +19,33 @@ interface TrustItem {
 const TRUST_ITEMS: TrustItem[] = [
   {
     icon: ShieldCheck,
-    code: "01",
-    title: "100% Genuine Devices",
-    subtitle: "Sealed hardware. Zero grey market.",
+    code: "VERIFIED",
+    title: "100% Original Sealed",
+    subtitle: "Brand new factory-sealed units with serial verification.",
   },
   {
     icon: Award,
-    code: "02",
-    title: "Boutique Warranty",
-    subtitle: "Official guarantee enclosed.",
+    code: "WARRANTY",
+    title: "6–12 Month Warranty",
+    subtitle: "Official boutique warranty certificate enclosed.",
   },
   {
     icon: CreditCard,
-    code: "03",
-    title: "Cash on Inspection",
-    subtitle: "Inspect device before paying.",
+    code: "SAFETY",
+    title: "Pay on Delivery",
+    subtitle: "Inspect & test your phone thoroughly before paying.",
   },
   {
     icon: Truck,
-    code: "04",
-    title: "Delivers Nationwide",
-    subtitle: "Buea, Molyko & nationwide.",
+    code: "EXPRESS",
+    title: "Fast Delivery",
+    subtitle: "Same-day in Buea, 24h express to Douala & Yaoundé.",
   },
   {
     icon: RotateCcw,
-    code: "05",
+    code: "SUPPORT",
     title: "7-Day Replacement",
-    subtitle: "Instant direct unit swap.",
+    subtitle: "Direct replacement if there is any manufacturer defect.",
   },
 ];
 
@@ -65,15 +65,15 @@ export function TrustSection() {
                   <div className="w-8 h-8 bg-black border border-white/15 flex items-center justify-center shrink-0 group-hover:border-[#D4AF37] transition-colors">
                     <Icon className="w-4 h-4 text-[#D4AF37]" />
                   </div>
-                  <span className="text-[10px] font-mono text-zinc-600 group-hover:text-[#D4AF37] transition-colors">
-                    [ {item.code} ]
+                  <span className="text-[9px] font-mono font-bold text-zinc-500 group-hover:text-[#D4AF37] transition-colors">
+                    {item.code}
                   </span>
                 </div>
 
-                <h4 className="text-xs font-bold text-white tracking-wide uppercase font-mono">
+                <h4 className="text-xs font-bold text-white tracking-wide uppercase font-sans">
                   {item.title}
                 </h4>
-                <p className="text-[11px] text-zinc-400 mt-1 leading-snug">
+                <p className="text-[11px] text-zinc-400 mt-1 leading-snug font-sans">
                   {item.subtitle}
                 </p>
               </div>

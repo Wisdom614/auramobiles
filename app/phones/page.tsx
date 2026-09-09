@@ -308,21 +308,21 @@ function PhonesCatalogContent() {
           <div>
             <div className="flex items-center gap-2 font-mono text-[10px] text-zinc-400 uppercase tracking-widest mb-1">
               <span className="w-1.5 h-1.5 bg-[#D4AF37]"></span>
-              <span className="text-[#D4AF37] font-bold">[ INVENTORY // SMARTPHONES_CATALOG ]</span>
+              <span className="text-[#D4AF37] font-semibold">Curated Smartphone Collection</span>
               <span>•</span>
-              <span>CAMEROON DISPATCH</span>
+              <span>Nationwide Delivery in Cameroon</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
-              Smartphones Catalog
+              All Smartphones
             </h1>
             <p className="text-zinc-400 text-xs sm:text-sm mt-1">
-              Official boutique warranty, sealed units, and express delivery nationwide across Cameroon.
+              Brand new sealed &amp; certified pre-owned phones with warranty. Tested and delivered to your doorstep.
             </p>
           </div>
 
           <div className="flex items-center gap-3 font-mono text-xs">
             <span className="px-3 py-1.5 bg-[#0E0E12] border border-white/10 text-zinc-300">
-              MATCHED: <strong className="text-[#D4AF37]">{filteredPhones.length}</strong> UNITS
+              AVAILABLE: <strong className="text-[#D4AF37]">{filteredPhones.length}</strong> PHONES
             </span>
             {activeFiltersCount > 0 && (
               <button
@@ -432,7 +432,7 @@ function PhonesCatalogContent() {
                     <div className="flex items-center justify-between pb-3 border-b border-white/10">
                       <div>
                         <span className="text-[11px] text-[#D4AF37] uppercase tracking-wider block font-bold">
-                          [ PRICE RANGE FILTER ]
+                          Price Range Filter
                         </span>
                         <span className="text-xs text-zinc-300 font-semibold">
                           {formatCFA(minPrice)} – {maxPrice >= 2500000 ? "Any (2.5M+)" : formatCFA(maxPrice)}
@@ -446,7 +446,7 @@ function PhonesCatalogContent() {
                             onClick={handleResetPrice}
                             className="text-[11px] text-[#D4AF37] hover:underline uppercase transition cursor-pointer font-bold"
                           >
-                            [ Reset ]
+                            Reset
                           </button>
                         )}
                         <button
@@ -488,7 +488,7 @@ function PhonesCatalogContent() {
                                   isActive ? "bg-[#D4AF37] text-black font-bold" : "bg-white/10 text-zinc-400"
                                 }`}
                               >
-                                {count} units
+                                {count} phones
                               </span>
                             </button>
                           );
@@ -538,7 +538,7 @@ function PhonesCatalogContent() {
 
                         <div className="flex items-center justify-between gap-3 pt-2">
                           <span className="text-[11px] text-zinc-400">
-                            <strong className="text-[#D4AF37]">{filteredPhones.length}</strong> matching units
+                            <strong className="text-[#D4AF37]">{filteredPhones.length}</strong> matching phones
                           </span>
                           <div className="flex items-center gap-2">
                             <button
@@ -575,7 +575,7 @@ function PhonesCatalogContent() {
                   <div className="flex items-center justify-between pb-2.5 border-b border-white/10">
                     <div>
                       <span className="text-[10px] text-[#D4AF37] uppercase tracking-wider block font-bold">
-                        [ PRICE RANGE FILTER ]
+                        Price Range Filter
                       </span>
                       <span className="text-[11px] text-zinc-400">
                         {formatCFA(minPrice)} – {maxPrice >= 2500000 ? "Any (2.5M+)" : formatCFA(maxPrice)}
@@ -588,7 +588,7 @@ function PhonesCatalogContent() {
                         onClick={handleResetPrice}
                         className="text-[10px] text-zinc-400 hover:text-white hover:underline uppercase transition cursor-pointer"
                       >
-                        [ Reset ]
+                        Reset
                       </button>
                     )}
                   </div>
@@ -669,7 +669,7 @@ function PhonesCatalogContent() {
 
                       <div className="flex items-center justify-between gap-2 pt-1">
                         <span className="text-[10px] text-zinc-400">
-                          {filteredPhones.length} matching units
+                          {filteredPhones.length} matching phones
                         </span>
                         <div className="flex items-center gap-2">
                           <button
@@ -739,7 +739,7 @@ function PhonesCatalogContent() {
             {/* Storage Filter */}
             <div className="md:col-span-4 space-y-1">
               <span className="text-[10px] uppercase text-zinc-400 block tracking-wider">
-                [ STORAGE TIER ]
+                Storage Size
               </span>
               <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
                 {STORAGE_OPTIONS.map((size) => (
@@ -761,7 +761,7 @@ function PhonesCatalogContent() {
             {/* Condition Filter */}
             <div className="md:col-span-4 space-y-1">
               <span className="text-[10px] uppercase text-zinc-400 block tracking-wider">
-                [ HARDWARE CONDITION ]
+                Condition
               </span>
               <div className="flex items-center gap-1">
                 {[
@@ -787,7 +787,7 @@ function PhonesCatalogContent() {
             {/* Sort Order */}
             <div className="md:col-span-4 space-y-1">
               <span className="text-[10px] uppercase text-zinc-400 block tracking-wider">
-                [ SORT CATALOG ]
+                Sort By
               </span>
               <select
                 value={sortBy}
@@ -872,8 +872,8 @@ function PhonesCatalogContent() {
             <span className="absolute -bottom-1 -left-1 text-[#D4AF37] font-mono text-[9px]">+</span>
             <span className="absolute -bottom-1 -right-1 text-[#D4AF37] font-mono text-[9px]">+</span>
 
-            <p className="text-zinc-300 font-bold text-base font-mono uppercase tracking-wide">
-              [ NO DEVICES MATCHED CURRENT FILTERS ]
+            <p className="text-zinc-200 font-bold text-base uppercase tracking-wide">
+              No Phones Match Your Filters
             </p>
             <p className="text-zinc-400 text-xs max-w-md mx-auto leading-relaxed">
               No smartphones found for {selectedBrand !== "all" ? selectedBrand : "current selection"} within{" "}
@@ -904,7 +904,7 @@ export default function PhonesPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-[#09090B] flex items-center justify-center text-zinc-400 text-xs font-mono">
-          [ LOADING INVENTORY CATALOG... ]
+          Loading Phone Catalog...
         </div>
       }
     >

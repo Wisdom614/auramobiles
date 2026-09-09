@@ -351,16 +351,16 @@ function OrderTrackingContent() {
             </div>
 
             <div>
-              <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37] block">
-                [ RADAR TELEMETRY // SCANNING SUPABASE DISPATCH DATABASE ]
+              <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37] block font-semibold">
+                Searching Order Database
               </span>
               <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono mt-1">
-                Querying Dispatch Registry: {searchQuery}
+                Looking up Order: {searchQuery}
               </h3>
             </div>
 
-            <p className="text-xs font-mono text-zinc-500 max-w-sm mx-auto">
-              Scanning real-time courier coordinates, milestone timestamps, and IMEI allocation status...
+            <p className="text-xs text-zinc-400 max-w-sm mx-auto font-sans">
+              Fetching real-time order status, packaging updates, and delivery transit milestones...
             </p>
           </div>
         ) : activeOrder ? (
@@ -432,7 +432,7 @@ function OrderTrackingContent() {
               {/* 2. Interactive Timeline */}
               <div className="pt-8">
                 <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono mb-6">
-                  Live Dispatch Milestone
+                  Order Timeline &amp; Status
                 </h3>
 
                 <div className="relative">
@@ -479,7 +479,7 @@ function OrderTrackingContent() {
                             >
                               {step.title}
                             </h4>
-                            <p className="text-[11px] text-zinc-400 mt-1 leading-relaxed">
+                            <p className="text-[11px] text-zinc-400 mt-1 leading-relaxed font-sans">
                               {step.description}
                             </p>
                           </div>
@@ -497,8 +497,8 @@ function OrderTrackingContent() {
               {/* Items Card (7 Cols) */}
               <div className="lg:col-span-7 p-6 sm:p-7 rounded-3xl bg-[#121217] border border-white/10 space-y-4">
                 <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center justify-between">
-                  <span>Ordered Hardware ({activeOrder.items.length})</span>
-                  <span className="text-zinc-500 text-[11px]">100% Genuine Sealed</span>
+                  <span>Ordered Phones ({activeOrder.items.length})</span>
+                  <span className="text-zinc-500 text-[11px] font-sans">100% Genuine Sealed</span>
                 </h3>
 
                 <div className="space-y-4 pt-2">
@@ -540,7 +540,7 @@ function OrderTrackingContent() {
                 <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-zinc-400">
                   <div className="space-y-1">
                     <span className="text-zinc-500 font-mono text-[10px] uppercase block">
-                      Recipient & Destination
+                      Recipient &amp; Delivery Address
                     </span>
                     <strong className="text-white block">{activeOrder.customer.fullName}</strong>
                     <p>{activeOrder.customer.address}</p>
@@ -549,15 +549,15 @@ function OrderTrackingContent() {
 
                   <div className="space-y-1">
                     <span className="text-zinc-500 font-mono text-[10px] uppercase block">
-                      Payment & Settlement
+                      Payment Method
                     </span>
                     <strong className="text-white block capitalize">
                       {activeOrder.customer.paymentMethod.replace(/_/g, " ")}
                     </strong>
-                    <p className="text-emerald-400 flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Authenticated / Verified
+                    <p className="text-emerald-400 flex items-center gap-1.5 font-sans">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Confirmed
                     </p>
-                    <p className="text-[11px] text-zinc-500">Official receipt attached</p>
+                    <p className="text-[11px] text-zinc-400 font-sans">Official invoice available</p>
                   </div>
                 </div>
               </div>
@@ -568,11 +568,11 @@ function OrderTrackingContent() {
                 {/* Cost Breakdown */}
                 <div className="p-6 rounded-3xl bg-[#121217] border border-white/10 space-y-3.5 text-xs">
                   <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono pb-2 border-b border-white/10">
-                    Settlement Summary
+                    Order Summary
                   </h3>
 
                   <div className="flex justify-between text-zinc-400">
-                    <span>Hardware Subtotal:</span>
+                    <span>Phones Subtotal:</span>
                     <span className="font-mono text-white">{formatCFA(activeOrder.subtotal)}</span>
                   </div>
 
@@ -584,7 +584,7 @@ function OrderTrackingContent() {
                   )}
 
                   <div className="flex justify-between text-zinc-400">
-                    <span>VIP Express Courier:</span>
+                    <span>Delivery Fee:</span>
                     <span className="font-mono text-white">
                       {activeOrder.deliveryFee === 0 ? "FREE" : formatCFA(activeOrder.deliveryFee)}
                     </span>
@@ -605,9 +605,9 @@ function OrderTrackingContent() {
                       <MessageCircle className="w-5 h-5 text-[#D4AF37]" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-white">Need Delivery Adjustment?</h4>
-                      <p className="text-[11px] text-zinc-400">
-                        Chat directly with our Douala & Yaoundé dispatch manager.
+                      <h4 className="text-xs font-bold text-white">Need Help or Change Address?</h4>
+                      <p className="text-[11px] text-zinc-400 font-sans">
+                        Chat directly with our showroom team in Buea or our dispatch team.
                       </p>
                     </div>
                   </div>
@@ -615,7 +615,7 @@ function OrderTrackingContent() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                     <button
                       onClick={() => setIsReceiptOpen(true)}
-                      className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold flex items-center justify-center gap-1.5 border border-[#D4AF37]/30 transition-colors col-span-1 sm:col-span-2"
+                      className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold flex items-center justify-center gap-1.5 border border-[#D4AF37]/30 transition-colors col-span-1 sm:col-span-2 cursor-pointer"
                     >
                       <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
                       <span>Download Order Invoice (PDF)</span>
@@ -630,7 +630,7 @@ function OrderTrackingContent() {
                       className="py-2.5 px-3 rounded-xl bg-[#1E1E28] hover:bg-[#282838] text-white font-semibold flex items-center justify-center gap-1.5 border border-white/5 transition-colors"
                     >
                       <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>WhatsApp VIP</span>
+                      <span>WhatsApp Support</span>
                     </a>
 
                     <a
@@ -638,7 +638,7 @@ function OrderTrackingContent() {
                       className="py-2.5 px-3 rounded-xl bg-[#1E1E28] hover:bg-[#282838] text-white font-semibold flex items-center justify-center gap-1.5 border border-white/5 transition-colors"
                     >
                       <PhoneCall className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      <span>Call Dispatch</span>
+                      <span>Call Showroom</span>
                     </a>
                   </div>
                 </div>

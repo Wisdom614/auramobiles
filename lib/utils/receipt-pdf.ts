@@ -65,12 +65,12 @@ export function downloadOrderPdf(order: Order, settings?: SiteSettings) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
   doc.setTextColor(100, 100, 110);
-  doc.text("BILLED & DISPATCHED TO:", margin + 5, y + 6);
+  doc.text("DELIVERED TO:", margin + 5, y + 6);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(20, 20, 25);
-  doc.text(order.customer?.fullName || "Valued VIP Client", margin + 5, y + 13);
+  doc.text(order.customer?.fullName || "Valued Customer", margin + 5, y + 13);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
@@ -88,7 +88,7 @@ export function downloadOrderPdf(order: Order, settings?: SiteSettings) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
   doc.setTextColor(100, 100, 110);
-  doc.text("ORDER PARTICULAR DETAILS:", margin + colWidth + 5, y + 6);
+  doc.text("ORDER DETAILS:", margin + colWidth + 5, y + 6);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
@@ -185,7 +185,7 @@ export function downloadOrderPdf(order: Order, settings?: SiteSettings) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(140, 105, 20);
-  doc.text("OFFICIAL BOUTIQUE WARRANTY & RETURN POLICY", margin + 4, y + 6);
+  doc.text("OFFICIAL WARRANTY & RETURN POLICY", margin + 4, y + 6);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);

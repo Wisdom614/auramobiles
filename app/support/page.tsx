@@ -60,21 +60,21 @@ export default function SupportPage() {
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-[#D4AF37]/30 text-amber-300 text-xs font-semibold mb-3">
             <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
             <span className="uppercase tracking-widest font-mono text-[10px]">
-              Concierge Care
+              Customer Support &amp; Showroom
             </span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            How May Our Concierge Assist You?
+            How Can We Help You Today?
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400 mt-3 leading-relaxed">
-            Direct access to genuine device verification, express delivery dispatch, and personal technical advisory across Cameroon.
+          <p className="text-xs sm:text-sm text-zinc-400 mt-3 leading-relaxed font-sans">
+            Visit our Buea showroom in Molyko, get help with phone orders, or chat directly with our team on WhatsApp for fast response.
           </p>
         </div>
 
         {/* Physical Showrooms Grid */}
         <div>
           <h2 className="text-xl font-bold text-white mb-6">
-            Our Physical Flagship Lounges
+            Our Showroom &amp; Delivery Hub
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
@@ -84,7 +84,7 @@ export default function SupportPage() {
                 <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-[#D4AF37]/15 text-amber-300 border border-[#D4AF37]/30">
                   Buea Showroom
                 </span>
-                <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5">
+                <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5 font-sans">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   Open Today
                 </span>
@@ -100,7 +100,7 @@ export default function SupportPage() {
                 </p>
               </div>
 
-              <div className="space-y-2 text-xs text-zinc-300 pt-2 border-t border-white/5">
+              <div className="space-y-2 text-xs text-zinc-300 pt-2 border-t border-white/5 font-sans">
                 <p className="flex items-center gap-2">
                   <Phone className="w-3.5 h-3.5 text-[#D4AF37]" />
                   <span className="font-mono">{settings.whatsappPhone}</span>
@@ -115,7 +115,7 @@ export default function SupportPage() {
                 href={`https://wa.me/${settings.whatsappCleanNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3 rounded-xl bg-[#181820] hover:bg-[#202028] border border-white/10 text-xs font-bold text-white flex items-center justify-center gap-2 transition-colors"
+                className="w-full py-3 rounded-xl bg-[#181820] hover:bg-[#202028] border border-white/10 text-xs font-bold text-white flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <MessageCircle className="w-4 h-4 text-emerald-400" />
                 <span>Chat with Buea Showroom on WhatsApp</span>
@@ -126,9 +126,9 @@ export default function SupportPage() {
             <div className="p-6 rounded-3xl bg-[#121217] border border-white/8 hover:border-[#D4AF37]/40 transition-all space-y-4">
               <div className="flex items-center justify-between">
                 <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-[#D4AF37]/15 text-amber-300 border border-[#D4AF37]/30">
-                  Delivers Nationwide
+                  Nationwide Delivery
                 </span>
-                <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5">
+                <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5 font-sans">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   24h Express Dispatch
                 </span>
@@ -140,11 +140,11 @@ export default function SupportPage() {
                 </h3>
                 <p className="text-xs text-zinc-400 mt-1 flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-[#D4AF37] shrink-0" />
-                  <span>Direct Express Dispatch to Douala, Yaoundé & All Cities</span>
+                  <span>Direct Express Delivery to Douala, Yaoundé &amp; All Regions</span>
                 </p>
               </div>
 
-              <div className="space-y-2 text-xs text-zinc-300 pt-2 border-t border-white/5">
+              <div className="space-y-2 text-xs text-zinc-300 pt-2 border-t border-white/5 font-sans">
                 <p className="flex items-center gap-2">
                   <Phone className="w-3.5 h-3.5 text-[#D4AF37]" />
                   <span className="font-mono">{settings.secondaryPhone}</span>
@@ -159,10 +159,10 @@ export default function SupportPage() {
                 href={`https://wa.me/${settings.secondaryPhone.replace(/[^0-9]/g, "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3 rounded-xl bg-[#181820] hover:bg-[#202028] border border-white/10 text-xs font-bold text-white flex items-center justify-center gap-2 transition-colors"
+                className="w-full py-3 rounded-xl bg-[#181820] hover:bg-[#202028] border border-white/10 text-xs font-bold text-white flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <MessageCircle className="w-4 h-4 text-emerald-400" />
-                <span>Connect with Nationwide Dispatch</span>
+                <span>Contact Nationwide Delivery on WhatsApp</span>
               </a>
             </div>
 
@@ -173,22 +173,22 @@ export default function SupportPage() {
         <div className="p-8 rounded-3xl bg-gradient-to-r from-[#141419] via-[#1A1A24] to-[#121217] border border-[#D4AF37]/30 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-2xl">
           <div className="space-y-1 text-center sm:text-left">
             <span className="text-xs uppercase font-mono tracking-wider text-[#D4AF37] font-semibold">
-              Instant AI Advisory
+              Instant AI Assistant
             </span>
             <h3 className="text-xl font-bold text-white">
-              Need instant guidance on specifications or budget?
+              Need recommendations based on your budget?
             </h3>
-            <p className="text-xs text-zinc-400 max-w-md">
-              Our AI Concierge is trained on our real-time Cameroon inventory, pricing in FCFA, and camera optics comparisons.
+            <p className="text-xs text-zinc-400 max-w-md font-sans">
+              Our AI Assistant helps you find phones by FCFA budget, compares camera specs, and suggests the best smartphone for your needs.
             </p>
           </div>
 
           <button
             onClick={() => setIsAiOpen(true)}
-            className="px-6 py-3.5 rounded-xl gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider flex items-center gap-2 shrink-0 shadow-lg shadow-amber-500/15"
+            className="px-6 py-3.5 rounded-xl gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider flex items-center gap-2 shrink-0 shadow-lg shadow-amber-500/15 cursor-pointer"
           >
             <Sparkles className="w-4 h-4 text-black" />
-            <span>Launch AI Concierge</span>
+            <span>Ask AI Assistant</span>
           </button>
         </div>
 

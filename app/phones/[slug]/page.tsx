@@ -29,6 +29,7 @@ import { useCart } from "@/lib/store/cart-context";
 import { useWishlist } from "@/lib/store/wishlist-context";
 import { useSettings } from "@/lib/store/settings-context";
 import { ProductCard } from "@/components/product/product-card";
+import { StickyMobilePdpBar } from "@/components/product/sticky-mobile-pdp-bar";
 import { getPhoneBySlugFromDB, getPhonesFromDB } from "@/lib/supabase/client";
 
 interface PageProps {
@@ -293,17 +294,17 @@ export default function PhoneDetailPage({ params }: PageProps) {
       <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center text-center px-4 py-20">
         <div className="p-8 border border-white/10 bg-[#121217] max-w-md w-full rounded-none">
           <span className="text-[10px] font-mono uppercase text-[#D4AF37] font-bold block mb-2">
-            [ ERROR // ITEM NOT IN ARCHIVE ]
+            Phone Not Available
           </span>
           <h1 className="text-2xl font-bold text-white mb-2">Smartphone Not Found</h1>
           <p className="text-xs text-zinc-400 mb-6">
-            The requested device was not found in our current boutique inventory.
+            The requested smartphone was not found in our current store inventory.
           </p>
           <Link
             href="/phones"
             className="w-full inline-block py-3.5 gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider rounded-none hover:opacity-90 transition-all text-center"
           >
-            Browse Smartphone Catalog
+            Browse All Phones
           </Link>
         </div>
       </div>
@@ -336,12 +337,12 @@ export default function PhoneDetailPage({ params }: PageProps) {
     <div className="min-h-screen bg-[#09090B] text-zinc-100 py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
-        {/* 1. Breadcrumbs Navigation (Swiss Monospaced Style) */}
+        {/* 1. Breadcrumbs Navigation (Clean Style) */}
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <nav className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono tracking-wider overflow-x-auto">
-            <Link href="/" className="hover:text-white transition-colors">AURA</Link>
+            <Link href="/" className="hover:text-white transition-colors">Home</Link>
             <span>/</span>
-            <Link href="/phones" className="hover:text-white transition-colors">ARCHIVE</Link>
+            <Link href="/phones" className="hover:text-white transition-colors">All Phones</Link>
             <span>/</span>
             <Link href={`/phones?brand=${phone.brand}`} className="hover:text-white transition-colors uppercase">
               {phone.brand}
@@ -392,14 +393,14 @@ export default function PhoneDetailPage({ params }: PageProps) {
               <span className="absolute bottom-2 left-2 text-[10px] font-mono text-zinc-600 select-none pointer-events-none z-10">+</span>
               <span className="absolute bottom-2 right-2 text-[10px] font-mono text-zinc-600 select-none pointer-events-none z-10">+</span>
 
-              {/* Technical Blueprint Micro-Label */}
+              {/* Blueprint Badge */}
               <div className="absolute top-3 left-4 flex items-center gap-2 z-10 pointer-events-none">
                 <span className="text-[9px] font-mono tracking-widest text-[#D4AF37] uppercase font-bold border border-[#D4AF37]/30 px-2 py-0.5 bg-black/60 backdrop-blur-sm">
-                  {phone.condition === "Certified Refurbished" ? "CERTIFIED PRE-OWNED" : "SEALED HARDWARE"}
+                  {phone.condition === "Certified Refurbished" ? "Clean Pre-Owned (UK Used)" : "100% Brand New Sealed"}
                 </span>
                 {phone.isNew && (
                   <span className="text-[9px] font-mono tracking-widest text-amber-300 uppercase font-bold border border-amber-400/30 px-2 py-0.5 bg-black/60 backdrop-blur-sm">
-                    FLAGSHIP RELEASE
+                    Flagship Release
                   </span>
                 )}
               </div>
@@ -478,11 +479,11 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 </div>
               )}
 
-              {/* Technical Frame Badge & Swipe Hint */}
+              {/* Frame Badge */}
               {imagesList.length > 1 && (
                 <div className="absolute bottom-3 right-4 px-2 py-0.5 bg-black/80 border border-white/15 text-[9px] font-mono text-zinc-400 rounded-none z-10 flex items-center gap-1.5 pointer-events-none">
                   <span className="text-[#D4AF37] hidden sm:inline">SWIPE ◄►</span>
-                  <span>FRAME [ 0{selectedImageIdx + 1} / 0{imagesList.length} ]</span>
+                  <span>Photo {selectedImageIdx + 1} of {imagesList.length}</span>
                 </div>
               )}
             </div>
@@ -525,15 +526,15 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 <Truck className="w-4 h-4 text-[#D4AF37] shrink-0" />
                 <div>
                   <span className="text-[10px] font-mono uppercase text-zinc-400 block font-bold">EXPRESS DELIVERY</span>
-                  <span className="text-white font-medium text-[11px]">Buea, Molyko • Nationwide Dispatch</span>
+                  <span className="text-white font-medium text-[11px]">Buea, Douala, Yaoundé &amp; Nationwide</span>
                 </div>
               </div>
 
               <div className="p-3.5 bg-[#0F0F13] flex items-center gap-2.5">
                 <RotateCcw className="w-4 h-4 text-[#D4AF37] shrink-0" />
                 <div>
-                  <span className="text-[10px] font-mono uppercase text-zinc-400 block font-bold">REPLACEMENT</span>
-                  <span className="text-white font-medium text-[11px]">7-Day Hardware Exchange</span>
+                  <span className="text-[10px] font-mono uppercase text-zinc-400 block font-bold">EXCHANGE POLICY</span>
+                  <span className="text-white font-medium text-[11px]">7-Day Replacement Guarantee</span>
                 </div>
               </div>
             </div>
@@ -547,13 +548,13 @@ export default function PhoneDetailPage({ params }: PageProps) {
             <div className="border-b border-white/10 pb-5">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37] font-bold">
-                  [ {phone.brand.toUpperCase()} // OFFICIAL SPECIFICATION ]
+                  {phone.brand.toUpperCase()} • Official Model
                 </span>
                 
                 <div className="flex items-center gap-1 text-xs text-amber-300 font-mono">
                   <Star className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
                   <span className="font-bold">{phone.rating}</span>
-                  <span className="text-zinc-500">({phone.reviewCount})</span>
+                  <span className="text-zinc-500 font-sans">({phone.reviewCount} reviews)</span>
                 </div>
               </div>
 
@@ -561,7 +562,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 {phone.name}
               </h1>
 
-              <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+              <p className="text-xs text-zinc-400 mt-1 leading-relaxed font-sans">
                 {phone.tagline}
               </p>
             </div>
@@ -570,7 +571,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
             <div className="border border-white/15 bg-[#121217] p-5 rounded-none flex items-baseline justify-between">
               <div>
                 <span className="text-[9px] text-zinc-500 uppercase font-mono tracking-widest block font-bold">
-                  BOUTIQUE SPECIFICATION PRICE
+                  STORE PRICE (FCFA)
                 </span>
                 <div className="flex items-baseline gap-2.5 mt-1">
                   <span className="text-2xl sm:text-3xl font-black text-[#D4AF37] font-mono tracking-tight">
@@ -587,10 +588,10 @@ export default function PhoneDetailPage({ params }: PageProps) {
               <div className="text-right">
                 <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400 uppercase">
                   <span className="w-1.5 h-1.5 rounded-none bg-emerald-400 animate-pulse" />
-                  <span>{activeStorage.stock > 0 ? `${activeStorage.stock} UNITS READY` : "DEPLETED"}</span>
+                  <span>{activeStorage.stock > 0 ? `${activeStorage.stock} UNITS IN STOCK` : "SOLD OUT"}</span>
                 </span>
-                <span className="text-[10px] text-zinc-500 block font-mono mt-0.5">
-                  SHOWROOM DISPATCH READY
+                <span className="text-[10px] text-zinc-400 block font-sans mt-0.5">
+                  Ready for instant dispatch
                 </span>
               </div>
             </div>
@@ -620,7 +621,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
                   <div className="p-3 bg-[#0E0E12] space-y-0.5">
                     <div className="flex items-center gap-1.5 text-[#D4AF37]">
                       <BatteryCharging className="w-3.5 h-3.5" />
-                      <span className="text-[9px] uppercase font-mono tracking-wider font-bold">BATTERY CAPACITY</span>
+                      <span className="text-[9px] uppercase font-mono tracking-wider font-bold">BATTERY LIFE</span>
                     </div>
                     <p className="text-[11px] font-bold text-white truncate font-mono">{phone.specs.battery}</p>
                   </div>
@@ -629,7 +630,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
                   <div className="p-3 bg-[#0E0E12] space-y-0.5">
                     <div className="flex items-center gap-1.5 text-[#D4AF37]">
                       <Smartphone className="w-3.5 h-3.5" />
-                      <span className="text-[9px] uppercase font-mono tracking-wider font-bold">PANEL RESOLUTION</span>
+                      <span className="text-[9px] uppercase font-mono tracking-wider font-bold">DISPLAY</span>
                     </div>
                     <p className="text-[11px] font-bold text-white truncate font-mono">{phone.specs.screen.split(" ")[0]} OLED</p>
                   </div>
@@ -641,7 +642,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-                  [ 01. SELECT STORAGE TIER ]
+                  Select Storage:
                 </span>
                 <span className="text-xs text-[#D4AF37] font-mono font-bold">
                   {activeStorage.size}
@@ -673,7 +674,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
                         {formatCFA(variant.price)}
                       </span>
                       <span className="text-[9px] text-zinc-500 font-mono block mt-0.5 uppercase">
-                        {variant.stock > 0 ? `${variant.stock} UNITS` : "SOLD OUT"}
+                        {variant.stock > 0 ? `${variant.stock} in stock` : "Sold Out"}
                       </span>
                     </button>
                   );
@@ -686,7 +687,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-                    [ 02. FACTORY COLORWAY ]
+                    Select Color:
                   </span>
                   <span className="text-xs text-zinc-300 font-mono font-semibold">
                     {currentColor.name}
@@ -726,7 +727,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
             )}
 
             {/* Acquisition & Order CTAs (Strict Straight Edges) */}
-            <div className="space-y-2.5 pt-2">
+            <div id="main-pdp-buy-box" className="space-y-2.5 pt-2">
               
               {/* Primary Add to Cart Button */}
               <button
@@ -736,12 +737,12 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 {isAdded ? (
                   <>
                     <Check className="w-4 h-4 stroke-[3] text-black" />
-                    <span>ADDED TO CART</span>
+                    <span>Added to Cart!</span>
                   </>
                 ) : (
                   <>
                     <ShoppingBag className="w-4 h-4 text-black" />
-                    <span>ADD TO CART</span>
+                    <span>Add to Cart</span>
                   </>
                 )}
               </button>
@@ -751,14 +752,14 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 href={`https://wa.me/${settings.whatsappCleanNumber || "237699442100"}?text=${encodeURIComponent(
                   `Hello ${settings.storeName}, I want to order the ${phone.name} (${activeStorage.size}, ${currentColor.name}) for ${formatCFA(
                     currentPrice
-                  )}. Please confirm availability and delivery dispatch in Douala/Yaoundé.`
+                  )}. Please confirm availability and delivery dispatch.`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-3.5 px-4 bg-[#0A1A10] hover:bg-[#0E2617] border border-[#25D366]/40 text-[#25D366] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 rounded-none transition-all min-h-[46px]"
               >
                 <MessageCircle className="w-4 h-4" />
-                <span>ORDER DIRECT VIA WHATSAPP (1-TAP)</span>
+                <span>Order via WhatsApp (Instant Reply)</span>
               </a>
 
               {/* Secondary Row: Buy Now / Direct Checkout + Wishlist */}
@@ -767,7 +768,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
                   onClick={handleBuyNow}
                   className="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-mono font-semibold text-xs uppercase tracking-wider rounded-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <span>BUY NOW (CHECKOUT)</span>
+                  <span>Buy Now (Checkout)</span>
                   <span>→</span>
                 </button>
 
@@ -784,17 +785,28 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 </button>
               </div>
 
-              {/* Trade-In Hook (Sharp Blueprint Callout) */}
+              {/* Trade-In Hook */}
               <Link
                 href={`/trade-in?target=${phone.slug}`}
                 className="w-full py-3 px-4 bg-[#101016] hover:bg-[#161622] border border-[#D4AF37]/30 text-amber-200 text-xs font-mono flex items-center justify-between rounded-none transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <RefreshCw className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>PHONE SWAP: Value your old phone toward this unit</span>
+                  <span>Phone Swap: Trade in your old phone for this model</span>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-[#D4AF37]" />
               </Link>
+
+              {/* Localized City Delivery Assurance Pill */}
+              <div className="p-3 bg-white/[0.03] border border-white/10 text-[11px] text-zinc-300 flex items-start gap-2.5 rounded-none">
+                <Truck className="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-semibold text-white">Fast Nationwide Delivery:</span>
+                  <p className="text-zinc-400 text-[10px] mt-0.5 leading-normal">
+                    Free pickup at Check Point Molyko, Buea • Same-day bike delivery in Buea/Limbe • 24h Express Bus to Douala, Yaoundé &amp; all regions.
+                  </p>
+                </div>
+              </div>
 
             </div>
 
@@ -802,12 +814,12 @@ export default function PhoneDetailPage({ params }: PageProps) {
             {phone.highlights && phone.highlights.length > 0 && (
               <div className="border-t border-white/10 pt-4 space-y-2">
                 <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block font-bold">
-                  [ ARCHITECTURAL HIGHLIGHTS ]
+                  Key Highlights &amp; Features
                 </span>
-                <div className="space-y-1.5 text-xs text-zinc-300 font-mono">
+                <div className="space-y-1.5 text-xs text-zinc-300 font-sans">
                   {phone.highlights.map((h, i) => (
                     <div key={i} className="flex items-start gap-2">
-                      <span className="text-[#D4AF37] font-bold shrink-0">■</span>
+                      <span className="text-[#D4AF37] font-bold shrink-0 mt-0.5">✔</span>
                       <span>{h}</span>
                     </div>
                   ))}
@@ -819,20 +831,20 @@ export default function PhoneDetailPage({ params }: PageProps) {
 
         </div>
 
-        {/* 3. Technical Specifications Blueprint Grid (Swiss-Style Technical Table) */}
+        {/* 3. Technical Specifications Blueprint Grid */}
         <div className="mt-16 pt-12 border-t border-white/10 space-y-8">
           
           <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-white/10 pb-4">
             <div>
               <span className="text-[10px] font-mono uppercase text-[#D4AF37] tracking-widest font-bold block mb-1">
-                ENGINEERING SPECIFICATION ARCHIVE
+                Full Specifications
               </span>
               <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
                 Technical Specifications Sheet
               </h2>
             </div>
             <span className="text-xs font-mono text-zinc-500">
-              SERIAL REF: {phone.slug.toUpperCase()}
+              MODEL REF: {phone.slug.toUpperCase()}
             </span>
           </div>
 
@@ -877,12 +889,12 @@ export default function PhoneDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Box Contents (Sharp Blueprint Checklist) */}
+          {/* Box Contents */}
           {phone.boxContents && phone.boxContents.length > 0 && (
             <div className="p-5 border border-white/10 bg-[#0F0F14] rounded-none space-y-3">
               <div className="flex items-center gap-2 text-white font-bold text-xs uppercase font-mono tracking-wider">
                 <Package className="w-4 h-4 text-[#D4AF37]" />
-                <span>OFFICIAL SEALED BOX CONTENTS</span>
+                <span>What&apos;s Included in the Box</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono text-zinc-300">
                 {phone.boxContents.map((item, i) => (
@@ -897,15 +909,15 @@ export default function PhoneDetailPage({ params }: PageProps) {
 
         </div>
 
-        {/* 4. Related Phones Archive (Sharp Grid) */}
+        {/* 4. Related Phones Archive */}
         {relatedPhones.length > 0 && (
           <div className="mt-16 pt-12 border-t border-white/10 space-y-6">
             <div className="flex items-baseline justify-between border-b border-white/10 pb-4">
               <h2 className="text-lg sm:text-xl font-bold text-white uppercase tracking-wider font-mono">
-                [ YOU MAY ALSO CONSIDER // ALTERNATIVE HARDWARE ]
+                You May Also Like
               </h2>
               <Link href="/phones" className="text-xs font-mono text-[#D4AF37] hover:underline">
-                VIEW COMPLETE ARCHIVE →
+                View All Phones →
               </Link>
             </div>
 
@@ -918,6 +930,14 @@ export default function PhoneDetailPage({ params }: PageProps) {
         )}
 
       </div>
+
+      {/* Persistent Mobile Action Bar on PDP Scroll */}
+      <StickyMobilePdpBar
+        phone={phone}
+        selectedStorage={activeStorage}
+        selectedColor={currentColor}
+        triggerElementId="main-pdp-buy-box"
+      />
     </div>
   );
 }

@@ -62,11 +62,11 @@ export function CartDrawer() {
           <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-[#141419]">
             <div className="flex items-center gap-2.5">
               <ShoppingBag className="w-4 h-4 text-[#D4AF37]" />
-              <h2 className="text-xs font-bold tracking-widest uppercase font-mono">
-                [ ACQUISITION BAG ]
+              <h2 className="text-xs font-bold tracking-widest uppercase font-mono text-white">
+                Shopping Cart
               </h2>
               <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-[#D4AF37] text-xs font-mono font-bold">
-                {itemCount}
+                {itemCount} {itemCount === 1 ? "item" : "items"}
               </span>
             </div>
             <button
@@ -85,11 +85,11 @@ export function CartDrawer() {
                   <ShoppingBag className="w-6 h-6 text-[#D4AF37]/60" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white uppercase font-mono tracking-wider">
-                    [ BAG IS EMPTY ]
+                  <h3 className="text-sm font-bold text-white uppercase font-sans tracking-wider">
+                    Your Cart is Empty
                   </h3>
                   <p className="text-xs text-zinc-400 mt-1 max-w-xs leading-relaxed">
-                    Explore our flagship devices with official boutique warranty and express delivery nationwide.
+                    Explore our collection of 100% original smartphones with warranty and express nationwide delivery.
                   </p>
                 </div>
                 <button
@@ -99,7 +99,7 @@ export function CartDrawer() {
                   }}
                   className="px-5 py-3 gold-gradient-bg text-black font-extrabold text-xs tracking-widest uppercase hover:opacity-95 transition cursor-pointer"
                 >
-                  Browse Smartphones
+                  Browse Phones
                 </button>
               </div>
             ) : (
@@ -171,8 +171,8 @@ export function CartDrawer() {
           {items.length > 0 && (
             <div className="p-4 sm:p-5 border-t border-white/10 bg-[#121217] space-y-3">
               <div className="flex justify-between items-baseline font-mono">
-                <span className="text-xs text-zinc-400 uppercase tracking-widest">
-                  [ SUBTOTAL ({itemCount}) ]
+                <span className="text-xs text-zinc-400 uppercase tracking-wider font-semibold">
+                  Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})
                 </span>
                 <span className="text-lg font-black text-white">
                   {formatCFA(subtotal)}
@@ -184,7 +184,7 @@ export function CartDrawer() {
                 onClick={handleCheckoutClick}
                 className="w-full py-3.5 gold-gradient-bg text-black font-extrabold text-xs tracking-widest uppercase flex items-center justify-center gap-2 hover:opacity-95 transition min-h-[48px] cursor-pointer"
               >
-                <span>PROCEED TO CHECKOUT</span>
+                <span>Proceed to Checkout</span>
                 <ArrowRight className="w-4 h-4 stroke-[2.5]" />
               </button>
 
@@ -193,22 +193,22 @@ export function CartDrawer() {
                 href={generateWhatsAppMessage()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3 bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/30 text-emerald-400 font-bold text-xs tracking-widest uppercase flex items-center justify-center gap-2 transition min-h-[44px] font-mono"
+                className="w-full py-3 bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/30 text-emerald-400 font-bold text-xs tracking-widest uppercase flex items-center justify-center gap-2 transition min-h-[44px]"
               >
                 <MessageCircle className="w-4 h-4 text-emerald-400" />
-                <span>ORDER VIA WHATSAPP (1-TAP)</span>
+                <span>Order via WhatsApp (1-Tap)</span>
               </a>
 
               {/* Continue Shopping button */}
               <button
                 onClick={() => setIsCartOpen(false)}
-                className="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/15 text-zinc-300 hover:text-white font-mono text-[11px] tracking-wider uppercase flex items-center justify-center gap-1.5 transition cursor-pointer"
+                className="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/15 text-zinc-300 hover:text-white text-[11px] tracking-wider uppercase flex items-center justify-center gap-1.5 transition cursor-pointer font-semibold"
               >
                 <span>← Continue Shopping</span>
               </button>
 
-              <p className="text-[10px] font-mono text-zinc-500 text-center uppercase">
-                [ 100% SEALED HARDWARE • INSPECT BEFORE PAYING ]
+              <p className="text-[10px] text-zinc-400 text-center">
+                ✓ 100% Original Sealed Phones • Pay on Delivery (Inspect First)
               </p>
             </div>
           )}

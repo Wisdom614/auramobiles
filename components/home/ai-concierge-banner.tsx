@@ -29,42 +29,42 @@ export function AiConciergeBanner() {
             <div className="lg:col-span-7 space-y-6">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-[#D4AF37]/30 text-amber-300 text-xs font-medium">
                 <Bot className="w-3.5 h-3.5 text-[#D4AF37]" />
-                <span className="uppercase tracking-wider font-mono text-[11px]">
-                  Personal Shopping Intelligence
+                <span className="uppercase tracking-wider font-mono text-[11px] font-bold">
+                  Instant Phone Advisor
                 </span>
               </div>
 
               <div className="space-y-3">
-                <p className="text-xl sm:text-2xl text-amber-200/90 font-serif italic">
-                  Not sure which phone is right for you?
+                <p className="text-xl sm:text-2xl text-amber-200/90 font-sans font-semibold">
+                  Not sure which phone fits your budget?
                 </p>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.15]">
-                  Ask our AI Concierge.
+                  Ask Our AI Assistant.
                 </h2>
               </div>
 
               <p className="text-zinc-300 text-base leading-relaxed max-w-xl">
-                Get bespoke recommendations tailored to your exact budget in FCFA, camera priorities, battery needs, and preferred brand ecosystem.
+                Get instant phone recommendations tailored to your exact budget in FCFA, camera quality, battery life, and favourite brand.
               </p>
 
               <div className="flex flex-wrap gap-4 text-xs text-zinc-300 pt-1">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" />
-                  <span>Real-time Cameroon inventory knowledge</span>
+                  <span>Real Cameroon stock & prices</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" />
-                  <span>Direct FCFA pricing comparisons</span>
+                  <span>Clear FCFA price comparisons</span>
                 </div>
               </div>
 
               <div className="pt-2">
                 <button
                   onClick={() => setIsAiOpen(true)}
-                  className="px-8 py-4 rounded-xl gold-gradient-bg text-black font-bold text-sm tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-xl shadow-amber-500/15 hover:shadow-amber-500/30 hover:scale-[1.02] active:scale-[0.99] transition-all"
+                  className="px-8 py-4 rounded-none gold-gradient-bg text-black font-bold text-sm tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-xl shadow-amber-500/15 hover:shadow-amber-500/30 hover:scale-[1.02] active:scale-[0.99] transition-all cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4 text-black" />
-                  <span>Ask AI Concierge</span>
+                  <span>Chat with AI Assistant</span>
                   <ArrowRight className="w-4 h-4 text-black" />
                 </button>
               </div>

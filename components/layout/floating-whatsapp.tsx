@@ -16,19 +16,19 @@ import { useSettings } from "@/lib/store/settings-context";
 const PRESET_INQUIRIES = [
   {
     label: "📱 Check Phone Stock & Prices",
-    text: "Hello AURA Luxe Mobile, I am visiting your online boutique and would like to check current stock and pricing for your flagships.",
+    text: "Hello AURA Luxe Mobile, I am looking to check current stock and pricing for your phones.",
   },
   {
     label: "🚚 Same-Day Express Delivery",
-    text: "Hello AURA, I would like to know about your same-day express delivery in Douala & Yaoundé.",
+    text: "Hello AURA, I would like to know how fast delivery is to my location in Buea / Douala / Yaoundé.",
   },
   {
-    label: "🔄 Trade-In / Swap Appraisal",
-    text: "Hello! I want to trade in my old smartphone for a new flagship. How does the showroom appraisal work?",
+    label: "🔄 Swap / Trade-In My Old Phone",
+    text: "Hello! I want to trade in / swap my old smartphone for an upgrade. How do I proceed?",
   },
   {
-    label: "💳 Cash on Delivery Terms",
-    text: "Hello, can I inspect my smartphone and pay cash on delivery at my address?",
+    label: "💵 Pay on Delivery Question",
+    text: "Hello, can I inspect the phone and pay upon delivery at my address?",
   },
 ];
 
@@ -67,7 +67,7 @@ export function FloatingWhatsApp() {
   const handleOpenWhatsApp = (messageText: string) => {
     const finalMessage =
       messageText.trim() ||
-      `Hello ${settings.storeName}, I am visiting your online store and need assistance.`;
+      `Hello ${settings.storeName}, I am visiting your website and need some assistance with phones.`;
     const url = `https://wa.me/${cleanWaNumber}?text=${encodeURIComponent(
       finalMessage
     )}`;
@@ -80,13 +80,7 @@ export function FloatingWhatsApp() {
     <div className="fixed bottom-20 md:bottom-6 left-4 sm:left-6 z-40 transition-all duration-300">
       {/* 1. First-Visit Slide-In Greeting Bubble (When collapsed) */}
       {!isOpen && hasPrompted && !isDismissed && (
-        <div className="mb-3 max-w-[290px] sm:max-w-xs p-4 rounded-none bg-[#09090D]/95 backdrop-blur-xl border border-[#25D366]/40 shadow-2xl shadow-black/90 animate-in fade-in slide-in-from-bottom-3 duration-300 relative font-mono">
-          {/* Corner Crosshairs */}
-          <span className="absolute top-1.5 left-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
-          <span className="absolute top-1.5 right-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
-          <span className="absolute bottom-1.5 left-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
-          <span className="absolute bottom-1.5 right-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
-
+        <div className="mb-3 max-w-[290px] sm:max-w-xs p-4 rounded-none bg-[#09090D]/95 backdrop-blur-xl border border-[#25D366]/40 shadow-2xl shadow-black/90 animate-in fade-in slide-in-from-bottom-3 duration-300 relative font-sans">
           <button
             onClick={handleDismissPrompt}
             aria-label="Dismiss greeting"
@@ -102,32 +96,32 @@ export function FloatingWhatsApp() {
 
             <div className="space-y-1 pr-3">
               <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-none bg-emerald-400 animate-pulse" />
-                <span className="text-[9px] font-mono font-bold text-emerald-400 uppercase tracking-widest">
-                  [ WA // SHOWROOM ONLINE ]
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider">
+                  Store Online
                 </span>
               </div>
               <h4 className="text-xs font-bold text-white leading-tight font-sans">
                 Need phone advice or stock check?
               </h4>
               <p className="text-[11px] text-zinc-400 leading-snug font-sans">
-                Direct hotline to our Douala &amp; Yaoundé retail specialists.
+                Chat directly with our Buea showroom managers.
               </p>
             </div>
           </div>
 
           <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between">
-            <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
-              FAST CAMEROON DISPATCH
+            <span className="text-[9.5px] font-mono text-zinc-400">
+              Buea • Douala • Yaoundé
             </span>
             <button
               onClick={() => {
                 setHasPrompted(false);
                 setIsOpen(true);
               }}
-              className="px-3.5 py-1.5 rounded-none bg-[#25D366] hover:bg-[#20bd5a] text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all border border-[#25D366]"
+              className="px-3.5 py-1.5 rounded-none bg-[#25D366] hover:bg-[#20bd5a] text-black font-sans font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all border border-[#25D366]"
             >
-              <span>[ QUICK CHAT ]</span>
+              <span>Chat Now</span>
               <ArrowRight className="w-3 h-3" />
             </button>
           </div>
@@ -136,13 +130,7 @@ export function FloatingWhatsApp() {
 
       {/* 2. Expanded WhatsApp Concierge Card */}
       {isOpen ? (
-        <div className="w-[320px] sm:w-[350px] rounded-none bg-[#09090D]/98 backdrop-blur-2xl border border-[#25D366]/40 shadow-2xl shadow-black/95 overflow-hidden animate-in fade-in zoom-in-95 duration-200 font-mono relative">
-          {/* Corner Crosshairs */}
-          <span className="absolute top-1.5 left-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
-          <span className="absolute top-1.5 right-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
-          <span className="absolute bottom-1.5 left-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
-          <span className="absolute bottom-1.5 right-1.5 text-[9px] font-mono text-[#25D366]/40 select-none pointer-events-none">+</span>
-
+        <div className="w-[320px] sm:w-[350px] rounded-none bg-[#09090D]/98 backdrop-blur-2xl border border-[#25D366]/40 shadow-2xl shadow-black/95 overflow-hidden animate-in fade-in zoom-in-95 duration-200 font-sans relative">
           {/* Card Header */}
           <div className="p-3.5 bg-black/90 border-b border-white/10 relative">
             <button
@@ -161,22 +149,22 @@ export function FloatingWhatsApp() {
 
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-                    [ WA // {settings.storeName || "AURA"} ]
+                  <span className="text-xs font-bold text-white uppercase tracking-wider">
+                    {settings.storeName || "AURA Luxe Mobile"}
                   </span>
-                  <span className="px-1.5 py-0.2 rounded-none text-[8px] bg-[#25D366]/15 text-[#25D366] font-mono border border-[#25D366]/30 uppercase">
-                    ACTIVE
+                  <span className="px-1.5 py-0.2 rounded-none text-[8px] bg-[#25D366]/15 text-[#25D366] font-mono border border-[#25D366]/30 uppercase font-bold">
+                    ONLINE
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] text-zinc-400 mt-0.5">
+                <div className="flex items-center gap-2 text-[10px] text-zinc-400 mt-0.5 font-mono">
                   <span className="flex items-center gap-1">
                     <MapPin className="w-2.5 h-2.5 text-[#D4AF37]" />
-                    DLA &amp; YDE
+                    Buea Showroom
                   </span>
-                  <span>//</span>
+                  <span>•</span>
                   <span className="flex items-center gap-1 text-emerald-400">
                     <Clock className="w-2.5 h-2.5" />
-                    REPLY &lt; 3M
+                    Replies in &lt; 3 mins
                   </span>
                 </div>
               </div>
@@ -187,18 +175,18 @@ export function FloatingWhatsApp() {
           <div className="p-4 space-y-3.5 max-h-[380px] overflow-y-auto no-scrollbar font-sans">
             {/* Friendly Greeting Note */}
             <div className="p-3 rounded-none bg-white/5 border border-white/10 text-xs text-zinc-300 space-y-1">
-              <p className="font-semibold text-white font-mono text-[11px] uppercase tracking-wider">
-                [ BOUTIQUE DESK // ACTIVE ]
+              <p className="font-semibold text-white text-[11px] uppercase tracking-wider">
+                How can we help you today?
               </p>
-              <p className="text-[11px] text-zinc-300 leading-relaxed">
-                Select an immediate inquiry topic below or input a custom question for our advisors:
+              <p className="text-[11px] text-zinc-400 leading-relaxed">
+                Tap a topic below or type your question to chat directly on WhatsApp:
               </p>
             </div>
 
             {/* Quick Inquiries List */}
             <div className="space-y-1.5">
-              <span className="text-[9px] uppercase font-mono font-bold tracking-widest text-zinc-400 block">
-                [ POPULAR INQUIRIES ]:
+              <span className="text-[9.5px] uppercase font-mono font-bold tracking-wider text-zinc-400 block">
+                Common Questions:
               </span>
               {PRESET_INQUIRIES.map((item, index) => (
                 <button
@@ -216,8 +204,8 @@ export function FloatingWhatsApp() {
 
             {/* Custom Input */}
             <div className="space-y-1.5 pt-1">
-              <span className="text-[9px] uppercase font-mono font-bold tracking-widest text-zinc-400 block">
-                [ CUSTOM QUERY ]:
+              <span className="text-[9.5px] uppercase font-mono font-bold tracking-wider text-zinc-400 block">
+                Or type your question:
               </span>
               <div className="relative">
                 <input
@@ -229,7 +217,7 @@ export function FloatingWhatsApp() {
                       handleOpenWhatsApp(customMessage);
                     }
                   }}
-                  placeholder="e.g. Check S24 Ultra 512GB in Douala showroom..."
+                  placeholder="e.g. Do you have iPhone 15 Pro Max in stock in Buea?"
                   className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#25D366] transition-colors pr-9 font-sans"
                 />
                 <button
@@ -247,48 +235,42 @@ export function FloatingWhatsApp() {
           <div className="p-3 bg-black border-t border-white/10 flex items-center justify-between gap-2">
             <a
               href={`tel:${cleanWaNumber}`}
-              className="px-3 py-2 rounded-none bg-white/5 hover:bg-white/10 border border-white/15 text-zinc-300 hover:text-white text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 transition-colors"
+              className="px-3 py-2 rounded-none bg-white/5 hover:bg-white/10 border border-white/15 text-zinc-300 hover:text-white text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 transition-colors"
             >
               <PhoneCall className="w-3 h-3 text-[#D4AF37]" />
-              <span>[ CALL ]</span>
+              <span>Call Us</span>
             </a>
 
             <button
               onClick={() =>
                 handleOpenWhatsApp(customMessage || PRESET_INQUIRIES[0].text)
               }
-              className="flex-1 py-2 px-3 rounded-none bg-[#25D366] hover:bg-[#20bd5a] text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 border border-[#25D366] transition-all"
+              className="flex-1 py-2 px-3 rounded-none bg-[#25D366] hover:bg-[#20bd5a] text-black font-sans font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 border border-[#25D366] transition-all"
             >
               <MessageCircle className="w-3.5 h-3.5" />
-              <span>[ DISPATCH TO WA ]</span>
+              <span>Open in WhatsApp</span>
             </button>
           </div>
         </div>
       ) : (
-        /* 3. Floating Trigger Button with Technical Frame */
+        /* 3. Floating Trigger Button */
         <button
           onClick={() => {
             setIsOpen(true);
             setHasPrompted(false);
           }}
-          className="relative group p-3 rounded-none bg-black/90 border border-[#25D366]/60 text-[#25D366] hover:bg-[#25D366] hover:text-black transition-all shadow-2xl flex items-center gap-2.5 font-mono"
+          className="relative group p-3 rounded-none bg-black/90 border border-[#25D366]/60 text-[#25D366] hover:bg-[#25D366] hover:text-black transition-all shadow-2xl flex items-center gap-2.5 font-sans"
           title="Chat with AURA Showroom on WhatsApp"
         >
-          {/* Corner Crosshairs */}
-          <span className="absolute top-1 left-1 text-[8px] select-none font-mono opacity-50">+</span>
-          <span className="absolute top-1 right-1 text-[8px] select-none font-mono opacity-50">+</span>
-          <span className="absolute bottom-1 left-1 text-[8px] select-none font-mono opacity-50">+</span>
-          <span className="absolute bottom-1 right-1 text-[8px] select-none font-mono opacity-50">+</span>
-
           <div className="w-5 h-5 rounded-none bg-black border border-current flex items-center justify-center">
             <MessageCircle className="w-3.5 h-3.5" />
           </div>
 
-          <span className="text-xs font-mono font-bold uppercase tracking-wider hidden sm:inline">
-            [ WA // CONCIERGE ]
+          <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline">
+            Chat on WhatsApp
           </span>
 
-          <span className="w-1.5 h-1.5 rounded-none bg-emerald-400 animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
         </button>
       )}
     </div>

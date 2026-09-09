@@ -22,35 +22,35 @@ interface Pillar {
 const PILLARS: Pillar[] = [
   {
     icon: Cpu,
-    title: "65-Point Diagnostic Audit",
-    subtitle: "Hardware & Biometrics Tested",
-    description: "Every device undergoes stringent automated checks: battery cycle telemetry, display sampling, Face ID/Fingerprint sensors, and optical stabilization.",
+    title: "100% Tested & Verified",
+    subtitle: "Hardware & Battery Audit",
+    description: "Every phone undergoes full verification: battery health, vibrant display, Face ID/fingerprint sensors, and optical cameras work flawlessly.",
     metric: "100%",
-    metricLabel: "Audit Passed",
+    metricLabel: "Tested Units",
   },
   {
     icon: Building2,
-    title: "Local Flagship Showrooms",
-    subtitle: "Douala & Yaoundé Lounges",
-    description: "Visit our dedicated physical boutiques to test devices in person, transfer your data securely, or consult with our hardware technicians.",
-    metric: "2",
-    metricLabel: "Central Lounges",
+    title: "Physical Showroom",
+    subtitle: "Buea, Molyko Checkpoint",
+    description: "Visit our physical store to test any phone in person, inspect sealed boxes, swap your current phone, or get expert advice on your next upgrade.",
+    metric: "Buea",
+    metricLabel: "Showroom Hub",
   },
   {
     icon: ShieldCheck,
-    title: "Official Serial & IMEI Lineage",
-    subtitle: "Zero Grey Market Risk",
-    description: "No bypasses or counterfeit clones. Live verification on official Apple and Samsung manufacturer portals before completing acquisition.",
+    title: "Official Brand Warranty",
+    subtitle: "Zero Counterfeit Risk",
+    description: "Genuine Apple, Samsung, Google, and Tecno hardware with valid serial numbers. Inspect and check official warranty before paying.",
     metric: "15k+",
-    metricLabel: "Verified Releases",
+    metricLabel: "Phones Delivered",
   },
   {
     icon: UserCheck,
-    title: "VIP White-Glove Setup",
-    subtitle: "Complete Data Migration",
-    description: "Our concierge team migrates WhatsApp databases, banking applications, media libraries, and eSIMs with zero downtime and strict confidentiality.",
+    title: "Free WhatsApp Transfer",
+    subtitle: "Full Data Migration",
+    description: "Our store team will help transfer all your WhatsApp chats, contacts, photos, and banking apps to your new phone for free.",
     metric: "4.9/5",
-    metricLabel: "Client Rating",
+    metricLabel: "Customer Rating",
   },
 ];
 
@@ -61,18 +61,18 @@ export function WhyChooseUs() {
         
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37] block">
-            [ OPERATIONAL INTEGRITY // APEX QUALITY STANDARDS ]
+          <span className="text-[10px] font-mono uppercase tracking-wider text-[#D4AF37] font-bold block">
+            THE AURA ADVANTAGE
           </span>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white uppercase tracking-tight font-sans mt-1">
-            Why Discerning Clients Choose AURA
+            Why Cameroonians Choose AURA
           </h2>
           <p className="text-zinc-400 text-xs sm:text-sm mt-2 leading-relaxed">
-            Bridging international consumer electronics excellence with local Cameroon reliability and warranty security.
+            Genuine sealed smartphones, honest prices in FCFA, official warranty, and reliable delivery across Cameroon.
           </p>
         </div>
 
-        {/* 4-Pillar Architectural Table with 1px Grids */}
+        {/* 4-Pillar Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border border-white/15 divide-y md:divide-y-0 md:divide-x divide-white/15 bg-[#0E0E12]">
           {PILLARS.map((pillar, idx) => {
             const Icon = pillar.icon;
@@ -82,12 +82,11 @@ export function WhyChooseUs() {
                 className="p-6 flex flex-col justify-between hover:bg-[#121217] transition-colors relative group"
               >
                 <div>
-                  {/* Chamber index */}
                   <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10 font-mono text-[10px]">
-                    <span className="text-[#D4AF37] uppercase tracking-wider">
-                      [ STANDARD 0{idx + 1} ]
+                    <span className="text-[#D4AF37] uppercase tracking-wider font-bold">
+                      PROMISE 0{idx + 1}
                     </span>
-                    <span className="text-zinc-600">VERIFIED</span>
+                    <span className="text-emerald-400 font-bold">GUARANTEED</span>
                   </div>
 
                   <div className="w-9 h-9 bg-black border border-white/15 flex items-center justify-center mb-4 group-hover:border-[#D4AF37] transition-colors">
@@ -97,7 +96,7 @@ export function WhyChooseUs() {
                   <h3 className="text-sm font-bold text-white uppercase tracking-wide font-sans">
                     {pillar.title}
                   </h3>
-                  <p className="text-[10px] text-[#D4AF37] font-mono mt-0.5 uppercase">
+                  <p className="text-[10.5px] text-[#D4AF37] font-mono mt-0.5 uppercase">
                     {pillar.subtitle}
                   </p>
 
