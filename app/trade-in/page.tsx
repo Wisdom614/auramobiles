@@ -97,28 +97,28 @@ const TRADE_SOURCE_MODELS: DeviceModel[] = [
 const PHYSICAL_CONDITIONS = [
   {
     id: "flawless",
-    icon: "💎",
+    grade: "GRADE A+",
     title: "Like New (Flawless)",
     desc: "No scratches at all, original screen, battery health 85%+",
     factor: 1.0,
   },
   {
     id: "excellent",
-    icon: "✨",
+    grade: "GRADE A",
     title: "Very Good Condition",
     desc: "Light signs of normal pocket use, clean glass, battery 80%+",
     factor: 0.88,
   },
   {
     id: "good",
-    icon: "📱",
+    grade: "GRADE B",
     title: "Good (Used)",
     desc: "Visible scratches on body or bezel, screen & camera fully working",
     factor: 0.74,
   },
   {
     id: "damaged",
-    icon: "⚠️",
+    grade: "GRADE C",
     title: "Cracked Glass",
     desc: "Screen or back glass has cracks, but phone turns on & functions",
     factor: 0.50,
@@ -301,7 +301,7 @@ Phone: *${customerPhone || "Via WhatsApp"}*
 • Store Price: ${formatCFA(targetRetailPrice)}
 
 *3. ESTIMATED BALANCE I PAY:*
-👉 *${formatCFA(netUpgradeBalance)}*
+*${formatCFA(netUpgradeBalance)}*
 
 *SWAP LOCATION:*
 • ${inspectionProtocol === "buea_showroom" ? "AURA Showroom — Molyko Check Point, Buea" : "Courier / Nationwide Delivery"}
@@ -572,7 +572,7 @@ Hello AURA, I want to confirm stock and complete this phone swap.`;
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{cond.icon}</span>
+                        <span className="px-1.5 py-0.5 bg-white/10 text-[#D4AF37] text-[10px] font-mono font-bold">{cond.grade}</span>
                         <span className="text-xs font-black uppercase text-white font-mono">{cond.title}</span>
                       </div>
                       {selectedCondition === cond.id && (

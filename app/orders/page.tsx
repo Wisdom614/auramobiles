@@ -262,7 +262,7 @@ function OrderTrackingContent() {
                   Thank you! Your device allocation is active.
                 </h2>
                 <p className="text-xs text-amber-200/90 mt-1 font-medium">
-                  📞 Our concierge will contact you via WhatsApp or Direct Call within 15–30 minutes to confirm your delivery before dispatching.
+                  Our dispatch concierge will contact you via WhatsApp or direct phone call within 15–30 minutes to confirm your delivery before dispatching.
                 </p>
               </div>
             </div>

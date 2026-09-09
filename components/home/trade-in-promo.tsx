@@ -42,7 +42,7 @@ export function TradeInPromo() {
                 </Link>
 
                 <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
-                  📍 Showroom in Buea, Molyko • Doorstep Swap Nationwide
+                  Showroom in Buea, Molyko • Doorstep Swap Nationwide
                 </span>
               </div>
 

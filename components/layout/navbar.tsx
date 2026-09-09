@@ -130,7 +130,7 @@ export function Navbar() {
           <div className="flex items-center gap-1.5 text-zinc-300">
             <Truck className="w-3.5 h-3.5 text-[#D4AF37]" />
             <span className="text-[10.5px] sm:text-xs">
-              📍 Showroom: Checkpoint, Molyko, Buea • Nationwide Delivery across Cameroon
+              Showroom: Checkpoint, Molyko, Buea • Nationwide Delivery across Cameroon
             </span>
           </div>
 
@@ -452,7 +452,7 @@ export function Navbar() {
                 <span>Chat on WhatsApp (Instant Reply)</span>
               </a>
               <p className="text-[9.5px] text-zinc-400 text-center">
-                📍 Showroom at Checkpoint, Molyko, Buea
+                Showroom at Checkpoint, Molyko, Buea
               </p>
             </div>
 

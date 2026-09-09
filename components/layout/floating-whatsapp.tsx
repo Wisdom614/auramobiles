@@ -15,19 +15,19 @@ import { useSettings } from "@/lib/store/settings-context";
 // Common prefilled customer inquiries for instant 1-tap engagement
 const PRESET_INQUIRIES = [
   {
-    label: "📱 Check Phone Stock & Prices",
+    label: "Check Phone Stock & Prices",
     text: "Hello AURA Luxe Mobile, I am looking to check current stock and pricing for your phones.",
   },
   {
-    label: "🚚 Same-Day Express Delivery",
+    label: "Same-Day Express Delivery",
     text: "Hello AURA, I would like to know how fast delivery is to my location in Buea / Douala / Yaoundé.",
   },
   {
-    label: "🔄 Swap / Trade-In My Old Phone",
+    label: "Swap / Trade-In My Old Phone",
     text: "Hello! I want to trade in / swap my old smartphone for an upgrade. How do I proceed?",
   },
   {
-    label: "💵 Pay on Delivery Question",
+    label: "Pay on Delivery Information",
     text: "Hello, can I inspect the phone and pay upon delivery at my address?",
   },
 ];

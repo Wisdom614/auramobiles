@@ -33,7 +33,7 @@ interface HeroSlide {
 const HERO_SLIDES: HeroSlide[] = [
   {
     id: "iphone-16-pro-max",
-    tag: "🔥 NEW ARRIVAL • FACTORY SEALED",
+    tag: "NEW ARRIVAL • FACTORY SEALED",
     titleWhite: "iPhone 16 Pro Max",
     titleGold: "Bigger. Brighter. Better.",
     description:
@@ -51,7 +51,7 @@ const HERO_SLIDES: HeroSlide[] = [
   },
   {
     id: "samsung-galaxy-s24-ultra",
-    tag: "⚡ TOP FLAGSHIP • GALAXY AI",
+    tag: "FLAGSHIP • GALAXY AI",
     titleWhite: "Galaxy S24 Ultra",
     titleGold: "Power. Precision. Intelligence.",
     description:
@@ -105,7 +105,7 @@ export function HeroSection() {
         <div className="flex items-center justify-between pb-4 mb-6 border-b border-white/10 text-[10.5px] font-mono uppercase tracking-wider text-zinc-400">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse"></span>
-            <span className="text-white font-bold">📍 Buea Showroom: Checkpoint, Molyko</span>
+            <span className="text-white font-bold">Buea Showroom: Checkpoint, Molyko</span>
             <span className="text-zinc-600 hidden sm:inline">|</span>
             <span className="text-[#D4AF37] hidden sm:inline">100% Original Sealed Phones</span>
           </div>
@@ -192,7 +192,7 @@ export function HeroSection() {
 
               {/* Watermark badge */}
               <div className="absolute bottom-3 left-3 text-[10px] font-mono text-zinc-300 tracking-wider uppercase pointer-events-none">
-                ✓ 100% Original Sealed • In Stock
+                100% Original Sealed • In Stock
               </div>
             </div>
 

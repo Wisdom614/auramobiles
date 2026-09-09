@@ -317,7 +317,7 @@ export default function AdminDashboardPage() {
       highlightsText: preset.highlights.join("\n"),
       boxContentsText: preset.boxContents.join("\n"),
     });
-    showToast(`⚡ Auto-filled real specs & pricing for ${preset.name}!`, "success");
+    showToast(`Auto-filled specs & pricing for ${preset.name}`, "success");
   };
 
   // Handle Image Upload
@@ -2238,7 +2238,7 @@ export default function AdminDashboardPage() {
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
                   <label className="text-[11px] font-mono font-bold text-white uppercase tracking-wider">
-                    ⚡ 1-CLICK FLAGSHIP SPEC PRESETS
+                    1-CLICK FLAGSHIP SPEC PRESETS
                   </label>
                 </div>
                 <span className="text-[10px] text-[#D4AF37] font-mono font-semibold uppercase">

@@ -819,7 +819,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 <div className="space-y-1.5 text-xs text-zinc-300 font-sans">
                   {phone.highlights.map((h, i) => (
                     <div key={i} className="flex items-start gap-2">
-                      <span className="text-[#D4AF37] font-bold shrink-0 mt-0.5">✔</span>
+                      <Check className="w-3.5 h-3.5 text-[#D4AF37] shrink-0 mt-0.5" />
                       <span>{h}</span>
                     </div>
                   ))}
@@ -899,7 +899,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono text-zinc-300">
                 {phone.boxContents.map((item, i) => (
                   <div key={i} className="p-2.5 bg-[#14141A] border border-white/5 flex items-center gap-2 rounded-none">
-                    <span className="text-[#D4AF37] text-[10px]">✔</span>
+                    <Check className="w-3 h-3 text-[#D4AF37] shrink-0" />
                     <span>{item}</span>
                   </div>
                 ))}

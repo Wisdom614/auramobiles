@@ -207,8 +207,8 @@ export function CartDrawer() {
                 <span>← Continue Shopping</span>
               </button>
 
-              <p className="text-[10px] text-zinc-400 text-center">
-                ✓ 100% Original Sealed Phones • Pay on Delivery (Inspect First)
+              <p className="text-[10px] text-zinc-400 text-center font-mono">
+                100% Original Sealed Phones • Pay on Delivery Available
               </p>
             </div>
           )}
