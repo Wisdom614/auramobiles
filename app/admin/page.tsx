@@ -637,9 +637,15 @@ export default function AdminDashboardPage() {
     } else {
       const currentImages = editingPhone.images || [];
       const updatedImages = [res.url, ...currentImages.slice(1)];
+      const updatedColors = (editingPhone.colorVariants || []).map((c, idx) =>
+        idx === 0 ? { ...c, image: res.url } : c
+      );
       setEditingPhone({
         ...editingPhone,
         images: updatedImages,
+        colorVariants: updatedColors.length > 0 ? updatedColors : [
+          { id: `${editingPhone.id}-c1`, name: "Standard Finish", hex: "#8A8A8E", image: res.url }
+        ],
       });
       showToast("Updated phone photo!", "success");
     }
@@ -688,11 +694,18 @@ export default function AdminDashboardPage() {
       resolvedOriginalPrice = Math.round(resolvedBasePrice * 1.15);
     }
 
+    const updatedColors = (editingPhone.colorVariants || []).map((c, idx) =>
+      idx === 0 ? { ...c, image: primaryImg } : c
+    );
+
     const updatedPhone: Phone = {
       ...editingPhone,
       basePrice: resolvedBasePrice,
       originalPrice: resolvedOriginalPrice,
       storageVariants: storageVariantsList,
+      colorVariants: updatedColors.length > 0 ? updatedColors : [
+        { id: `${editingPhone.id}-c1`, name: "Standard Finish", hex: "#8A8A8E", image: primaryImg }
+      ],
       images: allImages,
       highlights: highlightsList,
       boxContents: boxList,
@@ -3417,12 +3430,21 @@ export default function AdminDashboardPage() {
                           type="text"
                           placeholder="Or update primary image URL..."
                           value={editingPhone.images?.[0] || ""}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const newUrl = e.target.value;
+                            const currentImages = editingPhone.images || [];
+                            const updatedImages = [newUrl, ...currentImages.slice(1)];
+                            const updatedColors = (editingPhone.colorVariants || []).map((c, idx) =>
+                              idx === 0 ? { ...c, image: newUrl } : c
+                            );
                             setEditingPhone({
                               ...editingPhone,
-                              images: [e.target.value, ...(editingPhone.images?.slice(1) || [])],
-                            })
-                          }
+                              images: updatedImages,
+                              colorVariants: updatedColors.length > 0 ? updatedColors : [
+                                { id: `${editingPhone.id}-c1`, name: "Standard Finish", hex: "#8A8A8E", image: newUrl }
+                              ],
+                            });
+                          }}
                           className="w-full bg-black border border-white/15 rounded-none px-3 py-2 text-xs text-white/90 focus:border-[#D4AF37] focus:outline-none"
                         />
                       </div>

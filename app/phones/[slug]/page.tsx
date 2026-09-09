@@ -150,25 +150,26 @@ export default function PhoneDetailPage({ params }: PageProps) {
     image: phone?.images?.[0] || "/placeholder.png",
   };
 
-  // Compile exhaustive unique images list (from phone.images + any color variants)
+  // Compile clean curated images list (from phone.images)
   const imagesList = useMemo(() => {
     if (!phone) return [];
     const list: string[] = [];
-    if (Array.isArray(phone.images)) {
+    if (Array.isArray(phone.images) && phone.images.length > 0) {
       phone.images.forEach((img) => {
-        if (img && !list.includes(img)) list.push(img);
+        if (img && img.trim() && !list.includes(img.trim())) list.push(img.trim());
       });
     }
-    if (Array.isArray(phone.colorVariants)) {
+    // Only if phone.images is empty, fallback to color variants
+    if (list.length === 0 && Array.isArray(phone.colorVariants)) {
       phone.colorVariants.forEach((c) => {
-        if (c.image && !list.includes(c.image)) list.push(c.image);
+        if (c.image && c.image.trim() && !list.includes(c.image.trim())) list.push(c.image.trim());
       });
     }
     if (list.length === 0) {
-      list.push(currentColor.image || "/placeholder.png");
+      list.push("/placeholder.png");
     }
     return list;
-  }, [phone, currentColor.image]);
+  }, [phone]);
 
   // Ensure index stays valid if imagesList changes
   useEffect(() => {

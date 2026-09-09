@@ -99,7 +99,6 @@ function PhonesCatalogContent() {
 
   useEffect(() => {
     async function loadCatalog() {
-      setIsLoadingCatalog(true);
       try {
         const dbPhones = await getPhonesFromDB();
         if (dbPhones && dbPhones.length > 0) {
@@ -111,7 +110,20 @@ function PhonesCatalogContent() {
         setIsLoadingCatalog(false);
       }
     }
+    
+    setIsLoadingCatalog(true);
     loadCatalog();
+
+    const handleFocus = () => {
+      loadCatalog();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("visibilitychange", handleFocus);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("visibilitychange", handleFocus);
+    };
   }, []);
 
   // Update category from URL if query changes

@@ -16,10 +16,11 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
   const { addItem } = useCart();
   const [isAddedToast, setIsAddedToast] = useState(false);
 
-  const defaultColor = phone.colorVariants?.[0] || { id: "c1", name: "Standard", hex: "#888", image: phone.images?.[0] || "" };
+  const primaryImage = phone.images?.[0] || phone.colorVariants?.[0]?.image || "/placeholder.png";
+  const defaultColor = phone.colorVariants?.[0] || { id: "c1", name: "Standard", hex: "#888", image: primaryImage };
   const defaultStorage = phone.storageVariants?.[0] || { id: "s1", size: "Standard", price: phone.basePrice, stock: 1 };
   const displayPrice = defaultStorage?.price && defaultStorage.price > 0 ? defaultStorage.price : phone.basePrice;
-  const activeImage = defaultColor?.image || phone.images?.[0] || "/placeholder.png";
+  const activeImage = primaryImage;
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
