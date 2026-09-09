@@ -86,7 +86,7 @@ export default function CheckoutPage() {
             Your Cart is Empty
           </h1>
           <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-            You haven&apos;t added any phones to your cart yet. Explore our genuine sealed collection with warranty.
+            You haven&apos;t added any phones to your cart yet. Explore our authentic collection of brand new sealed & certified pre-owned phones.
           </p>
 
           <Link
@@ -390,7 +390,7 @@ export default function CheckoutPage() {
                     <span>Free Showroom Pick-Up in Buea:</span>
                   </div>
                   <p className="text-[11px] text-zinc-300 leading-relaxed font-sans">
-                    AURA Flagship Showroom: Checkpoint, Molyko, Buea. Your sealed phone will be ready for testing and pickup in 30 minutes.
+                    AURA Flagship Showroom: Checkpoint, Molyko, Buea. Your phone will be prepared for testing and pickup in 30 minutes.
                   </p>
                 </div>
               )}
@@ -560,10 +560,10 @@ export default function CheckoutPage() {
               <div className="pt-4 border-t border-white/10 mt-4 text-[10.5px] text-zinc-400 space-y-1">
                 <div className="flex items-center gap-1.5 text-emerald-400">
                   <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                  <span className="font-semibold uppercase font-mono">100% Original Sealed • Official Warranty</span>
+                  <span className="font-semibold uppercase font-mono">100% Authentic Devices • Official Warranty</span>
                 </div>
                 <p className="text-zinc-500 text-[10px]">
-                  You can inspect the sealed package before paying the courier.
+                  You can inspect and test the device before completing payment.
                 </p>
               </div>
 
@@ -614,7 +614,7 @@ export default function CheckoutPage() {
                   }`}
                 >
                   <span className="text-[#D4AF37] font-bold">01 •</span>
-                  <span>Reserving sealed phone in Buea Showroom...</span>
+                  <span>Reserving device in Buea Showroom...</span>
                 </div>
 
                 <div

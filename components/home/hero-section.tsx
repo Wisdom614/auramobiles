@@ -107,7 +107,7 @@ export function HeroSection() {
             <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse"></span>
             <span className="text-white font-bold">Buea Showroom: Checkpoint, Molyko</span>
             <span className="text-zinc-600 hidden sm:inline">|</span>
-            <span className="text-[#D4AF37] hidden sm:inline">100% Original Sealed Phones</span>
+            <span className="text-[#D4AF37] hidden sm:inline">100% Authentic • Sealed & Tested Pre-Owned</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-zinc-400">Nationwide 24h Express Delivery</span>

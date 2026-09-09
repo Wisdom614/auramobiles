@@ -104,7 +104,7 @@ function OrderSuccessContent() {
               Order Confirmed — Thank You, {customerName}!
             </h1>
             <p className="text-xs sm:text-sm text-zinc-400 max-w-lg mx-auto mt-2 leading-relaxed">
-              Your sealed phone has been reserved at our Buea showroom and is being prepared for dispatch.
+              Your device has been reserved at our Buea showroom and is being prepared for dispatch.
             </p>
           </div>
 
@@ -187,10 +187,10 @@ function OrderSuccessContent() {
                   02
                 </div>
                 <h3 className="font-bold text-white text-xs uppercase font-sans tracking-wider">
-                  Sealed Packaging &amp; Warranty
+                  Authentic Inspection &amp; Warranty
                 </h3>
                 <p className="text-zinc-400 text-xs leading-relaxed">
-                  Your phone is inspected, sealed, and packaged with your official warranty certificate.
+                  Your phone is inspected, tested, and packaged with your official warranty certificate.
                 </p>
               </div>
 
@@ -327,7 +327,7 @@ function OrderSuccessContent() {
         <div className="pt-6 border-t border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3 text-center text-[10.5px] text-zinc-400">
           <div className="p-3 bg-[#0E0E12] border border-white/10 flex items-center justify-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
-            <span>100% Original Sealed Phones</span>
+            <span>100% Authentic • Sealed &amp; Tested</span>
           </div>
           <div className="p-3 bg-[#0E0E12] border border-white/10 flex items-center justify-center gap-1.5">
             <Truck className="w-3.5 h-3.5 text-[#D4AF37]" />

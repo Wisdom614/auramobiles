@@ -205,7 +205,7 @@ export function OrderReceiptModal({ order, isOpen, onClose }: OrderReceiptModalP
                       <td className="py-3 px-3.5">
                         <p className="font-bold text-white text-xs">{item.name}</p>
                         <p className="text-[10px] font-mono text-zinc-400">
-                          {item.brand} • 100% Genuine Sealed
+                          {item.brand} • 100% Authentic Device
                         </p>
                       </td>
                       <td className="py-3 px-3.5 text-center text-zinc-300 whitespace-nowrap text-[11px] font-mono">

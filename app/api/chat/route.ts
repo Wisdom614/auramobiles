@@ -216,7 +216,7 @@ function getFallbackResponse(query: string, catalog: Phone[]) {
     lower.includes("charge")
   ) {
     responseText =
-      "Top battery champions in our store:\n\n• **OnePlus 12 5G** (5,400mAh + 100W charging in 26 mins)\n• **Galaxy S24 Ultra** (5,000mAh, solid 2-day battery)\n• **iPhone 16 Pro Max** (Up to 33h video playback)\n\nAll sealed with 12-month warranty.";
+      "Top battery champions in our store:\n\n• **OnePlus 12 5G** (5,400mAh + 100W charging in 26 mins)\n• **Galaxy S24 Ultra** (5,000mAh, solid 2-day battery)\n• **iPhone 16 Pro Max** (Up to 33h video playback)\n\nAll backed by official boutique warranty.";
     recs = ["oneplus-12", "samsung-galaxy-s24-ultra", "iphone-16-pro-max"];
   } else if (
     lower.includes("camera") ||
@@ -232,7 +232,7 @@ function getFallbackResponse(query: string, catalog: Phone[]) {
     lower.includes("exchange")
   ) {
     responseText =
-      "You can easily swap your current phone:\n\n1. Select your phone on our **Swap Page** (`/trade-in`).\n2. Get an instant valuation.\n3. Pay only the difference to get your new sealed phone!\n\nAvailable in our Buea showroom or via courier.";
+      "You can easily swap your current phone:\n\n1. Select your phone on our **Swap Page** (`/trade-in`).\n2. Get an instant valuation.\n3. Pay only the difference to get your upgraded phone!\n\nAvailable in our Buea showroom or via courier.";
     recs = ["iphone-16-pro-max", "samsung-galaxy-s24-ultra"];
   } else {
     responseText =

@@ -67,7 +67,7 @@ Respond ONLY with valid JSON in this exact structure:
 {
   "tagline": "Crafted with aerospace-grade titanium and powered by the revolutionary A18 Pro silicon.",
   "highlights": [
-    "100% Genuine Sealed Unit with Official AURA Boutique 1-Year Guarantee",
+    "100% Authentic Device with Official AURA Boutique Guarantee",
     "Studio-grade 48MP Pro camera system with 5x optical telephoto zoom",
     "All-day battery endurance with 50% charge in 30 minutes"
   ]
@@ -91,7 +91,7 @@ Respond ONLY with valid JSON in this exact structure:
           data: {
             tagline: `${phoneName} - Flagship Luxury Edition with Official AURA Warranty`,
             highlights: [
-              "100% Genuine Sealed Unit with Official Boutique Warranty",
+              "100% Authentic Device with Official Boutique Guarantee",
               "Flagship high-performance processor and pro-grade camera array",
               "Ultra-fast charging with all-day battery efficiency",
             ],
@@ -376,7 +376,7 @@ function getFallbackAutofill(query: string): AIPhoneAutofillResult {
     os,
     waterResistance: "IP68 Dust/Water Resistant",
     highlights: [
-      "100% Genuine Factory-Sealed Device with Authentication Card",
+      "100% Authentic Hardware with Official Boutique Guarantee",
       "Pro-grade camera system with crystal-clear HDR photography",
       "Ultra-fast charging and high-efficiency all-day battery life",
     ],

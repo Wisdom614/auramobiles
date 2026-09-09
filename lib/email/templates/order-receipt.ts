@@ -75,7 +75,7 @@ export function generateOrderReceiptHtml(order: Order, storefrontUrl: string = "
                 Thank you for your order, ${customer.fullName}.
               </h1>
               <p style="font-size: 13px; line-height: 1.6; color: #A1A1AA; margin: 10px 0 0 0;">
-                Your order has been safely received by our team at our Buea showroom in Molyko. We are carefully packaging your brand new sealed phone for fast delivery.
+                Your order has been safely received by our team at our Buea showroom in Molyko. We are carefully inspecting, testing, and packaging your authentic smartphone for fast delivery.
               </p>
             </td>
           </tr>
@@ -182,7 +182,7 @@ export function generateOrderReceiptHtml(order: Order, storefrontUrl: string = "
           <tr>
             <td style="padding: 20px 25px; background-color: #050507; border-top: 1px solid #18181B; font-family: monospace; font-size: 10px; color: #52525B; text-align: center;">
               <div>AURA LUXE MOBILE • BUEA, MOLYKO • EXPRESS DISPATCH NATIONWIDE</div>
-              <div style="margin-top: 4px;">All units covered by Official Boutique Warranty. Sealed Hardware.</div>
+              <div style="margin-top: 4px;">All units covered by Official Boutique Warranty. 100% Authentic Hardware.</div>
             </td>
           </tr>
 

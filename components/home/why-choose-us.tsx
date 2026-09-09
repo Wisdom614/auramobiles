@@ -32,7 +32,7 @@ const PILLARS: Pillar[] = [
     icon: Building2,
     title: "Physical Showroom",
     subtitle: "Buea, Molyko Checkpoint",
-    description: "Visit our physical store to test any phone in person, inspect sealed boxes, swap your current phone, or get expert advice on your next upgrade.",
+    description: "Visit our physical store to test any phone in person, inspect hardware condition, swap your current phone, or get expert advice on your next upgrade.",
     metric: "Buea",
     metricLabel: "Showroom Hub",
   },
@@ -68,7 +68,7 @@ export function WhyChooseUs() {
             Why Cameroonians Choose AURA
           </h2>
           <p className="text-zinc-400 text-xs sm:text-sm mt-2 leading-relaxed">
-            Genuine sealed smartphones, honest prices in FCFA, official warranty, and reliable delivery across Cameroon.
+            Authentic sealed &amp; certified pre-owned smartphones, honest prices in FCFA, boutique warranty, and reliable delivery across Cameroon.
           </p>
         </div>
 

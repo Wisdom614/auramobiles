@@ -35,14 +35,14 @@ const FAQS: FaqItem[] = [
   {
     id: "authenticity",
     category: "Device Authenticity",
-    q: "How do I verify that my smartphone is 100% original and genuine?",
-    a: "Every smartphone sold at AURA Luxe Mobile comes factory-sealed with an official manufacturer IMEI. You can verify the serial number live on the official Apple Coverage portal (checkcoverage.apple.com) or Samsung warranty verification database prior to unboxing. We also provide full IMEI-documented receipts.",
+    q: "How do I verify that my smartphone is 100% genuine and authentic?",
+    a: "We stock both Brand New Factory-Sealed devices and Certified Pre-Owned (Grade A) devices. For Brand New units, you can verify the serial number live on the official Apple Coverage portal (checkcoverage.apple.com) or Samsung warranty database prior to unboxing. For Certified Pre-Owned units, each phone undergoes a comprehensive 30+ point hardware, screen, and battery health inspection (guaranteed 85%+ battery health and 100% original OEM parts) with full IMEI-documented receipts.",
   },
   {
     id: "payment",
     category: "Payment Methods",
     q: "What payment methods are supported across Cameroon?",
-    a: "We accept MTN Mobile Money (*126#), Orange Money (#150#), and Cash on Delivery upon physical inspection and testing of your sealed phone at your address or our Buea showroom.",
+    a: "We accept MTN Mobile Money (*126#), Orange Money (#150#), and Cash on Delivery upon physical inspection and testing of your device at your address or our Buea showroom.",
   },
   {
     id: "delivery",
@@ -60,7 +60,7 @@ const FAQS: FaqItem[] = [
     id: "warranty",
     category: "Warranty & Returns",
     q: "What warranty coverage is included with my purchase?",
-    a: "All brand new sealed smartphones include a 6 to 12-month hardware warranty. Additionally, we provide a 7-Day Immediate Replacement Guarantee: if your device exhibits any hardware fault or sensor defect within 7 days, we exchange it for a fresh unit immediately.",
+    a: "Brand New sealed smartphones include a 6 to 12-month hardware warranty, while Certified Pre-Owned units include our 3 to 6-month Boutique Hardware Guarantee. Additionally, all purchases include our 7-Day Immediate Replacement Guarantee: if your device exhibits any hardware fault or defect within 7 days, we exchange it for a replacement unit immediately.",
   },
   {
     id: "data-transfer",
@@ -492,8 +492,8 @@ Hello AURA Support, I would like assistance regarding ${inquiryTopic}. Please co
           <div className="p-4 bg-[#0E0E12] border border-white/10 rounded-none flex items-center gap-3">
             <ShieldCheck className="w-5 h-5 text-[#D4AF37] shrink-0" />
             <div>
-              <span className="font-bold text-white block uppercase text-[11px]">100% Original Sealed</span>
-              <span className="text-zinc-400 text-[10px] font-sans">Official factory IMEI verification</span>
+              <span className="font-bold text-white block uppercase text-[11px]">100% Authentic Hardware</span>
+              <span className="text-zinc-400 text-[10px] font-sans">Sealed new & certified pre-owned with IMEI documentation</span>
             </div>
           </div>
 

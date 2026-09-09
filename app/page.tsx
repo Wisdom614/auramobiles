@@ -9,7 +9,7 @@ import { WhyChooseUs } from "@/components/home/why-choose-us";
 export const metadata = {
   title: "AURA Luxe Mobile | Official Flagship Smartphones & Phone Swap",
   description:
-    "Official luxury smartphone boutique serving Cameroon. Sealed iPhones, Samsung Galaxy, Xiaomi, Tecno, Infinix & Google Pixel. Same-day express delivery in Douala & Yaoundé.",
+    "Official luxury smartphone boutique serving Cameroon. Authentic brand new sealed & certified pre-owned iPhones, Samsung Galaxy, Xiaomi, Tecno, Infinix & Google Pixel. Same-day express delivery in Douala & Yaoundé.",
 };
 
 export default function Home() {

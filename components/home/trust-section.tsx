@@ -19,9 +19,9 @@ interface TrustItem {
 const TRUST_ITEMS: TrustItem[] = [
   {
     icon: ShieldCheck,
-    code: "VERIFIED",
-    title: "100% Original Sealed",
-    subtitle: "Brand new factory-sealed units with serial verification.",
+    code: "AUTHENTIC",
+    title: "100% Authentic Devices",
+    subtitle: "Brand new sealed & certified tested pre-owned with verification.",
   },
   {
     icon: Award,

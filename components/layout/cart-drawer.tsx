@@ -208,7 +208,7 @@ export function CartDrawer() {
               </button>
 
               <p className="text-[10px] text-zinc-400 text-center font-mono">
-                100% Original Sealed Phones • Pay on Delivery Available
+                100% Authentic Devices • Sealed & Certified Pre-Owned
               </p>
             </div>
           )}

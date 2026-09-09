@@ -151,7 +151,7 @@ export default function AdminDashboardPage() {
     charging: "MagSafe Wireless & 27W Fast USB-C",
     os: "iOS 18 with Apple Intelligence",
     waterResistance: "IP68 Certified",
-    highlightsText: "100% Genuine Sealed Unit\nBoutique Concierge Warranty\nVIP Handover in Douala & Yaoundé",
+    highlightsText: "100% Authentic Device\nBoutique Concierge Warranty\nVIP Handover in Douala & Yaoundé",
     boxContentsText: "Smartphone\nFast Charging Cable\nAURA Luxe Authentication Card",
   };
 
@@ -588,7 +588,7 @@ export default function AdminDashboardPage() {
       highlights:
         highlightsList.length > 0
           ? highlightsList
-          : ["100% Genuine Sealed Unit", "Boutique Concierge Warranty", "VIP Handover Available"],
+          : ["100% Authentic Device", "Boutique Concierge Warranty", "VIP Handover Available"],
       boxContents:
         boxList.length > 0
           ? boxList
@@ -2241,7 +2241,7 @@ export default function AdminDashboardPage() {
                     type="text"
                     value={siteForm.announcementText}
                     onChange={(e) => setSiteForm({ ...siteForm, announcementText: e.target.value })}
-                    placeholder="e.g. Free VIP delivery on orders over FCFA 500,000 • 100% Genuine Sealed Devices"
+                    placeholder="e.g. Free VIP delivery on orders over FCFA 500,000 • 100% Authentic Devices"
                     className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                   />
                   <div className="mt-2.5 p-3 rounded-none bg-black border border-white/10 flex items-center justify-between text-[11px] font-mono text-zinc-400">

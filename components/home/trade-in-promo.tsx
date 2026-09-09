@@ -28,7 +28,7 @@ export function TradeInPromo() {
               </h3>
 
               <p className="text-xs sm:text-sm text-zinc-300 max-w-lg leading-relaxed">
-                Bring your current iPhone, Samsung, Tecno, or Google Pixel and deduct its value immediately toward any phone in our store. Top up the small difference and walk away with a brand new sealed device!
+                Bring your current iPhone, Samsung, Tecno, or Google Pixel and deduct its value immediately toward any phone in our store. Top up the small difference and walk away with an upgraded authentic smartphone!
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-2">

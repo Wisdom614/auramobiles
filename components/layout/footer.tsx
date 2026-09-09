@@ -52,7 +52,7 @@ export function Footer() {
 
             <div className="pt-2 flex items-center gap-1.5 text-[11px] text-emerald-400/90 font-medium">
               <ShieldCheck className="w-4 h-4 text-[#D4AF37] shrink-0" />
-              <span>100% Original Sealed Phones</span>
+              <span>100% Authentic • Sealed & Tested</span>
             </div>
           </div>
 

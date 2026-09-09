@@ -77,7 +77,7 @@ function mapDbPhoneToModel(row: any): Phone {
       weight: "215g",
       waterResistance: "IP68 Certified",
     },
-    highlights: row.highlights || ["100% Genuine Sealed Unit", "Official Boutique Warranty"],
+    highlights: row.highlights || ["100% Authentic Device", "Official Boutique Warranty"],
     boxContents: row.box_contents || ["Smartphone", "Charging Cable", "Warranty Certificate"],
   };
 }

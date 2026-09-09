@@ -141,7 +141,7 @@ export function Navbar() {
           <div className="hidden sm:flex items-center gap-2 text-zinc-300">
             <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
             <span className="text-[10.5px] sm:text-xs uppercase">
-              100% Original Sealed Phones <span className="text-zinc-600">|</span> 6–12 Month Warranty
+              100% Authentic • Sealed & Tested <span className="text-zinc-600">|</span> 6–12 Month Warranty
             </span>
           </div>
 

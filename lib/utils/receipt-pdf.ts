@@ -145,7 +145,7 @@ export function downloadOrderPdf(order: Order, settings?: SiteSettings) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
     doc.setTextColor(120, 120, 130);
-    doc.text(`Brand: ${item.brand} • 100% Sealed Genuine`, xDesc, y + 9);
+    doc.text(`Brand: ${item.brand} • 100% Authentic Device`, xDesc, y + 9);
 
     doc.setFontSize(8);
     doc.setTextColor(60, 60, 70);
@@ -201,7 +201,7 @@ export function downloadOrderPdf(order: Order, settings?: SiteSettings) {
     y + 16
   );
   doc.text(
-    "Authorized Official Sealed Device • Inspected prior to delivery dispatch.",
+    "Authorized 100% Authentic Device • Inspected prior to delivery dispatch.",
     margin + 4,
     y + 21
   );

@@ -694,7 +694,7 @@ function OrderTrackingContent() {
                   <p className="text-[11px] font-mono text-white/60">
                     {activeOrder.customer.deliveryMethod.includes("buea") || activeOrder.customer.city.toLowerCase() === "buea"
                       ? "Direct Local Express (Same-Day Courier)"
-                      : "Secured Sealed Inter-City Transit"}
+                      : "Secured Express Inter-City Transit"}
                   </p>
                 </div>
 
@@ -729,7 +729,7 @@ function OrderTrackingContent() {
                     [ MANIFEST // ORDERED SMARTPHONES ({activeOrder.items.length}) ]
                   </h3>
                   <span className="text-[10px] font-mono text-[#D4AF37] uppercase tracking-widest">
-                    100% GENUINE SEALED
+                    100% AUTHENTIC DEVICE
                   </span>
                 </div>
 

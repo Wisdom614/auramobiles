@@ -24,7 +24,7 @@ AURA Luxe Mobile is built with a sophisticated **Luxury Dark & Warm Gold** aesth
 
 ### 1. Luxury Homepage (`/`)
 - **Hero Showcase**: Desert Titanium iPhone 16 Pro Max hero with quick-action CTAs, feature pills, and price badges.
-- **Authenticity Pillars**: 100% Genuine Sealed Devices, Official Boutique Warranty, 7-Day Replacement Guarantee, and Express VIP Delivery.
+- **Authenticity Pillars**: 100% Authentic Hardware (Brand New Sealed & Certified Pre-Owned), Official Boutique Warranty, 7-Day Replacement Guarantee, and Express VIP Delivery.
 - **Curated Brand Matrix**: Instant category filtering for Apple, Samsung, Xiaomi, Tecno, Infinix, and Google.
 - **Best Sellers Row**: 5-card horizontal row showcasing flagship models with live rating stars, storage specs, and instant cart actions.
 - **Certified Phone Swap Banner**: Direct trade-in entry point with appraisal callouts.
@@ -57,7 +57,7 @@ AURA Luxe Mobile is built with a sophisticated **Luxury Dark & Warm Gold** aesth
 
 ### 6. Order Tracking & Dispatch Concierge (`/orders`)
 - **Real-Time Milestone Timeline**:
-  - `Order Placed` → `Confirmed & IMEI Allocated` → `Quality Check & Sealed` → `VIP Courier En Route` → `Handover & Signature`.
+  - `Order Placed` → `Confirmed & IMEI Allocated` → `Quality Check & Packaging` → `VIP Courier En Route` → `Handover & Signature`.
 - **Order Lookup**: Search by Order ID (`AUR-89412`, etc.) with demo order presets.
 - **VIP WhatsApp Direct Action**: One-tap connection to dispatch managers.
 

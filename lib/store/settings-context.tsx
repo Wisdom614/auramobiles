@@ -26,7 +26,7 @@ export interface SiteSettings {
 export const DEFAULT_SETTINGS: SiteSettings = {
   storeName: "AURA LUXE MOBILE",
   tagline: "Premier Luxury Smartphone Boutique — Buea, Molyko (Delivers Nationwide)",
-  announcementText: "Showroom in Buea, Molyko • Delivers Nationwide Across Cameroon • 100% Sealed Hardware",
+  announcementText: "Showroom in Buea, Molyko • Delivers Nationwide Across Cameroon • 100% Authentic & Tested Hardware",
   whatsappPhone: "+237 699 44 21 00",
   whatsappCleanNumber: "237699442100",
   secondaryPhone: "+237 677 88 99 00",
