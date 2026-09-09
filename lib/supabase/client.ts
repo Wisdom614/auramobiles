@@ -29,6 +29,20 @@ export interface TradeInRecord {
 // Map database row to Phone model
 function mapDbPhoneToModel(row: any): Phone {
   const generatedSlug = row.slug || (row.name ? row.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") : row.id);
+  const storageVariants = Array.isArray(row.storage_variants) && row.storage_variants.length > 0 ? row.storage_variants : [
+    { id: "s1", size: "256GB", price: Number(row.price_fcfa || 500000), stock: 8 },
+  ];
+  
+  // Starting price always takes the lowest/first storage tier price if available
+  const startingTierPrice = storageVariants[0]?.price ? Number(storageVariants[0].price) : undefined;
+  const basePrice = startingTierPrice && startingTierPrice > 0 ? startingTierPrice : Number(row.price_fcfa || row.base_price || 500000);
+  
+  // Sanitize original price to avoid huge preset mismatches (e.g. 720k vs 95k)
+  let originalPrice = row.original_price_fcfa ? Number(row.original_price_fcfa) : undefined;
+  if (originalPrice && (originalPrice <= basePrice || originalPrice > basePrice * 3)) {
+    originalPrice = Math.round(basePrice * 1.15);
+  }
+
   return {
     id: row.id,
     slug: generatedSlug,
@@ -36,8 +50,8 @@ function mapDbPhoneToModel(row: any): Phone {
     brand: row.brand as Phone["brand"],
     tagline: row.tagline || `${row.name} - Luxury Flagship Edition`,
     category: row.category || "flagship",
-    basePrice: Number(row.price_fcfa || row.base_price || 500000),
-    originalPrice: row.original_price_fcfa ? Number(row.original_price_fcfa) : undefined,
+    basePrice,
+    originalPrice,
     rating: Number(row.rating ?? 4.9),
     reviewCount: Number((row.review_count || row.reviews_count) ?? 1),
     isNew: row.is_new ?? true,
@@ -45,9 +59,7 @@ function mapDbPhoneToModel(row: any): Phone {
     isFeatured: row.is_featured ?? false,
     condition: row.condition === "Certified Refurbished" ? "Certified Refurbished" : "Brand New",
     warranty: row.warranty || "Official Boutique Warranty",
-    storageVariants: row.storage_variants || [
-      { id: "s1", size: "256GB", price: Number(row.price_fcfa || 500000), stock: 8 },
-    ],
+    storageVariants,
     colorVariants: row.color_variants || [
       { id: "c1", name: "Titanium", hex: "#8A8A8E", image: row.thumbnail || row.images?.[0] || "" },
     ],
@@ -72,6 +84,16 @@ function mapDbPhoneToModel(row: any): Phone {
 
 // Map Phone model to database row
 function mapModelToDbPhone(phone: Phone): any {
+  const startingTierPrice = phone.storageVariants && phone.storageVariants.length > 0 && phone.storageVariants[0].price > 0
+    ? Number(phone.storageVariants[0].price)
+    : Number(phone.basePrice);
+  const effectiveBasePrice = startingTierPrice > 0 ? startingTierPrice : Number(phone.basePrice || 500000);
+
+  let effectiveOriginalPrice = phone.originalPrice ? Number(phone.originalPrice) : null;
+  if (effectiveOriginalPrice && (effectiveOriginalPrice <= effectiveBasePrice || effectiveOriginalPrice > effectiveBasePrice * 3)) {
+    effectiveOriginalPrice = Math.round(effectiveBasePrice * 1.15);
+  }
+
   return {
     id: phone.id,
     slug: phone.slug,
@@ -80,8 +102,8 @@ function mapModelToDbPhone(phone: Phone): any {
     brand: phone.brand,
     tagline: phone.tagline,
     category: phone.category,
-    price_fcfa: phone.basePrice,
-    original_price_fcfa: phone.originalPrice || null,
+    price_fcfa: effectiveBasePrice,
+    original_price_fcfa: effectiveOriginalPrice,
     rating: phone.rating,
     review_count: phone.reviewCount,
     is_new: phone.isNew || false,

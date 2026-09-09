@@ -457,6 +457,44 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Storage Tier Handlers for Add Phone Modal
+  const handleAddStorageTier = () => {
+    const current = newPhone.storageTiers || [];
+    const lastPrice = current.length > 0 ? Number(current[current.length - 1].price) : Number(newPhone.basePrice) || 95000;
+    setNewPhone((prev) => ({
+      ...prev,
+      storageTiers: [
+        ...current,
+        { size: "512GB", price: lastPrice + 50000, stock: 4 },
+      ],
+    }));
+  };
+
+  const handleUpdateStorageTier = (idx: number, field: "size" | "price" | "stock", value: any) => {
+    const current = [...(newPhone.storageTiers || [])];
+    if (!current[idx]) return;
+    current[idx] = { ...current[idx], [field]: value };
+    
+    // Auto-sync basePrice with the first tier's price
+    const newBase = idx === 0 && field === "price" && Number(value) > 0 ? Number(value) : newPhone.basePrice;
+    
+    setNewPhone((prev) => ({
+      ...prev,
+      storageTiers: current,
+      basePrice: newBase,
+    }));
+  };
+
+  const handleRemoveStorageTier = (idx: number) => {
+    const current = (newPhone.storageTiers || []).filter((_, i) => i !== idx);
+    const newBase = current.length > 0 ? Number(current[0].price) : newPhone.basePrice;
+    setNewPhone((prev) => ({
+      ...prev,
+      storageTiers: current,
+      basePrice: newBase,
+    }));
+  };
+
   // Handle Add Phone
   const handleCreatePhone = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -486,6 +524,18 @@ export default function AdminDashboardPage() {
       stock: Number(t.stock),
     }));
 
+    // Auto-resolve base price from the first storage tier
+    const resolvedBasePrice =
+      storageVariantsList.length > 0 && storageVariantsList[0].price > 0
+        ? Number(storageVariantsList[0].price)
+        : Number(newPhone.basePrice) || 95000;
+
+    // Sanitize comparison/original price
+    let resolvedOriginalPrice = newPhone.originalPrice ? Number(newPhone.originalPrice) : undefined;
+    if (resolvedOriginalPrice && (resolvedOriginalPrice <= resolvedBasePrice || resolvedOriginalPrice > resolvedBasePrice * 3)) {
+      resolvedOriginalPrice = Math.round(resolvedBasePrice * 1.15);
+    }
+
     const created: Phone = {
       id,
       slug,
@@ -493,8 +543,8 @@ export default function AdminDashboardPage() {
       brand: newPhone.brand,
       tagline: newPhone.tagline || `${newPhone.name} - Luxury Flagship Edition`,
       category: "flagship",
-      basePrice: Number(newPhone.basePrice),
-      originalPrice: newPhone.originalPrice ? Number(newPhone.originalPrice) : undefined,
+      basePrice: resolvedBasePrice,
+      originalPrice: resolvedOriginalPrice,
       rating: 4.9,
       reviewCount: 1,
       isNew: true,
@@ -510,7 +560,7 @@ export default function AdminDashboardPage() {
               {
                 id: `${id}-s1`,
                 size: "256GB",
-                price: Number(newPhone.basePrice),
+                price: resolvedBasePrice,
                 stock: Number(newPhone.stockCount),
               },
             ],
@@ -619,8 +669,30 @@ export default function AdminDashboardPage() {
       .map((s) => s.trim())
       .filter(Boolean);
 
+    const storageVariantsList: StorageVariant[] = (editingPhone.storageVariants || []).map((t, idx) => ({
+      id: t.id || `${editingPhone.id}-s${idx + 1}`,
+      size: t.size,
+      price: Number(t.price),
+      stock: Number(t.stock),
+    }));
+
+    // Auto-resolve base price from the first storage tier
+    const resolvedBasePrice =
+      storageVariantsList.length > 0 && storageVariantsList[0].price > 0
+        ? Number(storageVariantsList[0].price)
+        : Number(editingPhone.basePrice) || 95000;
+
+    // Sanitize comparison/original price
+    let resolvedOriginalPrice = editingPhone.originalPrice ? Number(editingPhone.originalPrice) : undefined;
+    if (resolvedOriginalPrice && (resolvedOriginalPrice <= resolvedBasePrice || resolvedOriginalPrice > resolvedBasePrice * 3)) {
+      resolvedOriginalPrice = Math.round(resolvedBasePrice * 1.15);
+    }
+
     const updatedPhone: Phone = {
       ...editingPhone,
+      basePrice: resolvedBasePrice,
+      originalPrice: resolvedOriginalPrice,
+      storageVariants: storageVariantsList,
       images: allImages,
       highlights: highlightsList,
       boxContents: boxList,
@@ -659,39 +731,15 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Storage tier helpers for Add Phone modal
-  const handleAddStorageTier = () => {
-    setNewPhone((prev) => ({
-      ...prev,
-      storageTiers: [
-        ...(prev.storageTiers || []),
-        { size: "512GB", price: Number(prev.basePrice) + 120000, stock: 4 },
-      ],
-    }));
-  };
-
-  const handleRemoveStorageTier = (index: number) => {
-    setNewPhone((prev) => ({
-      ...prev,
-      storageTiers: (prev.storageTiers || []).filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleUpdateStorageTier = (index: number, field: "size" | "price" | "stock", value: any) => {
-    setNewPhone((prev) => ({
-      ...prev,
-      storageTiers: (prev.storageTiers || []).map((t, i) => (i === index ? { ...t, [field]: value } : t)),
-    }));
-  };
-
   // Storage tier helpers for Edit Phone modal
   const handleAddEditStorageTier = () => {
     if (!editingPhone) return;
     const currentVariants = editingPhone.storageVariants || [];
+    const lastPrice = currentVariants.length > 0 ? currentVariants[currentVariants.length - 1].price : editingPhone.basePrice;
     const newTier: StorageVariant = {
       id: `${editingPhone.id}-s${currentVariants.length + 1}`,
       size: "512GB",
-      price: Number(editingPhone.basePrice) + 120000,
+      price: Number(lastPrice) + 50000,
       stock: 4,
     };
     setEditingPhone({
@@ -702,9 +750,12 @@ export default function AdminDashboardPage() {
 
   const handleRemoveEditStorageTier = (index: number) => {
     if (!editingPhone) return;
+    const updated = (editingPhone.storageVariants || []).filter((_, i) => i !== index);
+    const newBase = updated.length > 0 ? updated[0].price : editingPhone.basePrice;
     setEditingPhone({
       ...editingPhone,
-      storageVariants: (editingPhone.storageVariants || []).filter((_, i) => i !== index),
+      storageVariants: updated,
+      basePrice: newBase,
     });
   };
 
@@ -714,11 +765,14 @@ export default function AdminDashboardPage() {
     value: any
   ) => {
     if (!editingPhone) return;
+    const updated = (editingPhone.storageVariants || []).map((t, i) =>
+      i === index ? { ...t, [field]: value } : t
+    );
+    const newBase = index === 0 && field === "price" && Number(value) > 0 ? Number(value) : editingPhone.basePrice;
     setEditingPhone({
       ...editingPhone,
-      storageVariants: (editingPhone.storageVariants || []).map((t, i) =>
-        i === index ? { ...t, [field]: value } : t
-      ),
+      storageVariants: updated,
+      basePrice: newBase,
     });
   };
 
@@ -3028,6 +3082,54 @@ export default function AdminDashboardPage() {
                         className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                       />
                     </div>
+
+                    {/* Official Price Overview */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">
+                          Base Starting Price (FCFA) *
+                        </label>
+                        <input
+                          type="number"
+                          step={5000}
+                          required
+                          value={newPhone.basePrice}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            const currentTiers = [...(newPhone.storageTiers || [])];
+                            if (currentTiers.length > 0) {
+                              currentTiers[0] = { ...currentTiers[0], price: val };
+                            }
+                            setNewPhone({
+                              ...newPhone,
+                              basePrice: val,
+                              storageTiers: currentTiers,
+                            });
+                          }}
+                          className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-[#D4AF37] font-bold focus:border-[#D4AF37] focus:outline-none font-mono"
+                        />
+                        <span className="text-[9px] font-mono text-white/40 block mt-1">
+                          Auto-syncs with 1st storage tier below
+                        </span>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">
+                          Original / Before Discount Price (FCFA)
+                        </label>
+                        <input
+                          type="number"
+                          step={5000}
+                          placeholder="Optional strikethrough price"
+                          value={newPhone.originalPrice || ""}
+                          onChange={(e) => setNewPhone({ ...newPhone, originalPrice: e.target.value ? Number(e.target.value) : undefined })}
+                          className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-zinc-400 focus:border-[#D4AF37] focus:outline-none font-mono"
+                        />
+                        <span className="text-[9px] font-mono text-white/40 block mt-1">
+                          Leave blank or set realistic comparison (e.g. +10-15%)
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* SECTION 3: STORAGE VARIANTS & STOCK MANAGER (MOBILE-RESPONSIVE) */}
@@ -3390,6 +3492,54 @@ export default function AdminDashboardPage() {
                         onChange={(e) => setEditingPhone({ ...editingPhone, tagline: e.target.value })}
                         className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2 text-xs text-white focus:border-[#D4AF37] focus:outline-none"
                       />
+                    </div>
+
+                    {/* Official Price Overview */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">
+                          Base Starting Price (FCFA) *
+                        </label>
+                        <input
+                          type="number"
+                          step={5000}
+                          required
+                          value={editingPhone.basePrice}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            const currentTiers = [...(editingPhone.storageVariants || [])];
+                            if (currentTiers.length > 0) {
+                              currentTiers[0] = { ...currentTiers[0], price: val };
+                            }
+                            setEditingPhone({
+                              ...editingPhone,
+                              basePrice: val,
+                              storageVariants: currentTiers,
+                            });
+                          }}
+                          className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-[#D4AF37] font-bold focus:border-[#D4AF37] focus:outline-none font-mono"
+                        />
+                        <span className="text-[9px] font-mono text-white/40 block mt-1">
+                          Auto-syncs with 1st storage tier below
+                        </span>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">
+                          Original / Before Discount Price (FCFA)
+                        </label>
+                        <input
+                          type="number"
+                          step={5000}
+                          placeholder="Optional strikethrough price"
+                          value={editingPhone.originalPrice || ""}
+                          onChange={(e) => setEditingPhone({ ...editingPhone, originalPrice: e.target.value ? Number(e.target.value) : undefined })}
+                          className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-zinc-400 focus:border-[#D4AF37] focus:outline-none font-mono"
+                        />
+                        <span className="text-[9px] font-mono text-white/40 block mt-1">
+                          Leave blank or set realistic comparison (e.g. +10-15%)
+                        </span>
+                      </div>
                     </div>
                   </div>
 

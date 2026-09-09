@@ -67,7 +67,7 @@ function BestSellerCard({ phone }: BestSellerCardProps) {
         {/* Price */}
         <div className="flex items-baseline justify-between pt-1 font-mono">
           <span className="text-xs sm:text-sm font-black text-white">
-            {formatCFA(phone.basePrice)}
+            {formatCFA((phone.storageVariants && phone.storageVariants.length > 0 && phone.storageVariants[0].price > 0) ? phone.storageVariants[0].price : phone.basePrice)}
           </span>
           <span className="text-[9px] text-zinc-500 uppercase tracking-wider">
             STOCK READY

@@ -577,7 +577,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
                   <span className="text-2xl sm:text-3xl font-black text-[#D4AF37] font-mono tracking-tight">
                     {formatCFA(currentPrice)}
                   </span>
-                  {phone.originalPrice && phone.originalPrice > currentPrice && (
+                  {phone.originalPrice && phone.originalPrice > currentPrice && phone.originalPrice <= currentPrice * 2.5 && (
                     <span className="text-xs text-zinc-500 line-through font-mono">
                       {formatCFA(phone.originalPrice)}
                     </span>

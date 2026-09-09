@@ -16,9 +16,10 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
   const { addItem } = useCart();
   const [isAddedToast, setIsAddedToast] = useState(false);
 
-  const defaultColor = phone.colorVariants[0];
-  const defaultStorage = phone.storageVariants[0];
-  const activeImage = defaultColor?.image || phone.images[0];
+  const defaultColor = phone.colorVariants?.[0] || { id: "c1", name: "Standard", hex: "#888", image: phone.images?.[0] || "" };
+  const defaultStorage = phone.storageVariants?.[0] || { id: "s1", size: "Standard", price: phone.basePrice, stock: 1 };
+  const displayPrice = defaultStorage?.price && defaultStorage.price > 0 ? defaultStorage.price : phone.basePrice;
+  const activeImage = defaultColor?.image || phone.images?.[0] || "/placeholder.png";
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -75,7 +76,7 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
           <div className="text-center sm:text-right">
             <span className="text-xs text-zinc-400 block font-mono">Official Price</span>
             <span className="text-lg font-black text-[#D4AF37] font-mono">
-              {formatCFA(phone.basePrice)}
+              {formatCFA(displayPrice)}
             </span>
           </div>
 
@@ -150,7 +151,7 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
           {/* Price & In Stock */}
           <div className="mt-2 flex items-baseline justify-between">
             <span className="text-sm sm:text-base font-black text-white font-mono">
-              {formatCFA(phone.basePrice)}
+              {formatCFA(displayPrice)}
             </span>
             <span className="text-[10px] text-emerald-400 font-medium font-mono">In Stock</span>
           </div>
