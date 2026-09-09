@@ -39,24 +39,23 @@ export function ArrivalsTabs() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4 border-b border-white/10 pb-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-[#D4AF37]/30 text-amber-300 text-xs font-medium mb-3">
-              <Flame className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span className="uppercase tracking-wider font-mono text-[11px]">Trending in Douala & Yaoundé</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
-              Latest Arrivals & Best Sellers
+            <span className="text-xs font-mono uppercase tracking-widest text-[#D4AF37] font-bold block mb-1">
+              Curated Flagships • Douala, Yaoundé &amp; Nationwide
+            </span>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight uppercase">
+              Latest Arrivals &amp; Best Sellers
             </h2>
           </div>
 
-          {/* Luxury Tab Switchers */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#14141A] border border-white/10 shrink-0">
+          {/* Luxury Tab Switchers (Straight Edges) */}
+          <div className="flex items-center gap-1 border border-white/10 bg-black p-1 shrink-0 rounded-none">
             <button
               onClick={() => setActiveTab("new")}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-none text-xs font-mono font-bold uppercase transition-all cursor-pointer ${
                 activeTab === "new"
-                  ? "bg-[#D4AF37] text-black shadow-md shadow-amber-500/20"
+                  ? "gold-gradient-bg text-black"
                   : "text-zinc-400 hover:text-white"
               }`}
             >
@@ -66,9 +65,9 @@ export function ArrivalsTabs() {
 
             <button
               onClick={() => setActiveTab("bestsellers")}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-none text-xs font-mono font-bold uppercase transition-all cursor-pointer ${
                 activeTab === "bestsellers"
-                  ? "bg-[#D4AF37] text-black shadow-md shadow-amber-500/20"
+                  ? "gold-gradient-bg text-black"
                   : "text-zinc-400 hover:text-white"
               }`}
             >
@@ -78,14 +77,14 @@ export function ArrivalsTabs() {
 
             <button
               onClick={() => setActiveTab("certified")}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-none text-xs font-mono font-bold uppercase transition-all cursor-pointer ${
                 activeTab === "certified"
-                  ? "bg-[#D4AF37] text-black shadow-md shadow-amber-500/20"
+                  ? "gold-gradient-bg text-black"
                   : "text-zinc-400 hover:text-white"
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Certified Pre-Owned</span>
+              <span>Pre-Owned (UK Used)</span>
             </button>
           </div>
         </div>

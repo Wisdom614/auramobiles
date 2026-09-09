@@ -306,12 +306,9 @@ function PhonesCatalogContent() {
         {/* 1. ARCHITECTURAL SYSTEM TELEMETRY & HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-white/10">
           <div>
-            <div className="flex items-center gap-2 font-mono text-[10px] text-zinc-400 uppercase tracking-widest mb-1">
-              <span className="w-1.5 h-1.5 bg-[#D4AF37]"></span>
-              <span className="text-[#D4AF37] font-semibold">Curated Smartphone Collection</span>
-              <span>•</span>
-              <span>Nationwide Delivery in Cameroon</span>
-            </div>
+            <span className="text-xs font-mono uppercase tracking-widest text-[#D4AF37] font-bold block mb-1">
+              Curated Collection • Nationwide Delivery
+            </span>
             <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
               All Smartphones
             </h1>
@@ -321,8 +318,8 @@ function PhonesCatalogContent() {
           </div>
 
           <div className="flex items-center gap-3 font-mono text-xs">
-            <span className="px-3 py-1.5 bg-[#0E0E12] border border-white/10 text-zinc-300">
-              AVAILABLE: <strong className="text-[#D4AF37]">{filteredPhones.length}</strong> PHONES
+            <span className="text-zinc-400 text-xs font-mono">
+              <strong className="text-[#D4AF37] font-bold">{filteredPhones.length}</strong> Phones Available
             </span>
             {activeFiltersCount > 0 && (
               <button

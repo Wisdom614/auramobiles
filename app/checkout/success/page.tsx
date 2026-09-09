@@ -97,11 +97,10 @@ function OrderSuccessContent() {
           </div>
 
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 text-[#D4AF37] text-[10.5px] font-mono uppercase tracking-wider font-bold mb-3">
-              <Check className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span>ORDER RECEIVED &amp; RESERVED</span>
-            </div>
-            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white uppercase">
+            <span className="text-xs font-mono uppercase tracking-widest text-[#D4AF37] font-bold block mb-2">
+              Order Received &amp; Reserved
+            </span>
+            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white uppercase">
               Order Confirmed — Thank You, {customerName}!
             </h1>
             <p className="text-xs sm:text-sm text-zinc-400 max-w-lg mx-auto mt-2 leading-relaxed">

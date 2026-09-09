@@ -121,9 +121,9 @@ export function HeroSection() {
           <div className="lg:col-span-6 space-y-6 text-left">
             
             {/* Tag */}
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-white/5 border border-white/10 text-[#D4AF37] text-[10px] font-mono uppercase tracking-wider font-bold">
-              <span>{slide.tag}</span>
-            </div>
+            <span className="text-xs font-mono uppercase tracking-widest text-[#D4AF37] font-bold block">
+              {slide.tag}
+            </span>
 
             {/* Headline */}
             <div className="space-y-1.5">

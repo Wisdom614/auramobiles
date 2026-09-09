@@ -352,9 +352,8 @@ export default function CustomerAccountPage() {
                   <h1 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight truncate">
                     {profile?.fullName || "AURA Client"}
                   </h1>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] font-mono font-bold uppercase tracking-wider">
-                    <Sparkles className="w-3 h-3" />
-                    <span>Black Card</span>
+                  <span className="text-xs font-mono font-bold text-[#D4AF37] uppercase tracking-wider">
+                    • Member
                   </span>
                 </div>
                 

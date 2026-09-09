@@ -341,10 +341,9 @@ Hello AURA, I want to confirm stock and complete this phone swap.`;
           <span className="absolute bottom-2 right-2 text-[#D4AF37] font-mono text-xs select-none">+</span>
 
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-mono font-bold tracking-widest uppercase rounded-none">
-              <span className="w-2 h-2 bg-emerald-400 animate-pulse" />
-              <span>Instant Phone Swap &amp; Trade-In</span>
-            </div>
+            <span className="text-xs font-mono font-bold tracking-widest uppercase text-[#D4AF37] block">
+              Instant Phone Swap &amp; Trade-In
+            </span>
             <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight uppercase">
               Upgrade Your Phone in 4 Simple Steps
             </h1>
@@ -412,8 +411,8 @@ Hello AURA, I want to confirm stock and complete this phone swap.`;
           {step === 1 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="border-b border-white/10 pb-4">
-                <span className="text-[10px] font-mono uppercase text-[#D4AF37] font-bold tracking-widest block">
-                  STEP 1 OF 4 • YOUR CURRENT PHONE
+                <span className="text-xs font-mono uppercase text-[#D4AF37] font-bold tracking-widest block mb-1">
+                  Step 1 • Select Current Device
                 </span>
                 <h2 className="text-xl sm:text-2xl font-black text-white uppercase mt-1">
                   What phone do you currently have?
@@ -546,8 +545,8 @@ Hello AURA, I want to confirm stock and complete this phone swap.`;
           {step === 2 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="border-b border-white/10 pb-4">
-                <span className="text-[10px] font-mono uppercase text-[#D4AF37] font-bold tracking-widest block">
-                  STEP 2 OF 4 • PHONE CONDITION
+                <span className="text-xs font-mono uppercase text-[#D4AF37] font-bold tracking-widest block mb-1">
+                  Step 2 • Condition Assessment
                 </span>
                 <h2 className="text-xl sm:text-2xl font-black text-white uppercase mt-1">
                   What condition is your {sourceModel} in?
@@ -621,8 +620,8 @@ Hello AURA, I want to confirm stock and complete this phone swap.`;
           {step === 3 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="border-b border-white/10 pb-4">
-                <span className="text-[10px] font-mono uppercase text-[#D4AF37] font-bold tracking-widest block">
-                  STEP 3 OF 4 • TARGET UPGRADE
+                <span className="text-xs font-mono uppercase text-[#D4AF37] font-bold tracking-widest block mb-1">
+                  Step 3 • Choose Upgrade Flagship
                 </span>
                 <h2 className="text-xl sm:text-2xl font-black text-white uppercase mt-1">
                   Which new phone do you want to get?
@@ -723,8 +722,8 @@ Hello AURA, I want to confirm stock and complete this phone swap.`;
           {step === 4 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="border-b border-white/10 pb-4">
-                <span className="text-[10px] font-mono uppercase text-[#D4AF37] font-bold tracking-widest block">
-                  STEP 4 OF 4 • INSTANT DEAL SUMMARY
+                <span className="text-xs font-mono uppercase text-[#D4AF37] font-bold tracking-widest block mb-1">
+                  Step 4 • Valuation &amp; Deal Summary
                 </span>
                 <h2 className="text-xl sm:text-2xl font-black text-white uppercase mt-1">
                   Your Phone Swap Breakdown

@@ -393,13 +393,13 @@ export default function PhoneDetailPage({ params }: PageProps) {
               <span className="absolute bottom-2 left-2 text-[10px] font-mono text-zinc-600 select-none pointer-events-none z-10">+</span>
               <span className="absolute bottom-2 right-2 text-[10px] font-mono text-zinc-600 select-none pointer-events-none z-10">+</span>
 
-              {/* Blueprint Badge */}
+              {/* Condition Tag */}
               <div className="absolute top-3 left-4 flex items-center gap-2 z-10 pointer-events-none">
-                <span className="text-[9px] font-mono tracking-widest text-[#D4AF37] uppercase font-bold border border-[#D4AF37]/30 px-2 py-0.5 bg-black/60 backdrop-blur-sm">
+                <span className="text-[10px] font-mono tracking-widest text-[#D4AF37] uppercase font-bold bg-black/80 px-2.5 py-1">
                   {phone.condition === "Certified Refurbished" ? "Clean Pre-Owned (UK Used)" : "100% Brand New Sealed"}
                 </span>
                 {phone.isNew && (
-                  <span className="text-[9px] font-mono tracking-widest text-amber-300 uppercase font-bold border border-amber-400/30 px-2 py-0.5 bg-black/60 backdrop-blur-sm">
+                  <span className="text-[10px] font-mono tracking-widest text-white uppercase font-bold bg-[#D4AF37]/20 px-2 py-1">
                     Flagship Release
                   </span>
                 )}

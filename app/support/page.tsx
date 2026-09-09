@@ -134,10 +134,9 @@ Hello AURA Support, I would like assistance regarding ${inquiryTopic}. Please co
 
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
             <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-mono font-bold tracking-widest uppercase rounded-none">
-                <span className="w-2 h-2 bg-emerald-400 animate-pulse" />
-                <span>Customer Care &amp; Showroom Hub</span>
-              </div>
+              <span className="text-xs font-mono font-bold tracking-widest uppercase text-[#D4AF37] block">
+                Customer Care &amp; Showroom Hub
+              </span>
               <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight uppercase">
                 How Can We Assist You?
               </h1>
