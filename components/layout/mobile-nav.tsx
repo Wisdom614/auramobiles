@@ -12,6 +12,10 @@ export function MobileNav() {
   const { itemCount, setIsCartOpen } = useCart();
   const { user, profile } = useAuth();
 
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   const navItems = [
     { label: "Store", href: "/", icon: Home },
     { label: "Phones", href: "/phones", icon: Smartphone },

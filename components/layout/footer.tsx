@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   MapPin,
   Phone,
@@ -15,7 +16,12 @@ import {
 import { useSettings } from "@/lib/store/settings-context";
 
 export function Footer() {
+  const pathname = usePathname();
   const { settings } = useSettings();
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   return (
     <footer className="bg-[#09090B] border-t border-white/10 text-zinc-400 text-xs mt-auto font-sans">

@@ -122,6 +122,10 @@ export function Navbar() {
     { name: "Showroom & Support", href: "/support" },
   ];
 
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <>
       {/* 1. TOP ANNOUNCEMENT BAR */}

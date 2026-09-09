@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Bot, ArrowRight, X } from "lucide-react";
 import { useAi } from "@/lib/store/ai-context";
 
 export function FloatingConcierge() {
+  const pathname = usePathname();
   const { isAiOpen, setIsAiOpen } = useAi();
   const [minimized, setMinimized] = useState(false);
 
-  if (isAiOpen) return null;
+  if (pathname?.startsWith("/admin") || isAiOpen) return null;
 
   return (
     <div className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-30 transition-all duration-300">

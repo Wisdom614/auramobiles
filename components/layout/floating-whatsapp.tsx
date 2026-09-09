@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import {
   MessageCircle,
   X,
@@ -33,6 +34,7 @@ const PRESET_INQUIRIES = [
 ];
 
 export function FloatingWhatsApp() {
+  const pathname = usePathname();
   const { settings } = useSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [hasPrompted, setHasPrompted] = useState(false);
@@ -40,6 +42,11 @@ export function FloatingWhatsApp() {
   const [isDismissed, setIsDismissed] = useState(false);
 
   const cleanWaNumber = settings.whatsappCleanNumber || "237699442100";
+
+  // If on admin routes, do not render floating WhatsApp
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   // Gentle greeting popup 2.5s after user visits the boutique
   useEffect(() => {
