@@ -26,12 +26,19 @@ function FormattedMessageContent({ text, isUser }: { text: string; isUser: boole
   const lines = text.split("\n");
 
   const formatInline = (str: string) => {
+    // If str has uneven ** markers, clean them up
+    let cleanStr = str;
+    const asterisksCount = (cleanStr.match(/\*\*/g) || []).length;
+    if (asterisksCount % 2 !== 0) {
+      cleanStr = cleanStr.replace(/\*\*([^*]*)$/, "$1");
+    }
+
     // Split by **bold** markers
-    const parts = str.split(/(\*\*[^*]+\*\*)/g);
+    const parts = cleanStr.split(/(\*\*[^*]+\*\*)/g);
     return parts.map((part, i) => {
-      if (part.startsWith("**") && part.endsWith("**")) {
+      if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
         const content = part.slice(2, -2);
-        const isPrice = content.toLowerCase().includes("fcfa");
+        const isPrice = content.toLowerCase().includes("fcfa") || /\d+[\s,.]*\d*\s*fcfa/i.test(content);
         return (
           <strong
             key={i}

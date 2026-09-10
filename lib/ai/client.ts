@@ -27,7 +27,7 @@ export interface AIGenerationResult {
 export async function generateAICompletion(
   options: AIGenerationOptions
 ): Promise<AIGenerationResult | null> {
-  const { messages, temperature = 0.7, maxTokens = 400, jsonMode = false } = options;
+  const { messages, temperature = 0.2, maxTokens = 1200, jsonMode = false } = options;
 
   const groqApiKey = process.env.GROQ_API_KEY?.trim();
   const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
