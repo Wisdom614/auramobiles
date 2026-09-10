@@ -237,12 +237,13 @@ export default function CheckoutPage() {
       console.warn("Background order email trigger warning:", emailErr);
     });
 
-    setTimeout(() => setSubmissionStep(2), 500);
-    setTimeout(() => setSubmissionStep(3), 1100);
+    setTimeout(() => setSubmissionStep(2), 600);
+    setTimeout(() => setSubmissionStep(3), 1200);
+    setTimeout(() => setSubmissionStep(4), 1700);
     setTimeout(() => {
       clearCart();
       router.push(`/checkout/success?id=${newOrder.id}`);
-    }, 1700);
+    }, 2400);
   };
 
   return (
@@ -710,75 +711,101 @@ export default function CheckoutPage() {
 
       </div>
 
-      {/* Order Processing Modal */}
+      {/* Order Processing Modal with Distinct Green Success State */}
       {isSubmitting && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 select-none font-sans animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-[#0E0E12] border border-[#D4AF37] p-6 sm:p-8 relative shadow-2xl rounded-none">
-            <div className="space-y-5 text-center">
-              <div className="w-14 h-14 bg-black border border-white/20 flex items-center justify-center mx-auto relative rounded-none">
-                <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent animate-spin"></div>
-                <span className="absolute text-[8px] font-mono font-bold text-[#D4AF37]">
-                  {submissionStep * 33}%
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[#D4AF37] font-bold block">
-                  PROCESSING ORDER
-                </span>
-                <h3 className="text-base font-bold text-white uppercase tracking-wider font-sans mt-1">
-                  Confirming Your Smartphone Order
-                </h3>
-              </div>
-
-              {/* Progress gauge */}
-              <div className="w-full h-1.5 bg-black border border-white/10 overflow-hidden rounded-none">
-                <div
-                  className="h-full bg-gradient-to-r from-[#B38F28] via-[#D4AF37] to-[#F3E5AB] transition-all duration-300 ease-out"
-                  style={{ width: `${submissionStep * 33 + (submissionStep === 3 ? 1 : 0)}%` }}
-                />
-              </div>
-
-              {/* Step progression ticker */}
-              <div className="space-y-2 text-left pt-2 font-mono text-[11px]">
-                <div
-                  className={`p-2 border flex items-center gap-2 transition-colors rounded-none ${
-                    submissionStep >= 1
-                      ? "bg-[#141419] border-[#D4AF37]/50 text-white"
-                      : "bg-black border-white/5 text-zinc-600"
-                  }`}
-                >
-                  <span className="text-[#D4AF37] font-bold">01 •</span>
-                  <span>Reserving device in Buea Showroom...</span>
+          <div
+            className={`w-full max-w-md p-6 sm:p-8 relative shadow-2xl rounded-none transition-all duration-300 border ${
+              submissionStep === 4
+                ? "bg-[#06180E] border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.35)]"
+                : "bg-[#0E0E12] border-[#D4AF37]"
+            }`}
+          >
+            {submissionStep === 4 ? (
+              <div className="space-y-4 text-center animate-in zoom-in-95 duration-200">
+                <div className="w-16 h-16 bg-emerald-500/20 border-2 border-emerald-400 text-emerald-400 flex items-center justify-center mx-auto rounded-none shadow-[0_0_30px_rgba(16,185,129,0.5)]">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-400 stroke-[2.5]" />
                 </div>
 
-                <div
-                  className={`p-2 border flex items-center gap-2 transition-colors rounded-none ${
-                    submissionStep >= 2
-                      ? "bg-[#141419] border-[#D4AF37]/50 text-white"
-                      : "bg-black border-white/5 text-zinc-600"
-                  }`}
-                >
-                  <span className="text-[#D4AF37] font-bold">02 •</span>
-                  <span>Generating Order Receipt &amp; Warranty Code...</span>
-                </div>
-
-                <div
-                  className={`p-2 border flex items-center gap-2 transition-colors rounded-none ${
-                    submissionStep >= 3
-                      ? "bg-[#141419] border-[#D4AF37]/50 text-white"
-                      : "bg-black border-white/5 text-zinc-600"
-                  }`}
-                >
-                  <span className="text-[#D4AF37] font-bold">03 •</span>
-                  <span>Connecting to Courier Dispatch Network...</span>
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-400 font-bold block">
+                    ● ORDER VERIFIED &amp; RESERVED
+                  </span>
+                  <h3 className="text-lg font-black text-white uppercase tracking-tight font-sans mt-1">
+                    Order Placed Successfully!
+                  </h3>
+                  <p className="text-xs text-zinc-300 mt-1 font-mono">
+                    Opening your Official Receipt &amp; Tracking Hub...
+                  </p>
                 </div>
               </div>
+            ) : (
+              <div className="space-y-5 text-center">
+                <div className="w-14 h-14 bg-black border border-white/20 flex items-center justify-center mx-auto relative rounded-none">
+                  <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent animate-spin"></div>
+                  <span className="absolute text-[8px] font-mono font-bold text-[#D4AF37]">
+                    {submissionStep * 33}%
+                  </span>
+                </div>
 
-              <p className="text-[10px] text-zinc-400 font-mono">
-                Please do not refresh the page.
-              </p>
-            </div>
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#D4AF37] font-bold block">
+                    PROCESSING ORDER
+                  </span>
+                  <h3 className="text-base font-bold text-white uppercase tracking-wider font-sans mt-1">
+                    Confirming Your Smartphone Order
+                  </h3>
+                </div>
+
+                {/* Progress gauge */}
+                <div className="w-full h-1.5 bg-black border border-white/10 overflow-hidden rounded-none">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#B38F28] via-[#D4AF37] to-[#F3E5AB] transition-all duration-300 ease-out"
+                    style={{ width: `${submissionStep * 33}%` }}
+                  />
+                </div>
+
+                {/* Step progression ticker */}
+                <div className="space-y-2 text-left pt-2 font-mono text-[11px]">
+                  <div
+                    className={`p-2 border flex items-center gap-2 transition-colors rounded-none ${
+                      submissionStep >= 1
+                        ? "bg-[#141419] border-[#D4AF37]/50 text-white"
+                        : "bg-black border-white/5 text-zinc-600"
+                    }`}
+                  >
+                    <span className="text-[#D4AF37] font-bold">01 •</span>
+                    <span>Reserving device in Buea Showroom...</span>
+                  </div>
+
+                  <div
+                    className={`p-2 border flex items-center gap-2 transition-colors rounded-none ${
+                      submissionStep >= 2
+                        ? "bg-[#141419] border-[#D4AF37]/50 text-white"
+                        : "bg-black border-white/5 text-zinc-600"
+                    }`}
+                  >
+                    <span className="text-[#D4AF37] font-bold">02 •</span>
+                    <span>Generating Order Receipt &amp; Warranty Code...</span>
+                  </div>
+
+                  <div
+                    className={`p-2 border flex items-center gap-2 transition-colors rounded-none ${
+                      submissionStep >= 3
+                        ? "bg-[#141419] border-[#D4AF37]/50 text-white"
+                        : "bg-black border-white/5 text-zinc-600"
+                    }`}
+                  >
+                    <span className="text-[#D4AF37] font-bold">03 •</span>
+                    <span>Connecting to Courier Dispatch Network...</span>
+                  </div>
+                </div>
+
+                <p className="text-[10px] text-zinc-400 font-mono">
+                  Please do not refresh the page.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -20,12 +20,17 @@ import {
   Sparkles,
   ExternalLink,
   FileCheck,
+  Download,
+  Receipt,
+  Eye,
 } from "lucide-react";
 import { formatCFA } from "@/lib/formatters";
 import { useOrders } from "@/lib/store/orders-context";
 import { useSettings } from "@/lib/store/settings-context";
 import { Order } from "@/lib/data/mock-orders";
 import { getOrdersFromDB } from "@/lib/supabase/client";
+import { OrderReceiptModal } from "@/components/orders/order-receipt-modal";
+import { downloadOrderPdf } from "@/lib/utils/receipt-pdf";
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
@@ -35,6 +40,8 @@ function OrderSuccessContent() {
 
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   useEffect(() => {
     async function loadOrder() {
@@ -73,6 +80,18 @@ function OrderSuccessContent() {
     setTimeout(() => setCopied(false), 2500);
   };
 
+  const handleDownloadPdf = () => {
+    if (!activeOrder) return;
+    setIsDownloadingPdf(true);
+    try {
+      downloadOrderPdf(activeOrder, settings);
+    } catch (err) {
+      console.error("Failed to generate PDF:", err);
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
+
   const displayId = activeOrder?.id || orderId || "AUR-32900";
   const customerName = activeOrder?.customer?.fullName || "Valued Customer";
   const customerPhone = activeOrder?.customer?.phone || "+237 6XX XX XX XX";
@@ -80,79 +99,125 @@ function OrderSuccessContent() {
   const totalFCFA = activeOrder?.total || 980000;
 
   // Pre-filled WhatsApp direct link for expediting
-  const waMessage = `Hello ${settings.storeName || "AURA Luxe Mobile"}, I just placed order *${displayId}* for *${customerName}*. Please confirm my order and arrange delivery.`;
+  const waMessage = `Hello ${settings.storeName || "AURA Luxe Mobile"}, I just placed order *${displayId}* for *${customerName}*. Please confirm my order and arrange delivery to ${city}.`;
   const waNum = settings.whatsappCleanNumber || "237699442100";
   const waUrl = `https://wa.me/${waNum}?text=${encodeURIComponent(waMessage)}`;
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-white py-10 sm:py-16 font-sans">
+    <div className="min-h-screen bg-[#070709] text-white py-8 sm:py-14 font-sans">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 space-y-8">
         
-        {/* HEADER */}
-        <div className="text-center space-y-4 border-b border-white/10 pb-8 relative">
-          <div className="inline-flex items-center justify-center mb-1">
-            <div className="w-16 h-16 bg-[#121217] border border-[#D4AF37] flex items-center justify-center shadow-2xl shadow-[#D4AF37]/10 relative">
-              <CheckCircle2 className="w-8 h-8 text-[#D4AF37]" />
+        {/* DISTINCTIVE EMERALD GREEN SUCCESS HERO CARD */}
+        <div className="relative overflow-hidden bg-gradient-to-b from-[#062013] via-[#08170F] to-[#0D1110] border-2 border-emerald-500/70 p-6 sm:p-10 shadow-[0_0_60px_rgba(16,185,129,0.22)]">
+          {/* Subtle Ambient Radial Glow */}
+          <div className="absolute top-0 right-1/4 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-10 w-60 h-60 bg-[#D4AF37]/5 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col items-center text-center space-y-5">
+            
+            {/* Pulsing Green Verification Beacon */}
+            <div className="relative inline-flex items-center justify-center">
+              <span className="animate-ping absolute inline-flex h-20 w-20 rounded-full bg-emerald-500/20 opacity-75" />
+              <div className="w-20 h-20 bg-black/70 border-2 border-emerald-400 flex items-center justify-center shadow-[0_0_35px_rgba(16,185,129,0.5)] relative">
+                <CheckCircle2 className="w-10 h-10 text-emerald-400 animate-in zoom-in-50 duration-300" />
+              </div>
             </div>
-          </div>
 
-          <div>
-            <span className="text-xs font-mono uppercase tracking-widest text-[#D4AF37] font-bold block mb-2">
-              Order Received &amp; Reserved
-            </span>
-            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white uppercase">
-              Order Confirmed — Thank You, {customerName}!
-            </h1>
-            <p className="text-xs sm:text-sm text-zinc-400 max-w-lg mx-auto mt-2 leading-relaxed">
-              Your device has been reserved at our Buea showroom and is being prepared for dispatch.
-            </p>
-          </div>
+            {/* Confirmation Title & Subtitle */}
+            <div className="space-y-2 max-w-xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 text-[10.5px] font-mono uppercase tracking-widest font-bold">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>ORDER CONFIRMED &amp; ALLOCATED IN SHOWROOM VAULT</span>
+              </div>
+              <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white uppercase font-sans">
+                Order Placed Successfully!
+              </h1>
+              <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                Thank you, <strong className="text-white font-semibold">{customerName}</strong>! Your device has been securely reserved at our Buea showroom and queued for pre-dispatch inspection.
+              </p>
+            </div>
 
-          {/* Order Reference with Copy */}
-          <div className="inline-flex items-center gap-3 px-4 py-2.5 bg-[#0E0E12] border border-white/15 relative">
-            <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider font-semibold">ORDER ID:</span>
-            <span className="font-mono font-bold text-sm text-[#D4AF37] tracking-wider">{displayId}</span>
-            <button
-              onClick={copyOrderId}
-              className="px-2 py-1 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition font-mono text-[10px] flex items-center gap-1 cursor-pointer border border-white/10"
-              title="Copy Order ID"
-            >
-              {copied ? (
-                <>
-                  <Check className="w-3 h-3 text-emerald-400" />
-                  <span className="text-emerald-400 font-bold">COPIED</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3 h-3 text-[#D4AF37]" />
-                  <span>COPY</span>
-                </>
-              )}
-            </button>
+            {/* Order Reference Card */}
+            <div className="inline-flex flex-wrap items-center justify-center gap-3 px-5 py-3 bg-black/80 border border-emerald-500/40 text-xs">
+              <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider font-semibold">
+                OFFICIAL ORDER ID:
+              </span>
+              <span className="font-mono font-bold text-sm text-emerald-400 tracking-widest">
+                {displayId}
+              </span>
+              <button
+                onClick={copyOrderId}
+                className="px-2.5 py-1 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition font-mono text-[10.5px] flex items-center gap-1.5 cursor-pointer border border-white/10"
+                title="Copy Order ID"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-emerald-400 font-bold">COPIED</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <span>COPY</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Fast Action Buttons: PDF Receipt & WhatsApp Confirmation */}
+            <div className="w-full pt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs font-sans">
+              <button
+                onClick={() => setIsReceiptModalOpen(true)}
+                className="py-3 px-4 bg-[#121217] hover:bg-[#1A1A22] text-white border border-[#D4AF37]/50 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer"
+              >
+                <Eye className="w-4 h-4 text-[#D4AF37]" />
+                <span>View Official Receipt</span>
+              </button>
+
+              <button
+                onClick={handleDownloadPdf}
+                disabled={isDownloadingPdf}
+                className="py-3 px-4 bg-emerald-950/70 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-500/70 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-50"
+              >
+                <Download className="w-4 h-4 text-emerald-400" />
+                <span>{isDownloadingPdf ? "Generating PDF..." : "Download PDF Invoice"}</span>
+              </button>
+
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="sm:col-span-2 lg:col-span-1 py-3 px-4 bg-[#25D366] hover:bg-[#1EBE5D] text-black font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer shadow-lg"
+              >
+                <MessageCircle className="w-4 h-4 fill-black" />
+                <span>Fast WhatsApp Dispatch</span>
+              </a>
+            </div>
+
           </div>
         </div>
 
         {/* WHAT HAPPENS NEXT */}
-        <div className="bg-[#0E0E12] border border-[#D4AF37] p-6 sm:p-8 relative">
+        <div className="bg-[#0E0E12] border border-white/15 p-6 sm:p-8 relative">
           <div className="space-y-6 relative z-10">
             
-            {/* Attention Badge */}
+            {/* Attention Header */}
             <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-[#D4AF37] text-black flex items-center justify-center font-bold">
+                <div className="w-9 h-9 bg-emerald-500 text-black flex items-center justify-center font-bold">
                   <PhoneCall className="w-4 h-4" />
                 </div>
                 <div>
                   <h2 className="text-sm sm:text-base font-bold text-white uppercase tracking-wider font-sans">
                     What Happens Next?
                   </h2>
-                  <p className="text-xs text-[#F3E5AB]">
-                    Our store manager will contact you on WhatsApp or call before sending the courier.
+                  <p className="text-xs text-zinc-400">
+                    Our concierge will contact you via WhatsApp or phone call to confirm dispatch details.
                   </p>
                 </div>
               </div>
 
-              <span className="px-2.5 py-1 bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/40 text-[10px] font-mono uppercase tracking-wider font-bold">
+              <span className="px-2.5 py-1 bg-emerald-500/15 text-emerald-400 border border-emerald-500/40 text-[10px] font-mono uppercase tracking-wider font-bold">
                 Fast Response (&lt; 15 Mins)
               </span>
             </div>
@@ -160,72 +225,53 @@ function OrderSuccessContent() {
             {/* Direct Explanation */}
             <div className="p-4 bg-black border border-white/10 space-y-2.5">
               <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans">
-                We always confirm details before dispatching. An <strong>AURA Store Manager</strong> will message or call your WhatsApp number at:
+                We always confirm phone specifications and your address before courier departure. Our store manager will reach you at:
               </p>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#16161D] border border-white/20 text-[#D4AF37] font-mono font-bold text-xs">
                 <MessageCircle className="w-4 h-4 text-[#25D366]" />
                 <span>{customerPhone}</span>
+                <span className="text-zinc-500">•</span>
+                <span className="text-zinc-300 font-sans font-normal text-[11px]">{city}</span>
               </div>
             </div>
 
             {/* 3 Step Protocol Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
               <div className="p-4 bg-black border border-white/10 space-y-2">
-                <div className="w-6 h-6 bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-[#D4AF37] flex items-center justify-center font-mono font-bold text-[10px]">
+                <div className="w-6 h-6 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-mono font-bold text-[10px]">
                   01
                 </div>
                 <h3 className="font-bold text-white text-xs uppercase font-sans tracking-wider">
-                  Order &amp; Address Confirmation
+                  Model &amp; Address Verification
                 </h3>
                 <p className="text-zinc-400 text-xs leading-relaxed">
-                  We verify your phone model, storage size, color, and delivery address.
+                  We double-check your chosen phone storage, color condition, and exact delivery spot.
                 </p>
               </div>
 
               <div className="p-4 bg-black border border-white/10 space-y-2">
-                <div className="w-6 h-6 bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-[#D4AF37] flex items-center justify-center font-mono font-bold text-[10px]">
+                <div className="w-6 h-6 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-mono font-bold text-[10px]">
                   02
                 </div>
                 <h3 className="font-bold text-white text-xs uppercase font-sans tracking-wider">
-                  Authentic Inspection &amp; Warranty
+                  Hardware Test &amp; Warranty Seal
                 </h3>
                 <p className="text-zinc-400 text-xs leading-relaxed">
-                  Your phone is inspected, tested, and packaged with your official warranty certificate.
+                  Device battery health, display, and camera pass physical bench tests with warranty tags.
                 </p>
               </div>
 
               <div className="p-4 bg-black border border-white/10 space-y-2">
-                <div className="w-6 h-6 bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-[#D4AF37] flex items-center justify-center font-mono font-bold text-[10px]">
+                <div className="w-6 h-6 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-mono font-bold text-[10px]">
                   03
                 </div>
                 <h3 className="font-bold text-white text-xs uppercase font-sans tracking-wider">
-                  Inspect First, Then Pay
+                  Inspect First, Pay on Delivery
                 </h3>
                 <p className="text-zinc-400 text-xs leading-relaxed">
-                  Our courier brings the phone directly to you. Inspect and test it before paying.
+                  Our dispatch rider delivers to your doorstep. You thoroughly inspect the phone before payment.
                 </p>
               </div>
-            </div>
-
-            {/* 1-Tap WhatsApp & Call CTAs */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
-              <a
-                href={waUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full sm:flex-1 py-3.5 px-5 bg-emerald-950/50 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-500/50 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2.5 transition cursor-pointer font-sans"
-              >
-                <MessageCircle className="w-4 h-4 text-emerald-400" />
-                <span>Fast Confirmation on WhatsApp (1-Tap)</span>
-              </a>
-
-              <a
-                href={`tel:${settings.secondaryPhone.replace(/[^0-9+]/g, "") || "+237699442100"}`}
-                className="w-full sm:w-auto py-3.5 px-6 bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-widest border border-white/15 flex items-center justify-center gap-2 transition font-sans"
-              >
-                <PhoneCall className="w-4 h-4 text-[#D4AF37]" />
-                <span>Call Store Manager</span>
-              </a>
             </div>
 
           </div>
@@ -270,7 +316,7 @@ function OrderSuccessContent() {
                       {formatCFA(item.price * item.quantity)}
                     </div>
                     <span className="text-[9px] font-mono text-emerald-400 uppercase block mt-0.5 font-semibold">
-                      Official Warranty
+                      Official Warranty Included
                     </span>
                   </div>
                 </div>
@@ -291,7 +337,7 @@ function OrderSuccessContent() {
               </div>
               <div className="flex justify-between items-baseline pt-3 border-t border-white/15 text-sm">
                 <span className="font-bold text-white text-xs uppercase tracking-wider">
-                  Total Amount
+                  Total Payable
                 </span>
                 <span className="text-xl font-black font-mono text-[#D4AF37]">
                   {formatCFA(activeOrder.total)}
@@ -311,27 +357,37 @@ function OrderSuccessContent() {
             href={`/orders?id=${displayId}`}
             className="w-full sm:w-auto px-6 py-3.5 bg-[#121217] hover:bg-[#16161D] border border-white/15 text-xs font-bold uppercase tracking-wider text-white flex items-center justify-center gap-2 transition"
           >
-            <span>Track Order Status</span>
+            <span>Track Live Order Status</span>
             <ArrowRight className="w-4 h-4 text-[#D4AF37]" />
           </Link>
 
-          <Link
-            href="/phones"
-            className="w-full sm:w-auto px-6 py-3.5 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition hover:opacity-95"
-          >
-            <span>Browse More Phones</span>
-          </Link>
+          <div className="w-full sm:w-auto flex items-center gap-3">
+            <button
+              onClick={handleDownloadPdf}
+              className="w-full sm:w-auto px-5 py-3.5 bg-black hover:bg-white/5 border border-emerald-500/40 text-emerald-400 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+              <span>Download PDF</span>
+            </button>
+
+            <Link
+              href="/phones"
+              className="w-full sm:w-auto px-6 py-3.5 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition hover:opacity-95"
+            >
+              <span>Browse Showroom</span>
+            </Link>
+          </div>
         </div>
 
         {/* Trust Badges Strip */}
         <div className="pt-6 border-t border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3 text-center text-[10.5px] text-zinc-400">
           <div className="p-3 bg-[#0E0E12] border border-white/10 flex items-center justify-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
-            <span>100% Authentic • Sealed &amp; Tested</span>
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>100% Authentic • Sealed &amp; Bench Tested</span>
           </div>
           <div className="p-3 bg-[#0E0E12] border border-white/10 flex items-center justify-center gap-1.5">
             <Truck className="w-3.5 h-3.5 text-[#D4AF37]" />
-            <span>Same-Day Buea • 24h Nationwide</span>
+            <span>Same-Day Buea • 24h Nationwide Delivery</span>
           </div>
           <div className="p-3 bg-[#0E0E12] border border-white/10 flex items-center justify-center gap-1.5">
             <Store className="w-3.5 h-3.5 text-[#D4AF37]" />
@@ -340,6 +396,15 @@ function OrderSuccessContent() {
         </div>
 
       </div>
+
+      {/* Official Receipt Modal */}
+      {activeOrder && (
+        <OrderReceiptModal
+          order={activeOrder}
+          isOpen={isReceiptModalOpen}
+          onClose={() => setIsReceiptModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
@@ -348,7 +413,7 @@ export default function OrderSuccessPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#09090B] flex items-center justify-center text-white text-xs font-mono">
+        <div className="min-h-screen bg-[#070709] flex items-center justify-center text-white text-xs font-mono">
           Loading Order Confirmation...
         </div>
       }
@@ -357,3 +422,4 @@ export default function OrderSuccessPage() {
     </Suspense>
   );
 }
+
