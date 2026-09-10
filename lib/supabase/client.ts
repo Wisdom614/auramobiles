@@ -214,7 +214,12 @@ export async function getPhonesFromDB(): Promise<Phone[] | null> {
 }
 
 export async function getPhoneBySlugFromDB(slug: string): Promise<Phone | null> {
-  const cleanSlug = slug?.toLowerCase().trim();
+  let cleanSlug = "";
+  try {
+    cleanSlug = decodeURIComponent(slug || "").toLowerCase().trim();
+  } catch {
+    cleanSlug = (slug || "").toLowerCase().trim();
+  }
   if (!cleanSlug) return null;
 
   // 1. Instant match from memory cache
