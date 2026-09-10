@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { generateAICompletion } from "@/lib/ai/client";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -47,16 +48,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-      // Fallback heuristic generator
-      return NextResponse.json({
-        data: getFallbackAutofill(phoneName),
-        source: "fallback",
-      });
-    }
-
     if (action === "polish_copy") {
       const polishPrompt = `You are a luxury smartphone copywriter for AURA Luxe Mobile in Cameroon.
 Transform this phone note/description into a captivating, high-end luxury marketing tagline (max 1 sentence) and 3 short luxury highlights bullet points tailored for VIP buyers in Central Africa.
@@ -73,20 +64,13 @@ Respond ONLY with valid JSON in this exact structure:
   ]
 }`;
 
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-      const res = await fetch(geminiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: polishPrompt }] }],
-          generationConfig: {
-            temperature: 0.3,
-            responseMimeType: "application/json",
-          },
-        }),
+      const aiResult = await generateAICompletion({
+        messages: [{ role: "user", content: polishPrompt }],
+        temperature: 0.3,
+        jsonMode: true,
       });
 
-      if (!res.ok) {
+      if (!aiResult || !aiResult.text) {
         return NextResponse.json({
           data: {
             tagline: `${phoneName} - Flagship Luxury Edition with Official AURA Warranty`,
@@ -100,10 +84,22 @@ Respond ONLY with valid JSON in this exact structure:
         });
       }
 
-      const resData = await res.json();
-      const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-      const parsed = JSON.parse(rawText);
-      return NextResponse.json({ data: parsed, source: "gemini" });
+      try {
+        const parsed = JSON.parse(aiResult.text);
+        return NextResponse.json({ data: parsed, source: aiResult.provider });
+      } catch {
+        return NextResponse.json({
+          data: {
+            tagline: `${phoneName} - Flagship Luxury Edition with Official AURA Warranty`,
+            highlights: [
+              "100% Authentic Device with Official Boutique Guarantee",
+              "Flagship high-performance processor and pro-grade camera array",
+              "Ultra-fast charging with all-day battery efficiency",
+            ],
+          },
+          source: "fallback",
+        });
+      }
     }
 
     // Default: Full Spec Autofill
@@ -164,32 +160,29 @@ Respond ONLY with valid JSON matching this schema:
   ]
 }`;
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    const res = await fetch(geminiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: autofillPrompt }] }],
-        generationConfig: {
-          temperature: 0.2,
-          responseMimeType: "application/json",
-        },
-      }),
+    const aiResult = await generateAICompletion({
+      messages: [{ role: "user", content: autofillPrompt }],
+      temperature: 0.2,
+      maxTokens: 1200,
+      jsonMode: true,
     });
 
-    if (!res.ok) {
-      console.warn("Gemini API error, using intelligent fallback:", await res.text());
+    if (!aiResult || !aiResult.text) {
       return NextResponse.json({
         data: getFallbackAutofill(phoneName),
         source: "fallback",
       });
     }
 
-    const resData = await res.json();
-    const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-    const parsed: AIPhoneAutofillResult = JSON.parse(rawText);
-
-    return NextResponse.json({ data: parsed, source: "gemini" });
+    try {
+      const parsed: AIPhoneAutofillResult = JSON.parse(aiResult.text);
+      return NextResponse.json({ data: parsed, source: aiResult.provider });
+    } catch {
+      return NextResponse.json({
+        data: getFallbackAutofill(phoneName),
+        source: "fallback",
+      });
+    }
   } catch (error: any) {
     console.error("AI Admin Autofill Error:", error);
     return NextResponse.json(

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PHONES, Phone } from "@/lib/data/phones";
 import { getPhonesFromDB } from "@/lib/supabase/client";
+import { generateAICompletion } from "@/lib/ai/client";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -70,80 +71,27 @@ CRITICAL RESPONSE LENGTH & FORMATTING RULES:
 LIVE STORE INVENTORY:
 ${JSON.stringify(catalogSummary, null, 2)}`;
 
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-      return NextResponse.json(getFallbackResponse(query, catalog));
-    }
-
-    // Format Gemini contents payload
-    const formattedContents = [
+    // Build unified messages array
+    const aiMessages = [
+      { role: "system" as const, content: systemPrompt },
       ...history.slice(-6).map((m) => ({
-        role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content }],
+        role: m.role,
+        content: m.content,
       })),
-      {
-        role: "user",
-        parts: [{ text: query }],
-      },
+      { role: "user" as const, content: query },
     ];
 
-    // Call Google Gemini API (gemini-2.5-flash or gemini-1.5-flash)
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    
-    let geminiResponse;
-    try {
-      geminiResponse = await fetch(geminiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: systemPrompt }],
-          },
-          contents: formattedContents,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 350,
-          },
-        }),
-      });
+    const aiResult = await generateAICompletion({
+      messages: aiMessages,
+      temperature: 0.7,
+      maxTokens: 350,
+    });
 
-      // If gemini-2.5-flash is not available, try gemini-1.5-flash
-      if (!geminiResponse.ok && geminiResponse.status === 404) {
-        const fallbackModelUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-        geminiResponse = await fetch(fallbackModelUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            systemInstruction: {
-              parts: [{ text: systemPrompt }],
-            },
-            contents: formattedContents,
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 350,
-            },
-          }),
-        });
-      }
-    } catch (fetchError) {
-      console.warn("Gemini API connection error, using curated fallback:", fetchError);
+    if (!aiResult || !aiResult.text.trim()) {
       return NextResponse.json(getFallbackResponse(query, catalog));
     }
 
-    if (!geminiResponse.ok) {
-      const errorText = await geminiResponse.text();
-      console.warn(`Gemini API error (${geminiResponse.status}):`, errorText);
-      return NextResponse.json(getFallbackResponse(query, catalog));
-    }
-
-    const geminiData = await geminiResponse.json();
-    const rawText =
-      geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-
-    if (!rawText.trim()) {
-      return NextResponse.json(getFallbackResponse(query, catalog));
-    }
+    const rawText = aiResult.text;
 
     // Extract [RECOMMENDATIONS: id1, id2] tag
     let cleanedText = rawText;
@@ -178,8 +126,8 @@ ${JSON.stringify(catalogSummary, null, 2)}`;
     return NextResponse.json({
       text: cleanedText,
       recommendedPhoneIds: recommendedIds,
-      source: "gemini",
-      model: "gemini-flash",
+      source: aiResult.provider,
+      model: aiResult.model,
     });
   } catch (error) {
     console.error("Error in /api/chat:", error);
