@@ -1,9 +1,11 @@
-import jsPDF from "jspdf";
 import { Order } from "@/lib/data/mock-orders";
 import { formatCFA } from "@/lib/formatters";
 import { SiteSettings } from "@/lib/store/settings-context";
 
-export function downloadOrderPdf(order: Order, settings?: SiteSettings) {
+export async function downloadOrderPdf(order: Order, settings?: SiteSettings) {
+  // Dynamically import jsPDF only when user clicks to download (saves ~350KB on initial page load)
+  const { default: jsPDF } = await import("jspdf");
+
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",

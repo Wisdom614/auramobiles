@@ -123,47 +123,136 @@ function mapModelToDbPhone(phone: Phone): any {
 }
 
 // ==========================================================
+// HIGH-PERFORMANCE IN-MEMORY & SWR CACHE
+// ==========================================================
+let memoryPhonesCache: Phone[] | null = null;
+let memoryReviewsCache: CustomerReview[] | null = null;
+let memoryOrdersCache: Order[] | null = null;
+let memoryTradeInsCache: TradeInRecord[] | null = null;
+let isFetchingPhones = false;
+
+// ==========================================================
 // PHONES API
 // ==========================================================
 
 export async function getPhonesFromDB(): Promise<Phone[] | null> {
-  // 1. Try Supabase first
-  if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from("phones")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!error && data && data.length > 0) {
-        const mapped = data.map(mapDbPhoneToModel);
-        try {
-          localStorage.setItem("aura_phones_v1", JSON.stringify(mapped));
-        } catch {}
-        return mapped;
-      }
-    } catch {}
+  // 1. Instant Memory Cache (0ms latency)
+  if (memoryPhonesCache && memoryPhonesCache.length > 0) {
+    return memoryPhonesCache;
   }
 
-  // 2. Fallback to localStorage (holds newly created/edited admin phones)
+  // 2. Instant LocalStorage Cache (0ms latency)
   try {
-    const cached = localStorage.getItem("aura_phones_v1");
+    const cached = typeof window !== "undefined" ? localStorage.getItem("aura_phones_v1") : null;
     if (cached) {
       const parsed = JSON.parse(cached);
       if (Array.isArray(parsed) && parsed.length > 0) {
+        memoryPhonesCache = parsed;
+        // Background revalidate from Supabase without blocking UI
+        if (supabase && !isFetchingPhones) {
+          isFetchingPhones = true;
+          supabase
+            .from("phones")
+            .select("*")
+            .order("created_at", { ascending: false })
+            .then(({ data, error }) => {
+              isFetchingPhones = false;
+              if (!error && data && data.length > 0) {
+                const mapped = data.map(mapDbPhoneToModel);
+                memoryPhonesCache = mapped;
+                try {
+                  localStorage.setItem("aura_phones_v1", JSON.stringify(mapped));
+                } catch {}
+              }
+            })
+            .catch(() => {
+              isFetchingPhones = false;
+            });
+        }
         return parsed;
       }
     }
   } catch {}
 
-  // 3. Fallback to default catalog
-  return PHONES;
+  // 3. Fallback to default catalog instantly while fetching in background
+  if (!memoryPhonesCache) {
+    memoryPhonesCache = PHONES;
+  }
+
+  if (supabase && !isFetchingPhones) {
+    isFetchingPhones = true;
+    try {
+      // 2.5s timeout promise race so cold Supabase free tier never hangs UI
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Supabase timeout")), 2500)
+      );
+
+      const fetchPromise = supabase
+        .from("phones")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      const res: any = await Promise.race([fetchPromise, timeoutPromise]);
+      isFetchingPhones = false;
+
+      if (res?.data && res.data.length > 0) {
+        const mapped = res.data.map(mapDbPhoneToModel);
+        memoryPhonesCache = mapped;
+        try {
+          if (typeof window !== "undefined") {
+            localStorage.setItem("aura_phones_v1", JSON.stringify(mapped));
+          }
+        } catch {}
+        return mapped;
+      }
+    } catch {
+      isFetchingPhones = false;
+    }
+  }
+
+  return memoryPhonesCache || PHONES;
 }
 
 export async function getPhoneBySlugFromDB(slug: string): Promise<Phone | null> {
   const cleanSlug = slug?.toLowerCase().trim();
+  if (!cleanSlug) return null;
 
-  // 1. Try Supabase
+  // 1. Instant match from memory cache
+  if (memoryPhonesCache && memoryPhonesCache.length > 0) {
+    const match = memoryPhonesCache.find(
+      (p) =>
+        p.slug?.toLowerCase() === cleanSlug ||
+        p.id?.toLowerCase() === cleanSlug ||
+        p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") === cleanSlug
+    );
+    if (match) return match;
+  }
+
+  // 2. Check localStorage cache
+  try {
+    const cached = typeof window !== "undefined" ? localStorage.getItem("aura_phones_v1") : null;
+    if (cached) {
+      const parsed: Phone[] = JSON.parse(cached);
+      const match = parsed.find(
+        (p) =>
+          p.slug?.toLowerCase() === cleanSlug ||
+          p.id?.toLowerCase() === cleanSlug ||
+          p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") === cleanSlug
+      );
+      if (match) return match;
+    }
+  } catch {}
+
+  // 3. Fallback match in default PHONES catalog (0ms)
+  const defaultMatch = PHONES.find(
+    (p) =>
+      p.slug?.toLowerCase() === cleanSlug ||
+      p.id?.toLowerCase() === cleanSlug ||
+      p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") === cleanSlug
+  );
+  if (defaultMatch) return defaultMatch;
+
+  // 4. Query Supabase directly if not found locally
   if (supabase) {
     try {
       const { data, error } = await supabase
@@ -178,28 +267,20 @@ export async function getPhoneBySlugFromDB(slug: string): Promise<Phone | null> 
     } catch {}
   }
 
-  // 2. Check full catalog (Supabase or localStorage cache)
-  const all = await getPhonesFromDB();
-  if (all && all.length > 0) {
-    const match = all.find(
-      (p) =>
-        p.slug?.toLowerCase() === cleanSlug ||
-        p.id?.toLowerCase() === cleanSlug ||
-        p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") === cleanSlug
-    );
-    if (match) return match;
-  }
-
   return null;
 }
 
 export async function insertPhoneToDB(phone: Phone): Promise<boolean> {
-  // Sync to localStorage immediately
+  // Sync to memory and localStorage immediately (0ms)
   try {
-    const cached = localStorage.getItem("aura_phones_v1");
-    const currentList: Phone[] = cached ? JSON.parse(cached) : PHONES;
+    const cached = typeof window !== "undefined" ? localStorage.getItem("aura_phones_v1") : null;
+    const currentList: Phone[] = cached ? JSON.parse(cached) : (memoryPhonesCache || PHONES);
     const filtered = currentList.filter((p) => p.id !== phone.id);
-    localStorage.setItem("aura_phones_v1", JSON.stringify([phone, ...filtered]));
+    const updated = [phone, ...filtered];
+    memoryPhonesCache = updated;
+    if (typeof window !== "undefined") {
+      localStorage.setItem("aura_phones_v1", JSON.stringify(updated));
+    }
   } catch {}
 
   if (!supabase) return true;
@@ -293,34 +374,73 @@ export async function seedCatalogToDB(): Promise<{ count: number; error?: string
 // ==========================================================
 
 export async function getOrdersFromDB(): Promise<Order[] | null> {
-  if (!supabase) return null;
+  if (memoryOrdersCache && memoryOrdersCache.length > 0) {
+    return memoryOrdersCache;
+  }
+
   try {
-    const { data, error } = await supabase
+    const cached = typeof window !== "undefined" ? localStorage.getItem("aura_orders_v1") : null;
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed)) {
+        memoryOrdersCache = parsed;
+      }
+    }
+  } catch {}
+
+  if (!supabase) return memoryOrdersCache;
+
+  try {
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Supabase timeout")), 2500)
+    );
+
+    const fetchPromise = supabase
       .from("orders")
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error || !data) return null;
-    return data.map((row: any) => ({
-      id: row.id,
-      trackingNumber: row.tracking_number,
-      createdAt: row.created_at,
-      status: row.status as OrderStatus,
-      estimatedDelivery: row.estimated_delivery,
-      subtotal: Number(row.subtotal),
-      discount: Number(row.discount || 0),
-      deliveryFee: Number(row.delivery_fee || 0),
-      total: Number(row.total),
-      customer: row.customer,
-      items: row.items,
-      timeline: row.timeline,
-    }));
-  } catch {
-    return null;
-  }
+    const res: any = await Promise.race([fetchPromise, timeoutPromise]);
+    if (res?.data && Array.isArray(res.data)) {
+      const mapped: Order[] = res.data.map((row: any) => ({
+        id: row.id,
+        trackingNumber: row.tracking_number,
+        createdAt: row.created_at,
+        status: row.status as OrderStatus,
+        estimatedDelivery: row.estimated_delivery,
+        subtotal: Number(row.subtotal),
+        discount: Number(row.discount || 0),
+        deliveryFee: Number(row.delivery_fee || 0),
+        total: Number(row.total),
+        customer: row.customer,
+        items: row.items,
+        timeline: row.timeline,
+      }));
+      memoryOrdersCache = mapped;
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("aura_orders_v1", JSON.stringify(mapped));
+        }
+      } catch {}
+      return mapped;
+    }
+  } catch {}
+
+  return memoryOrdersCache;
 }
 
 export async function insertOrderToDB(order: Order): Promise<boolean> {
+  try {
+    const cached = typeof window !== "undefined" ? localStorage.getItem("aura_orders_v1") : null;
+    const currentList: Order[] = cached ? JSON.parse(cached) : (memoryOrdersCache || []);
+    const filtered = currentList.filter((o) => o.id !== order.id);
+    const updated = [order, ...filtered];
+    memoryOrdersCache = updated;
+    if (typeof window !== "undefined") {
+      localStorage.setItem("aura_orders_v1", JSON.stringify(updated));
+    }
+  } catch {}
+
   if (!supabase) return false;
   try {
     const { error } = await supabase.from("orders").insert({
@@ -348,6 +468,18 @@ export async function updateOrderStatusInDB(
   newStatus: OrderStatus,
   updatedTimeline: Order["timeline"]
 ): Promise<boolean> {
+  try {
+    const cached = typeof window !== "undefined" ? localStorage.getItem("aura_orders_v1") : null;
+    const currentList: Order[] = cached ? JSON.parse(cached) : (memoryOrdersCache || []);
+    const updated = currentList.map((o) =>
+      o.id === orderId ? { ...o, status: newStatus, timeline: updatedTimeline } : o
+    );
+    memoryOrdersCache = updated;
+    if (typeof window !== "undefined") {
+      localStorage.setItem("aura_orders_v1", JSON.stringify(updated));
+    }
+  } catch {}
+
   if (!supabase) return false;
   try {
     const { error } = await supabase
@@ -370,17 +502,29 @@ export async function updateOrderStatusInDB(
 // ==========================================================
 
 export async function getTradeInsFromDB(): Promise<TradeInRecord[] | null> {
+  if (memoryTradeInsCache && memoryTradeInsCache.length > 0) {
+    return memoryTradeInsCache;
+  }
+
   if (!supabase) return null;
   try {
-    const { data, error } = await supabase
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Supabase timeout")), 2500)
+    );
+
+    const fetchPromise = supabase
       .from("trade_ins")
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error || !data) return null;
-    return data;
-  } catch {
+    const res: any = await Promise.race([fetchPromise, timeoutPromise]);
+    if (res?.data && Array.isArray(res.data)) {
+      memoryTradeInsCache = res.data;
+      return res.data;
+    }
     return null;
+  } catch {
+    return memoryTradeInsCache;
   }
 }
 
@@ -809,18 +953,46 @@ export function mapModelToDbReview(rev: CustomerReview): any {
 }
 
 export async function getReviewsFromDB(): Promise<CustomerReview[] | null> {
-  if (!supabase) return null;
+  if (memoryReviewsCache && memoryReviewsCache.length > 0) {
+    return memoryReviewsCache;
+  }
+
   try {
-    const { data, error } = await supabase
+    const cached = typeof window !== "undefined" ? localStorage.getItem("aura_reviews_v1") : null;
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        memoryReviewsCache = parsed;
+      }
+    }
+  } catch {}
+
+  if (!supabase) return memoryReviewsCache || INITIAL_REVIEWS;
+
+  try {
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Supabase timeout")), 2500)
+    );
+
+    const fetchPromise = supabase
       .from("customer_reviews")
       .select("*, phones(name)")
       .order("created_at", { ascending: false });
 
-    if (error || !data || data.length === 0) return null;
-    return data.map(mapDbReviewToModel);
-  } catch {
-    return null;
-  }
+    const res: any = await Promise.race([fetchPromise, timeoutPromise]);
+    if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
+      const mapped = res.data.map(mapDbReviewToModel);
+      memoryReviewsCache = mapped;
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("aura_reviews_v1", JSON.stringify(mapped));
+        }
+      } catch {}
+      return mapped;
+    }
+  } catch {}
+
+  return memoryReviewsCache || INITIAL_REVIEWS;
 }
 
 export async function insertReviewToDB(rev: CustomerReview): Promise<boolean> {
