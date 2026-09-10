@@ -48,6 +48,7 @@ import {
   Star,
   ThumbsUp,
   PenTool,
+  Award,
 } from "lucide-react";
 import { formatCFA } from "@/lib/formatters";
 import { Phone, PHONES, StorageVariant } from "@/lib/data/phones";
@@ -1346,15 +1347,27 @@ export default function AdminDashboardPage() {
             </button>
           </div>
 
-          {activeTab === "inventory" && (
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-wider border border-[#D4AF37] transition shadow-lg shrink-0"
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href="/prospectus"
+              target="_blank"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 bg-purple-950/50 hover:bg-purple-900/70 text-purple-300 border border-purple-500/40 text-xs font-mono font-bold uppercase transition"
+              title="Open Private Commercial Pitch Deck & Prospectus"
             >
-              <Plus className="w-3.5 h-3.5 stroke-[3]" />
-              <span>+ ADD NEW PHONE</span>
-            </button>
-          )}
+              <Award className="w-3.5 h-3.5 text-purple-400" />
+              <span>Pitch Deck</span>
+            </Link>
+
+            {activeTab === "inventory" && (
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-none bg-[#D4AF37] hover:bg-[#F3E5AB] text-black font-mono font-bold text-xs uppercase tracking-wider border border-[#D4AF37] transition shadow-lg shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                <span>+ ADD NEW PHONE</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* TAB 1: OVERVIEW METRICS */}
