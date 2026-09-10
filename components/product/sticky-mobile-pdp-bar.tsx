@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { ShoppingBag, MessageCircle, RefreshCw, Check } from "lucide-react";
+import { ShoppingBag, MessageCircle, Check } from "lucide-react";
 import { formatCFA } from "@/lib/formatters";
 import { Phone, StorageVariant, ColorVariant } from "@/lib/data/phones";
 import { useCart } from "@/lib/store/cart-context";
 import { useSettings } from "@/lib/store/settings-context";
-import Link from "next/link";
 
 interface StickyMobilePdpBarProps {
   phone: Phone;
@@ -51,18 +50,19 @@ export function StickyMobilePdpBar({
     setTimeout(() => setIsAdded(false), 1800);
   };
 
-  const formattedWhatsAppUrl = `https://wa.me/${(settings?.whatsappNumber || "237670000000").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-    `Hello AURA Luxe Mobile, I would like to buy the ${phone.brand} ${phone.name} (${selectedStorage.size}, ${selectedColor.name}) priced at ${formatCFA(selectedStorage.price)}. Is it available for delivery?`
+  const cleanWaNumber = settings.whatsappCleanNumber || "237699442100";
+  const formattedWhatsAppUrl = `https://wa.me/${cleanWaNumber}?text=${encodeURIComponent(
+    `Hello ${settings.storeName}, I want to order the ${phone.name} (${selectedStorage.size}, ${selectedColor.name}) for ${formatCFA(selectedStorage.price)}. Please confirm availability and delivery dispatch.`
   )}`;
 
   const displayImage = selectedColor.image || phone.images?.[0] || "/placeholder.png";
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#0c0c0f]/95 backdrop-blur-xl border-t border-amber-500/20 px-4 py-3 shadow-[0_-10px_30px_rgba(0,0,0,0.7)] transition-all duration-300 animate-in slide-in-from-bottom">
+    <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#0C0C10]/95 backdrop-blur-xl border-t border-[#D4AF37]/30 px-3.5 py-2.5 shadow-[0_-10px_35px_rgba(0,0,0,0.8)] transition-all duration-300 animate-in slide-in-from-bottom font-sans">
       <div className="flex items-center justify-between gap-3">
         {/* Thumbnail & Price info */}
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          <div className="relative w-11 h-11 rounded-lg bg-zinc-900 border border-zinc-800 flex-shrink-0 overflow-hidden p-1">
+          <div className="relative w-11 h-11 rounded-none bg-black border border-white/15 shrink-0 overflow-hidden p-1 flex items-center justify-center">
             <Image
               src={displayImage}
               alt={phone.name}
@@ -72,13 +72,13 @@ export function StickyMobilePdpBar({
             />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-semibold text-white truncate">
+            <div className="text-xs font-bold text-white truncate font-sans uppercase">
               {phone.name}
             </div>
-            <div className="text-[11px] text-zinc-400 truncate flex items-center gap-1">
+            <div className="text-[11px] text-zinc-400 truncate flex items-center gap-1 font-mono">
               <span>{selectedStorage.size}</span>
               <span>•</span>
-              <span className="text-amber-400 font-bold">
+              <span className="text-[#D4AF37] font-bold">
                 {formatCFA(selectedStorage.price)}
               </span>
             </div>
@@ -86,31 +86,31 @@ export function StickyMobilePdpBar({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <a
             href={formattedWhatsAppUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center active:scale-95 transition-transform"
+            className="w-10 h-10 rounded-none bg-[#0A1A10] border border-[#25D366]/40 text-[#25D366] flex items-center justify-center active:scale-95 transition-transform"
             aria-label="Order on WhatsApp"
-            title="Express Order on WhatsApp"
+            title="Express WhatsApp Order"
           >
             <MessageCircle className="w-5 h-5 fill-current" />
           </a>
 
           <button
             onClick={handleAddToCart}
-            className="h-10 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-semibold text-xs flex items-center gap-1.5 shadow-lg shadow-amber-500/20 active:scale-95 transition-all"
+            className="h-10 px-4 rounded-none gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-amber-500/10 active:scale-95 transition-all font-mono"
           >
             {isAdded ? (
               <>
-                <Check className="w-4 h-4 text-black" />
+                <Check className="w-4 h-4 stroke-[3] text-black" />
                 <span>Added</span>
               </>
             ) : (
               <>
                 <ShoppingBag className="w-4 h-4 text-black" />
-                <span>Buy Now</span>
+                <span>Add to Cart</span>
               </>
             )}
           </button>

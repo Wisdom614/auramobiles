@@ -9,16 +9,18 @@ import {
   ArrowRight,
   MessageCircle,
   CheckCircle2,
-  Phone,
   User,
   MapPin,
   Banknote,
   Store,
   Sparkles,
-  Lock,
-  CornerDownRight,
   Truck,
   FileCheck,
+  Tag,
+  Check,
+  X,
+  CreditCard,
+  Lock,
 } from "lucide-react";
 import { useCart } from "@/lib/store/cart-context";
 import { useOrders } from "@/lib/store/orders-context";
@@ -43,7 +45,13 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionStep, setSubmissionStep] = useState(1);
 
-  // Auto-fill from authenticated VIP Profile
+  // Voucher / Promo Code state
+  const [voucherCode, setVoucherCode] = useState("");
+  const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discount: number } | null>(null);
+  const [voucherError, setVoucherError] = useState("");
+  const [isVoucherOpen, setIsVoucherOpen] = useState(false);
+
+  // Auto-fill from authenticated profile
   useEffect(() => {
     if (profile) {
       if (profile.fullName) setFullName(profile.fullName);
@@ -62,22 +70,55 @@ export default function CheckoutPage() {
     }
   }, [profile]);
 
-  // Delivery fee calculation from admin site settings
+  // Delivery fee calculation
+  const isEligibleFreeDelivery = subtotal >= (settings.freeDeliveryThreshold || 500000);
   const deliveryFee =
     deliveryOption === "pickup"
       ? 0
-      : subtotal >= settings.freeDeliveryThreshold
+      : isEligibleFreeDelivery
       ? 0
       : deliveryOption === "buea"
       ? (settings.deliveryFeeBuea || 1500)
       : settings.deliveryFeeNationwide;
 
-  const total = subtotal + deliveryFee;
+  const discountAmount = appliedVoucher ? appliedVoucher.discount : 0;
+  const total = Math.max(0, subtotal - discountAmount + deliveryFee);
+
+  const handleApplyVoucher = (e: React.FormEvent) => {
+    e.preventDefault();
+    setVoucherError("");
+    const code = voucherCode.trim().toUpperCase();
+
+    if (!code) {
+      setVoucherError("Please enter a voucher code.");
+      return;
+    }
+
+    if (code.startsWith("SWAP-") || code.includes("TRADE")) {
+      setAppliedVoucher({ code, discount: 50000 });
+      setVoucherError("");
+    } else if (code === "AURALUXE" || code === "VIP10") {
+      const disc = Math.round(subtotal * 0.05);
+      setAppliedVoucher({ code, discount: disc });
+      setVoucherError("");
+    } else if (code === "FREESHIP") {
+      setAppliedVoucher({ code, discount: deliveryFee || 3500 });
+      setVoucherError("");
+    } else {
+      setVoucherError("Invalid or expired voucher code. Try SWAP-1234 or AURALUXE");
+    }
+  };
+
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setVoucherCode("");
+    setVoucherError("");
+  };
 
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center text-center px-4 py-20 relative font-sans">
-        <div className="max-w-md w-full border border-white/10 bg-[#0E0E12] p-8 sm:p-10 relative">
+        <div className="max-w-md w-full border border-white/10 bg-[#0E0E12] p-8 sm:p-10 relative rounded-none">
           <div className="w-14 h-14 bg-black border border-white/15 flex items-center justify-center mx-auto mb-5 text-[#D4AF37]">
             <ShoppingBag className="w-6 h-6" />
           </div>
@@ -86,12 +127,12 @@ export default function CheckoutPage() {
             Your Cart is Empty
           </h1>
           <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-            You haven&apos;t added any phones to your cart yet. Explore our authentic collection of brand new sealed & certified pre-owned phones.
+            You haven&apos;t added any phones to your cart yet. Explore our authentic collection of brand new sealed &amp; certified pre-owned phones.
           </p>
 
           <Link
             href="/phones"
-            className="w-full inline-block py-3.5 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-widest hover:opacity-95 transition"
+            className="w-full inline-block py-3.5 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-widest hover:opacity-95 transition font-mono rounded-none"
           >
             Browse All Phones
           </Link>
@@ -118,7 +159,7 @@ export default function CheckoutPage() {
 
     const text = `Hello ${settings.storeName}, I want to place an order:\n\n*Customer:* ${fullName || "Client"}\n*Phone:* ${phoneNum || "Via WhatsApp"}\n*Delivery:* ${deliveryText}\n*Payment:* ${
       paymentMethod === "cod" ? "Pay on Delivery (Inspect First)" : paymentMethod === "mtn" ? "MTN MoMo" : "Orange Money"
-    }\n\n*Items Ordered:*\n${itemList}\n\n*Total Amount:* ${formatCFA(total)}\n\nPlease confirm availability and dispatch.`;
+    }\n\n*Items Ordered:*\n${itemList}\n${discountAmount > 0 ? `*Discount (${appliedVoucher?.code}):* -${formatCFA(discountAmount)}\n` : ""}*Total Amount:* ${formatCFA(total)}\n\nPlease confirm availability and dispatch.`;
 
     const waNum = settings.whatsappCleanNumber || "237699442100";
     window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(text)}`, "_blank");
@@ -182,12 +223,12 @@ export default function CheckoutPage() {
         paymentMethod: paymentMethodMapped,
       },
       subtotal,
-      discount: 0,
+      discount: discountAmount,
       deliveryFee,
       total,
     });
 
-    // Dispatch transactional order invoice & admin alert asynchronously
+    // Dispatch background email
     fetch("/api/email/order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -196,7 +237,6 @@ export default function CheckoutPage() {
       console.warn("Background order email trigger warning:", emailErr);
     });
 
-    // Step progression gives clear feedback to reassure user
     setTimeout(() => setSubmissionStep(2), 500);
     setTimeout(() => setSubmissionStep(3), 1100);
     setTimeout(() => {
@@ -206,22 +246,22 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-zinc-100 py-8 sm:py-12 font-sans">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+    <div className="min-h-screen bg-[#09090B] text-zinc-100 py-6 sm:py-10 font-sans">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-6">
         
         {/* Top Header Bar */}
-        <div className="mb-6 pb-4 border-b border-white/10 flex flex-wrap items-center justify-between gap-4">
+        <div className="pb-4 border-b border-white/10 flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[10.5px] font-mono uppercase tracking-wider text-[#D4AF37] font-bold">
                 SECURE CHECKOUT
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span className="w-1.5 h-1.5 rounded-none bg-emerald-400"></span>
               <span className="text-[10px] font-mono text-zinc-400">
-                CAMEROON DELIVERY
+                CAMEROON EXPRESS DISPATCH
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white uppercase font-sans">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase font-sans">
               Complete Your Order
             </h1>
           </div>
@@ -233,9 +273,24 @@ export default function CheckoutPage() {
           </Link>
         </div>
 
-        {/* Profile Status Bar */}
+        {/* Free Delivery Unlock Banner */}
+        {isEligibleFreeDelivery && (
+          <div className="p-3 bg-emerald-950/40 border border-emerald-500/40 flex items-center justify-between gap-3 text-xs font-mono text-emerald-300">
+            <div className="flex items-center gap-2">
+              <Truck className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>
+                <strong>VIP Privilege:</strong> Your order qualifies for <strong>FREE Express Delivery</strong> anywhere in Cameroon!
+              </span>
+            </div>
+            <span className="text-[10px] bg-emerald-500/20 px-2 py-0.5 font-bold uppercase shrink-0">
+              SAVED FCFA 3,500
+            </span>
+          </div>
+        )}
+
+        {/* VIP Profile Status Strip */}
         {profile ? (
-          <div className="mb-6 p-3.5 bg-[#121217] border border-[#D4AF37]/40 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="p-3.5 bg-[#121217] border border-[#D4AF37]/40 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
             <div className="flex items-center gap-2.5 text-zinc-200">
               <Sparkles className="w-4 h-4 text-[#D4AF37] shrink-0" />
               <span>
@@ -246,19 +301,19 @@ export default function CheckoutPage() {
               href="/account"
               className="text-[#D4AF37] hover:underline text-[11px] uppercase tracking-wider font-semibold"
             >
-              Edit Profile →
+              Account Settings →
             </Link>
           </div>
         ) : (
-          <div className="mb-6 p-3.5 bg-[#121217] border border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="p-3.5 bg-[#121217] border border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
             <span className="text-zinc-400 text-[11px]">
-              Already have an account? Sign in for fast auto-fill and past order tracking.
+              Already an AURA client? Sign in for 1-tap auto-fill &amp; order history.
             </span>
             <Link
               href="/account/login?redirect=/checkout"
               className="text-[#D4AF37] hover:underline text-[11px] font-bold uppercase tracking-wider"
             >
-              Sign In →
+              Client Sign In →
             </Link>
           </div>
         )}
@@ -269,20 +324,22 @@ export default function CheckoutPage() {
           <div className="lg:col-span-7 space-y-5">
             
             {/* STEP 01: Contact Information */}
-            <div className="p-5 sm:p-6 bg-[#0E0E12] border border-white/10 relative">
+            <div className="p-5 sm:p-6 bg-[#0E0E12] border border-white/10 relative rounded-none shadow-xl">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-[#D4AF37]" />
+                <div className="flex items-center gap-2.5">
+                  <span className="w-6 h-6 bg-[#D4AF37] text-black text-xs font-mono font-bold flex items-center justify-center">
+                    01
+                  </span>
                   <h2 className="text-xs font-bold uppercase tracking-wider text-white font-mono">
-                    Step 1: Contact Information
+                    Contact &amp; WhatsApp
                   </h2>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-500 uppercase">Required</span>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase">Step 1 of 3</span>
               </div>
 
               <div className="space-y-4 text-xs">
                 <div>
-                  <label className="block text-zinc-300 mb-1.5 text-[11px] uppercase tracking-wider font-semibold">
+                  <label className="block text-zinc-300 mb-1.5 text-[11px] uppercase tracking-wider font-semibold font-mono">
                     Your Full Name <span className="text-[#D4AF37]">*</span>
                   </label>
                   <input
@@ -291,12 +348,12 @@ export default function CheckoutPage() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. Wisdom Besong"
-                    className="w-full bg-black border border-white/15 px-3.5 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#D4AF37] transition font-sans"
+                    className="w-full bg-black border border-white/15 px-3.5 py-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#D4AF37] transition font-sans rounded-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-zinc-300 mb-1.5 text-[11px] uppercase tracking-wider font-semibold">
+                  <label className="block text-zinc-300 mb-1.5 text-[11px] uppercase tracking-wider font-semibold font-mono">
                     WhatsApp &amp; Phone Number <span className="text-[#D4AF37]">*</span>
                   </label>
                   <div className="flex">
@@ -309,44 +366,46 @@ export default function CheckoutPage() {
                       value={phoneNum}
                       onChange={(e) => setPhoneNum(e.target.value)}
                       placeholder="699 00 00 00"
-                      className="w-full bg-black border border-white/15 px-3.5 py-3 text-sm text-white placeholder-zinc-600 font-mono focus:outline-none focus:border-[#D4AF37] transition"
+                      className="w-full bg-black border border-white/15 px-3.5 py-3 text-xs text-white placeholder-zinc-600 font-mono focus:outline-none focus:border-[#D4AF37] transition rounded-none"
                     />
                   </div>
-                  <span className="text-[10.5px] text-zinc-400 mt-1.5 block">
-                    Our dispatch manager will WhatsApp or call you to confirm before sending the courier.
+                  <span className="text-[10.5px] text-zinc-400 mt-1.5 block font-mono">
+                    Our store manager will message or call you to confirm before dispatch.
                   </span>
                 </div>
               </div>
             </div>
 
             {/* STEP 02: Delivery Location */}
-            <div className="p-5 sm:p-6 bg-[#0E0E12] border border-white/10 relative">
+            <div className="p-5 sm:p-6 bg-[#0E0E12] border border-white/10 relative rounded-none shadow-xl">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-[#D4AF37]" />
+                <div className="flex items-center gap-2.5">
+                  <span className="w-6 h-6 bg-[#D4AF37] text-black text-xs font-mono font-bold flex items-center justify-center">
+                    02
+                  </span>
                   <h2 className="text-xs font-bold uppercase tracking-wider text-white font-mono">
-                    Step 2: Delivery Location
+                    Delivery Logistics
                   </h2>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-500 uppercase">Cameroon</span>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase">Step 2 of 3</span>
               </div>
 
-              {/* Location Selector */}
+              {/* Location Selector Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-4">
                 {[
-                  { id: "buea", label: "BUEA", sub: "Same-Day (1-2h)", fee: "1,500 FCFA" },
+                  { id: "buea", label: "BUEA", sub: "Same-Day (1-2h)", fee: isEligibleFreeDelivery ? "FREE" : "1,500 FCFA" },
                   { id: "pickup", label: "MOLYKO HUB", sub: "Showroom Pick-Up", fee: "FREE" },
-                  { id: "douala", label: "DOUALA", sub: "Express (24h)", fee: "3,500 FCFA" },
-                  { id: "yaounde", label: "YAOUNDÉ", sub: "Express (24h)", fee: "3,500 FCFA" },
-                  { id: "nationwide", label: "OTHER TOWNS", sub: "Courier (24-48h)", fee: "3,500 FCFA" },
+                  { id: "douala", label: "DOUALA", sub: "Express (24h)", fee: isEligibleFreeDelivery ? "FREE" : "3,500 FCFA" },
+                  { id: "yaounde", label: "YAOUNDÉ", sub: "Express (24h)", fee: isEligibleFreeDelivery ? "FREE" : "3,500 FCFA" },
+                  { id: "nationwide", label: "OTHER TOWNS", sub: "Agency (24-48h)", fee: isEligibleFreeDelivery ? "FREE" : "3,500 FCFA" },
                 ].map((opt) => (
                   <button
                     key={opt.id}
                     type="button"
                     onClick={() => setDeliveryOption(opt.id as any)}
-                    className={`p-3 text-left border transition-all cursor-pointer relative ${
+                    className={`p-3 text-left border transition-all cursor-pointer relative rounded-none ${
                       deliveryOption === opt.id
-                        ? "bg-[#16161D] border-[#D4AF37] text-white"
+                        ? "bg-[#16161D] border-[#D4AF37] text-white ring-1 ring-[#D4AF37]"
                         : "bg-black border-white/10 text-zinc-400 hover:border-white/25 hover:text-white"
                     }`}
                   >
@@ -369,7 +428,7 @@ export default function CheckoutPage() {
               {/* Delivery Address or Showroom Pickup Notice */}
               {deliveryOption !== "pickup" ? (
                 <div>
-                  <label className="block text-zinc-300 text-[11px] uppercase tracking-wider mb-1.5 font-semibold">
+                  <label className="block text-zinc-300 text-[11px] uppercase tracking-wider mb-1.5 font-semibold font-mono">
                     Delivery Address / Quarter / Landmark
                   </label>
                   <input
@@ -377,9 +436,9 @@ export default function CheckoutPage() {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="e.g. Molyko Checkpoint, Buea or Akwa, Douala"
-                    className="w-full bg-black border border-white/15 px-3.5 py-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#D4AF37] transition font-sans"
+                    className="w-full bg-black border border-white/15 px-3.5 py-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#D4AF37] transition font-sans rounded-none"
                   />
-                  <span className="text-[10.5px] text-zinc-400 mt-1 block">
+                  <span className="text-[10.5px] text-zinc-400 mt-1 block font-mono">
                     Our courier will call your phone number when approaching your address.
                   </span>
                 </div>
@@ -397,15 +456,17 @@ export default function CheckoutPage() {
             </div>
 
             {/* STEP 03: Payment Method */}
-            <div className="p-5 sm:p-6 bg-[#0E0E12] border border-white/10 relative">
+            <div className="p-5 sm:p-6 bg-[#0E0E12] border border-white/10 relative rounded-none shadow-xl">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
-                <div className="flex items-center gap-2">
-                  <Banknote className="w-4 h-4 text-[#D4AF37]" />
+                <div className="flex items-center gap-2.5">
+                  <span className="w-6 h-6 bg-[#D4AF37] text-black text-xs font-mono font-bold flex items-center justify-center">
+                    03
+                  </span>
                   <h2 className="text-xs font-bold uppercase tracking-wider text-white font-mono">
-                    Step 3: Payment Method
+                    Payment Method
                   </h2>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-500 uppercase">Safe Payment</span>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase">Step 3 of 3</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
@@ -415,32 +476,35 @@ export default function CheckoutPage() {
                     title: "Pay on Delivery",
                     desc: "Inspect & test the phone first, then pay the courier.",
                     badge: "RECOMMENDED",
+                    color: "text-[#D4AF37]",
                   },
                   {
                     id: "mtn",
                     title: "MTN MoMo",
                     desc: settings.mtnMomoNumber || "Pay via MTN Mobile Money (*126#)",
-                    badge: "MOBILE MONEY",
+                    badge: "*126# MOMO",
+                    color: "text-amber-400",
                   },
                   {
                     id: "orange",
                     title: "Orange Money",
                     desc: settings.orangeMoneyNumber || "Pay via Orange Money (#150#)",
-                    badge: "MOBILE MONEY",
+                    badge: "#150# OM",
+                    color: "text-orange-400",
                   },
                 ].map((pay) => (
                   <button
                     key={pay.id}
                     type="button"
                     onClick={() => setPaymentMethod(pay.id as any)}
-                    className={`p-3.5 text-left border transition-all cursor-pointer relative ${
+                    className={`p-3.5 text-left border transition-all cursor-pointer relative rounded-none ${
                       paymentMethod === pay.id
-                        ? "bg-[#16161D] border-[#D4AF37] text-white"
+                        ? "bg-[#16161D] border-[#D4AF37] text-white ring-1 ring-[#D4AF37]"
                         : "bg-black border-white/10 text-zinc-400 hover:border-white/25 hover:text-white"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[9px] font-mono text-[#D4AF37] uppercase tracking-wider font-bold">
+                      <span className={`text-[9px] font-mono uppercase tracking-wider font-bold ${pay.color}`}>
                         {pay.badge}
                       </span>
                       {paymentMethod === pay.id && (
@@ -448,7 +512,7 @@ export default function CheckoutPage() {
                       )}
                     </div>
                     <span className="text-xs font-bold text-white block font-sans">{pay.title}</span>
-                    <span className="text-[10.5px] text-zinc-400 block mt-1 leading-snug">
+                    <span className="text-[10.5px] text-zinc-400 block mt-1 leading-snug font-mono">
                       {pay.desc}
                     </span>
                   </button>
@@ -460,17 +524,17 @@ export default function CheckoutPage() {
 
           {/* Right Column: Order Summary (5 Cols) */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="p-5 sm:p-6 bg-[#0E0E12] border border-white/10 lg:sticky lg:top-24 relative">
-              <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
+            <div className="p-5 sm:p-6 bg-[#0E0E12] border border-white/10 lg:sticky lg:top-24 relative rounded-none shadow-2xl space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10 font-mono">
                 <div className="flex items-center gap-2">
                   <FileCheck className="w-4 h-4 text-[#D4AF37]" />
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-white font-mono">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-white">
                     Order Summary ({items.length} {items.length === 1 ? "phone" : "phones"})
                   </h3>
                 </div>
                 <Link
                   href="/phones"
-                  className="text-[10px] font-mono text-[#D4AF37] hover:underline uppercase"
+                  className="text-[10px] text-[#D4AF37] hover:underline uppercase"
                 >
                   Edit Cart
                 </Link>
@@ -480,14 +544,14 @@ export default function CheckoutPage() {
               <div className="space-y-3 max-h-64 overflow-y-auto pr-1 divide-y divide-white/5">
                 {items.map((it) => (
                   <div key={it.id} className="pt-3 first:pt-0 flex items-center gap-3 text-xs">
-                    <div className="w-12 h-14 bg-black border border-white/10 p-1 flex items-center justify-center shrink-0">
+                    <div className="w-12 h-14 bg-black border border-white/10 p-1 flex items-center justify-center shrink-0 rounded-none">
                       <img
                         src={it.selectedColor.image || it.phone.images[0]}
                         alt={it.phone.name}
                         className="w-full h-full object-contain"
                       />
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 font-sans">
                       <h4 className="font-bold text-white truncate text-xs">{it.phone.name}</h4>
                       <span className="text-[10px] font-mono text-zinc-400 block mt-0.5">
                         {it.selectedStorage.size} • {it.selectedColor.name}
@@ -505,38 +569,110 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
+              {/* Promo / Voucher Code Box */}
+              <div className="pt-3 border-t border-white/10">
+                {!appliedVoucher ? (
+                  <div>
+                    {!isVoucherOpen ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsVoucherOpen(true)}
+                        className="text-[11px] font-mono text-[#D4AF37] hover:underline flex items-center gap-1.5 cursor-pointer uppercase font-bold"
+                      >
+                        <Tag className="w-3.5 h-3.5" />
+                        <span>Have a Trade-In Voucher or Promo Code?</span>
+                      </button>
+                    ) : (
+                      <div className="space-y-2 font-mono">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={voucherCode}
+                            onChange={(e) => setVoucherCode(e.target.value)}
+                            placeholder="Enter Code (e.g. SWAP-1234)"
+                            className="flex-1 bg-black border border-white/20 px-2.5 py-1.5 text-xs text-white uppercase focus:outline-none focus:border-[#D4AF37] rounded-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleApplyVoucher}
+                            className="px-3 py-1.5 gold-gradient-bg text-black font-extrabold text-[11px] uppercase cursor-pointer rounded-none"
+                          >
+                            Apply
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setIsVoucherOpen(false); setVoucherError(""); }}
+                            className="p-1.5 text-zinc-500 hover:text-white cursor-pointer"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        {voucherError && (
+                          <p className="text-[10px] text-rose-400">{voucherError}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-2.5 bg-emerald-950/40 border border-emerald-500/40 flex items-center justify-between text-xs font-mono text-emerald-300">
+                    <div className="flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Voucher: <strong>{appliedVoucher.code}</strong> (-{formatCFA(appliedVoucher.discount)})</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveVoucher}
+                      className="text-zinc-400 hover:text-rose-400 cursor-pointer"
+                      title="Remove voucher"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {/* Cost Breakdown */}
-              <div className="pt-4 border-t border-white/10 space-y-2 text-xs font-mono">
+              <div className="pt-3 border-t border-white/10 space-y-2 text-xs font-mono">
                 <div className="flex justify-between text-zinc-400">
                   <span>Subtotal</span>
                   <span className="text-zinc-200">{formatCFA(subtotal)}</span>
                 </div>
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-emerald-400">
+                    <span>Discount / Voucher</span>
+                    <span>-{formatCFA(discountAmount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-zinc-400">
                   <span>Delivery Fee</span>
                   <span className="text-zinc-200">
-                    {deliveryFee === 0 ? "FREE" : formatCFA(deliveryFee)}
+                    {deliveryFee === 0 ? (
+                      <span className="text-emerald-400 font-bold">FREE</span>
+                    ) : (
+                      formatCFA(deliveryFee)
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between items-baseline pt-3 border-t border-white/15">
                   <span className="font-bold text-white text-xs uppercase tracking-wider">
                     Total Amount
                   </span>
-                  <span className="text-xl font-black text-[#D4AF37]">
+                  <span className="text-2xl font-black text-[#D4AF37]">
                     {formatCFA(total)}
                   </span>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="space-y-2.5 pt-5">
+              <div className="space-y-2.5 pt-3">
                 {/* Primary Button */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-4 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:opacity-95 transition min-h-[48px] cursor-pointer disabled:opacity-50 font-sans"
+                  className="w-full py-4 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:opacity-95 transition min-h-[48px] cursor-pointer disabled:opacity-50 font-mono shadow-lg shadow-amber-500/10 rounded-none"
                 >
                   {isSubmitting ? (
-                    <span className="font-mono">Confirming Order...</span>
+                    <span>Confirming Order...</span>
                   ) : (
                     <>
                       <span>Confirm Order (Pay on Delivery)</span>
@@ -545,24 +681,24 @@ export default function CheckoutPage() {
                   )}
                 </button>
 
-                {/* Secondary WhatsApp 1-Tap Direct Trigger */}
+                {/* Secondary WhatsApp 1-Tap Trigger */}
                 <button
                   type="button"
                   onClick={handleWhatsAppOrder}
-                  className="w-full py-3.5 bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/40 text-emerald-400 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition min-h-[44px] cursor-pointer font-sans"
+                  className="w-full py-3.5 bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/40 text-emerald-400 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition min-h-[44px] cursor-pointer font-mono rounded-none"
                 >
                   <MessageCircle className="w-4 h-4 text-emerald-400" />
-                  <span>Order via WhatsApp (1-Tap)</span>
+                  <span>Order via WhatsApp (Instant Reply)</span>
                 </button>
               </div>
 
               {/* Guarantees */}
-              <div className="pt-4 border-t border-white/10 mt-4 text-[10.5px] text-zinc-400 space-y-1">
-                <div className="flex items-center gap-1.5 text-emerald-400">
+              <div className="pt-4 border-t border-white/10 text-[10.5px] text-zinc-400 space-y-1">
+                <div className="flex items-center gap-1.5 text-emerald-400 font-mono">
                   <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                  <span className="font-semibold uppercase font-mono">100% Authentic Devices • Official Warranty</span>
+                  <span className="font-semibold uppercase">100% Authentic Devices • Official Warranty</span>
                 </div>
-                <p className="text-zinc-500 text-[10px]">
+                <p className="text-zinc-500 text-[10px] font-sans">
                   You can inspect and test the device before completing payment.
                 </p>
               </div>
@@ -577,10 +713,9 @@ export default function CheckoutPage() {
       {/* Order Processing Modal */}
       {isSubmitting && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 select-none font-sans animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-[#0E0E12] border border-[#D4AF37] p-6 sm:p-8 relative shadow-2xl">
+          <div className="w-full max-w-md bg-[#0E0E12] border border-[#D4AF37] p-6 sm:p-8 relative shadow-2xl rounded-none">
             <div className="space-y-5 text-center">
-              {/* Spinning gold indicator */}
-              <div className="w-14 h-14 bg-black border border-white/20 flex items-center justify-center mx-auto relative">
+              <div className="w-14 h-14 bg-black border border-white/20 flex items-center justify-center mx-auto relative rounded-none">
                 <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent animate-spin"></div>
                 <span className="absolute text-[8px] font-mono font-bold text-[#D4AF37]">
                   {submissionStep * 33}%
@@ -592,12 +727,12 @@ export default function CheckoutPage() {
                   PROCESSING ORDER
                 </span>
                 <h3 className="text-base font-bold text-white uppercase tracking-wider font-sans mt-1">
-                  Confirming Your Phone Order
+                  Confirming Your Smartphone Order
                 </h3>
               </div>
 
               {/* Progress gauge */}
-              <div className="w-full h-1.5 bg-black border border-white/10 overflow-hidden">
+              <div className="w-full h-1.5 bg-black border border-white/10 overflow-hidden rounded-none">
                 <div
                   className="h-full bg-gradient-to-r from-[#B38F28] via-[#D4AF37] to-[#F3E5AB] transition-all duration-300 ease-out"
                   style={{ width: `${submissionStep * 33 + (submissionStep === 3 ? 1 : 0)}%` }}
@@ -607,7 +742,7 @@ export default function CheckoutPage() {
               {/* Step progression ticker */}
               <div className="space-y-2 text-left pt-2 font-mono text-[11px]">
                 <div
-                  className={`p-2 border flex items-center gap-2 transition-colors ${
+                  className={`p-2 border flex items-center gap-2 transition-colors rounded-none ${
                     submissionStep >= 1
                       ? "bg-[#141419] border-[#D4AF37]/50 text-white"
                       : "bg-black border-white/5 text-zinc-600"
@@ -618,30 +753,30 @@ export default function CheckoutPage() {
                 </div>
 
                 <div
-                  className={`p-2 border flex items-center gap-2 transition-colors ${
+                  className={`p-2 border flex items-center gap-2 transition-colors rounded-none ${
                     submissionStep >= 2
                       ? "bg-[#141419] border-[#D4AF37]/50 text-white"
                       : "bg-black border-white/5 text-zinc-600"
                   }`}
                 >
                   <span className="text-[#D4AF37] font-bold">02 •</span>
-                  <span>Generating Order Receipt & Warranty Code...</span>
+                  <span>Generating Order Receipt &amp; Warranty Code...</span>
                 </div>
 
                 <div
-                  className={`p-2 border flex items-center gap-2 transition-colors ${
+                  className={`p-2 border flex items-center gap-2 transition-colors rounded-none ${
                     submissionStep >= 3
                       ? "bg-[#141419] border-[#D4AF37]/50 text-white"
                       : "bg-black border-white/5 text-zinc-600"
                   }`}
                 >
                   <span className="text-[#D4AF37] font-bold">03 •</span>
-                  <span>Assigning Courier for Delivery Dispatch...</span>
+                  <span>Connecting to Courier Dispatch Network...</span>
                 </div>
               </div>
 
-              <p className="text-[10px] text-zinc-400">
-                Please hold. Preparing your order receipt...
+              <p className="text-[10px] text-zinc-400 font-mono">
+                Please do not refresh the page.
               </p>
             </div>
           </div>

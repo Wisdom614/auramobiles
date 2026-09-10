@@ -22,6 +22,8 @@ import {
   Share2,
   ChevronLeft,
   ChevronRight,
+  Sparkles,
+  Zap,
 } from "lucide-react";
 import { Phone } from "@/lib/data/phones";
 import { formatCFA } from "@/lib/formatters";
@@ -66,13 +68,11 @@ export default function PhoneDetailPage({ params }: PageProps) {
     async function loadPhoneFromDB() {
       setIsLoading(true);
       try {
-        // 1. Fetch exact smartphone record from Supabase database
         const dbPhone = await getPhoneBySlugFromDB(resolvedParams.slug);
 
         if (isMounted && dbPhone) {
           setPhone(dbPhone);
 
-          // 2. Fetch catalog from database to compute related models
           const allDbPhones = await getPhonesFromDB();
           if (isMounted && allDbPhones) {
             const related = allDbPhones
@@ -86,7 +86,6 @@ export default function PhoneDetailPage({ params }: PageProps) {
             setRelatedPhones(related);
           }
         } else if (isMounted) {
-          // Fallback: search all DB records for matching slug or name
           const allDbPhones = await getPhonesFromDB();
           if (isMounted && allDbPhones) {
             const match = allDbPhones.find(
@@ -124,12 +123,11 @@ export default function PhoneDetailPage({ params }: PageProps) {
     };
   }, [resolvedParams.slug]);
 
-  // Always reset scroll to the top upon route navigation or slug change
+  // Always reset scroll to top on navigation
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [resolvedParams.slug]);
 
-  // Ensure scroll remains clean after data loading finishes
   useEffect(() => {
     if (!isLoading && phone) {
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
@@ -150,7 +148,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
     image: phone?.images?.[0] || "/placeholder.png",
   };
 
-  // Compile clean curated images list (from phone.images)
+  // Compile clean images list
   const imagesList = useMemo(() => {
     if (!phone) return [];
     const list: string[] = [];
@@ -159,26 +157,12 @@ export default function PhoneDetailPage({ params }: PageProps) {
         if (img && img.trim() && !list.includes(img.trim())) list.push(img.trim());
       });
     }
-    // Only if phone.images is empty, fallback to color variants
-    if (list.length === 0 && Array.isArray(phone.colorVariants)) {
-      phone.colorVariants.forEach((c) => {
-        if (c.image && c.image.trim() && !list.includes(c.image.trim())) list.push(c.image.trim());
-      });
-    }
-    if (list.length === 0) {
-      list.push("/placeholder.png");
+    if (list.length === 0 && currentColor.image) {
+      list.push(currentColor.image);
     }
     return list;
-  }, [phone]);
+  }, [phone, currentColor]);
 
-  // Ensure index stays valid if imagesList changes
-  useEffect(() => {
-    if (selectedImageIdx >= imagesList.length) {
-      setSelectedImageIdx(0);
-    }
-  }, [imagesList.length, selectedImageIdx]);
-
-  // Gallery Navigation Functions
   const goToNextImage = () => {
     if (imagesList.length <= 1) return;
     setSelectedImageIdx((prev) => (prev + 1) % imagesList.length);
@@ -189,7 +173,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
     setSelectedImageIdx((prev) => (prev - 1 + imagesList.length) % imagesList.length);
   };
 
-  // Touch Swipe Handlers (mobile)
+  // Touch handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     if (imagesList.length <= 1) return;
     setTouchStartX(e.touches[0].clientX);
@@ -202,22 +186,22 @@ export default function PhoneDetailPage({ params }: PageProps) {
     if (!isDragging || touchStartX === null || touchStartY === null) return;
     const currentX = e.touches[0].clientX;
     const currentY = e.touches[0].clientY;
-    const diffX = currentX - touchStartX;
-    const diffY = currentY - touchStartY;
+    const deltaX = currentX - touchStartX;
+    const deltaY = currentY - touchStartY;
 
-    // Only drag horizontally if motion is mostly horizontal
-    if (Math.abs(diffX) > Math.abs(diffY)) {
-      setDragOffset(diffX);
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (e.cancelable) e.preventDefault();
+      setDragOffset(deltaX);
     }
   };
 
   const handleTouchEnd = () => {
     if (!isDragging) return;
-    const threshold = 40;
-    if (dragOffset < -threshold) {
-      goToNextImage();
-    } else if (dragOffset > threshold) {
+    const threshold = 45;
+    if (dragOffset > threshold) {
       goToPrevImage();
+    } else if (dragOffset < -threshold) {
+      goToNextImage();
     }
     setDragOffset(0);
     setIsDragging(false);
@@ -225,28 +209,27 @@ export default function PhoneDetailPage({ params }: PageProps) {
     setTouchStartY(null);
   };
 
-  // Mouse Drag Handlers (desktop)
+  // Mouse drag handlers
   const handleMouseDown = (e: React.MouseEvent) => {
     if (imagesList.length <= 1) return;
     setTouchStartX(e.clientX);
-    setTouchStartY(e.clientY);
     setIsDragging(true);
     setDragOffset(0);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || touchStartX === null) return;
-    const diffX = e.clientX - touchStartX;
-    setDragOffset(diffX);
+    const deltaX = e.clientX - touchStartX;
+    setDragOffset(deltaX);
   };
 
   const handleMouseUpOrLeave = () => {
     if (!isDragging) return;
-    const threshold = 40;
-    if (dragOffset < -threshold) {
-      goToNextImage();
-    } else if (dragOffset > threshold) {
+    const threshold = 50;
+    if (dragOffset > threshold) {
       goToPrevImage();
+    } else if (dragOffset < -threshold) {
+      goToNextImage();
     }
     setDragOffset(0);
     setIsDragging(false);
@@ -254,7 +237,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
     setTouchStartY(null);
   };
 
-  // Keyboard navigation for image gallery
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (imagesList.length <= 1) return;
@@ -268,7 +251,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [imagesList.length]);
 
-  // Loading Skeleton in Architectural Style
+  // Loading Skeleton
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#09090B] text-zinc-100 py-8 sm:py-12 animate-pulse">
@@ -297,13 +280,13 @@ export default function PhoneDetailPage({ params }: PageProps) {
           <span className="text-[10px] font-mono uppercase text-[#D4AF37] font-bold block mb-2">
             Phone Not Available
           </span>
-          <h1 className="text-2xl font-bold text-white mb-2">Smartphone Not Found</h1>
+          <h1 className="text-2xl font-bold text-white mb-2 font-sans">Smartphone Not Found</h1>
           <p className="text-xs text-zinc-400 mb-6">
             The requested smartphone was not found in our current store inventory.
           </p>
           <Link
             href="/phones"
-            className="w-full inline-block py-3.5 gold-gradient-bg text-black font-bold text-xs uppercase tracking-wider rounded-none hover:opacity-90 transition-all text-center"
+            className="w-full inline-block py-3.5 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-wider rounded-none hover:opacity-90 transition-all text-center font-mono"
           >
             Browse All Phones
           </Link>
@@ -314,6 +297,9 @@ export default function PhoneDetailPage({ params }: PageProps) {
 
   const currentPrice = activeStorage.price || phone.basePrice;
   const inWish = isInWishlist(phone.id);
+  const hasSavings = phone.originalPrice && phone.originalPrice > currentPrice && phone.originalPrice <= currentPrice * 2.5;
+  const savingsAmount = hasSavings ? (phone.originalPrice! - currentPrice) : 0;
+  const savingsPercent = hasSavings ? Math.round((savingsAmount / phone.originalPrice!) * 100) : 0;
 
   const handleAddToCart = () => {
     addItem(phone, activeStorage, currentColor, 1, false);
@@ -334,13 +320,15 @@ export default function PhoneDetailPage({ params }: PageProps) {
     }
   };
 
+  const cleanWaNumber = settings.whatsappCleanNumber || "237699442100";
+
   return (
-    <div className="min-h-screen bg-[#09090B] text-zinc-100 py-8 sm:py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+    <div className="min-h-screen bg-[#09090B] text-zinc-100 py-6 sm:py-10 font-sans">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
-        {/* 1. Breadcrumbs Navigation (Clean Style) */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
-          <nav className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono tracking-wider overflow-x-auto">
+        {/* 1. Breadcrumbs Navigation */}
+        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <nav className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono tracking-wider overflow-x-auto no-scrollbar">
             <Link href="/" className="hover:text-white transition-colors">Home</Link>
             <span>/</span>
             <Link href="/phones" className="hover:text-white transition-colors">All Phones</Link>
@@ -354,27 +342,27 @@ export default function PhoneDetailPage({ params }: PageProps) {
 
           <button
             onClick={handleCopyShare}
-            className="p-1.5 text-zinc-400 hover:text-white border border-white/10 hover:border-white/30 rounded-none transition-colors text-xs flex items-center gap-1.5 font-mono shrink-0 ml-2"
+            className="p-1.5 px-2.5 text-zinc-400 hover:text-white border border-white/10 hover:border-white/30 rounded-none transition-colors text-xs flex items-center gap-1.5 font-mono shrink-0 ml-2 cursor-pointer"
             title="Share device link"
           >
             {copiedLink ? (
-              <span className="text-emerald-400 text-[10px]">LINK COPIED</span>
+              <span className="text-emerald-400 text-[10px] font-bold">LINK COPIED</span>
             ) : (
               <>
                 <Share2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline text-[10px]">SHARE</span>
+                <span className="hidden sm:inline text-[10px] font-bold">SHARE</span>
               </>
             )}
           </button>
         </div>
 
-        {/* 2. Product Hero Grid (Strict Architectural 2-Column Structure) */}
+        {/* 2. Product Hero Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           
-          {/* LEFT COLUMN: Gallery with Straight Edges & Technical Crosshairs (7 Cols) */}
+          {/* LEFT COLUMN: Image Canvas & Gallery (7 Cols) */}
           <div className="lg:col-span-7 space-y-4 lg:sticky lg:top-24">
             
-            {/* Main Showcase Canvas with Touch & Mouse Swipe Support */}
+            {/* Main Showcase Canvas */}
             <div
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -396,11 +384,11 @@ export default function PhoneDetailPage({ params }: PageProps) {
 
               {/* Condition Tag */}
               <div className="absolute top-3 left-4 flex items-center gap-2 z-10 pointer-events-none">
-                <span className="text-[10px] font-mono tracking-widest text-[#D4AF37] uppercase font-bold bg-black/80 px-2.5 py-1">
+                <span className="text-[10px] font-mono tracking-widest text-[#D4AF37] uppercase font-bold bg-black/85 border border-[#D4AF37]/40 px-2.5 py-1">
                   {phone.condition === "Certified Refurbished" ? "Clean Pre-Owned (UK Used)" : "100% Brand New Sealed"}
                 </span>
                 {phone.isNew && (
-                  <span className="text-[10px] font-mono tracking-widest text-white uppercase font-bold bg-[#D4AF37]/20 px-2 py-1">
+                  <span className="text-[10px] font-mono tracking-widest text-white uppercase font-bold bg-[#D4AF37]/25 border border-white/20 px-2 py-1">
                     Flagship Release
                   </span>
                 )}
@@ -430,7 +418,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 ))}
               </div>
 
-              {/* Navigation Chevrons (Previous / Next) */}
+              {/* Navigation Chevrons */}
               {imagesList.length > 1 && (
                 <>
                   <button
@@ -439,7 +427,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
                       e.stopPropagation();
                       goToPrevImage();
                     }}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-9 sm:h-9 bg-black/70 hover:bg-[#D4AF37] hover:text-black border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm z-20 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 rounded-none shadow-lg"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-9 sm:h-9 bg-black/75 hover:bg-[#D4AF37] hover:text-black border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm z-20 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 rounded-none shadow-lg"
                     aria-label="Previous photo"
                   >
                     <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -450,7 +438,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
                       e.stopPropagation();
                       goToNextImage();
                     }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-9 sm:h-9 bg-black/70 hover:bg-[#D4AF37] hover:text-black border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm z-20 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 rounded-none shadow-lg"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-9 sm:h-9 bg-black/75 hover:bg-[#D4AF37] hover:text-black border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm z-20 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 rounded-none shadow-lg"
                     aria-label="Next photo"
                   >
                     <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -460,7 +448,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
 
               {/* Pagination Dots Indicator */}
               {imagesList.length > 1 && (
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 bg-black/70 px-2.5 py-1 border border-white/10 backdrop-blur-sm rounded-full">
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 bg-black/80 px-2.5 py-1 border border-white/10 backdrop-blur-sm rounded-none">
                   {imagesList.map((_, idx) => (
                     <button
                       key={idx}
@@ -469,10 +457,10 @@ export default function PhoneDetailPage({ params }: PageProps) {
                         e.stopPropagation();
                         setSelectedImageIdx(idx);
                       }}
-                      className={`h-1.5 transition-all duration-300 cursor-pointer rounded-full ${
+                      className={`h-1.5 transition-all duration-300 cursor-pointer rounded-none ${
                         selectedImageIdx === idx
                           ? "w-5 bg-[#D4AF37]"
-                          : "w-1.5 bg-white/40 hover:bg-white/80"
+                          : "w-2 bg-white/40 hover:bg-white/80"
                       }`}
                       aria-label={`Jump to photo ${idx + 1}`}
                     />
@@ -482,14 +470,14 @@ export default function PhoneDetailPage({ params }: PageProps) {
 
               {/* Frame Badge */}
               {imagesList.length > 1 && (
-                <div className="absolute bottom-3 right-4 px-2 py-0.5 bg-black/80 border border-white/15 text-[9px] font-mono text-zinc-400 rounded-none z-10 flex items-center gap-1.5 pointer-events-none">
+                <div className="absolute bottom-3 right-4 px-2 py-0.5 bg-black/85 border border-white/15 text-[9px] font-mono text-zinc-400 rounded-none z-10 flex items-center gap-1.5 pointer-events-none">
                   <span className="text-[#D4AF37] hidden sm:inline">SWIPE ◄►</span>
                   <span>Photo {selectedImageIdx + 1} of {imagesList.length}</span>
                 </div>
               )}
             </div>
 
-            {/* Thumbnail Strip (Sharp Rectangular Tiles) */}
+            {/* Thumbnail Strip */}
             {imagesList.length > 1 && (
               <div className="grid grid-cols-4 sm:grid-cols-6 gap-2.5">
                 {imagesList.map((imgUrl, idx) => (
@@ -513,7 +501,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Guarantees Technical Strip (3 Equal Blocks) */}
+            {/* Guarantees Technical Strip */}
             <div className="grid grid-cols-1 sm:grid-cols-3 border border-white/10 divide-y sm:divide-y-0 sm:divide-x divide-white/10 text-xs">
               <div className="p-3.5 bg-[#0F0F13] flex items-center gap-2.5">
                 <ShieldCheck className="w-4 h-4 text-[#D4AF37] shrink-0" />
@@ -527,7 +515,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 <Truck className="w-4 h-4 text-[#D4AF37] shrink-0" />
                 <div>
                   <span className="text-[10px] font-mono uppercase text-zinc-400 block font-bold">EXPRESS DELIVERY</span>
-                  <span className="text-white font-medium text-[11px]">Buea, Douala, Yaoundé &amp; Nationwide</span>
+                  <span className="text-white font-medium text-[11px]">Buea, Douala &amp; Nationwide</span>
                 </div>
               </div>
 
@@ -535,21 +523,21 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 <RotateCcw className="w-4 h-4 text-[#D4AF37] shrink-0" />
                 <div>
                   <span className="text-[10px] font-mono uppercase text-zinc-400 block font-bold">EXCHANGE POLICY</span>
-                  <span className="text-white font-medium text-[11px]">7-Day Replacement Guarantee</span>
+                  <span className="text-white font-medium text-[11px]">7-Day Defect Exchange</span>
                 </div>
               </div>
             </div>
 
           </div>
 
-          {/* RIGHT COLUMN: Technical Configuration & Acquisition (5 Cols) */}
-          <div className="lg:col-span-5 space-y-6">
+          {/* RIGHT COLUMN: Configuration & Purchasing (5 Cols) */}
+          <div className="lg:col-span-5 space-y-5">
             
             {/* Header: Brand, Title, Rating */}
-            <div className="border-b border-white/10 pb-5">
+            <div className="border-b border-white/10 pb-4">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37] font-bold">
-                  {phone.brand.toUpperCase()} • Official Model
+                  {phone.brand.toUpperCase()} • Official Flagship
                 </span>
                 
                 <div className="flex items-center gap-1 text-xs text-amber-300 font-mono">
@@ -568,7 +556,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
               </p>
             </div>
 
-            {/* Pricing Matrix Block (Straight-Edged Table Box) */}
+            {/* Pricing Matrix Block */}
             <div className="border border-white/15 bg-[#121217] p-5 rounded-none flex items-baseline justify-between">
               <div>
                 <span className="text-[9px] text-zinc-500 uppercase font-mono tracking-widest block font-bold">
@@ -578,69 +566,89 @@ export default function PhoneDetailPage({ params }: PageProps) {
                   <span className="text-2xl sm:text-3xl font-black text-[#D4AF37] font-mono tracking-tight">
                     {formatCFA(currentPrice)}
                   </span>
-                  {phone.originalPrice && phone.originalPrice > currentPrice && phone.originalPrice <= currentPrice * 2.5 && (
+                  {hasSavings && (
                     <span className="text-xs text-zinc-500 line-through font-mono">
-                      {formatCFA(phone.originalPrice)}
+                      {formatCFA(phone.originalPrice!)}
                     </span>
                   )}
                 </div>
+                {hasSavings && (
+                  <div className="mt-1.5">
+                    <span className="px-2 py-0.5 bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 font-mono text-[10px] font-bold uppercase inline-block">
+                      SAVE {formatCFA(savingsAmount)} (-{savingsPercent}%)
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="text-right">
-                <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400 uppercase">
-                  <span className="w-1.5 h-1.5 rounded-none bg-emerald-400 animate-pulse" />
-                  <span>{activeStorage.stock > 0 ? `${activeStorage.stock} UNITS IN STOCK` : "SOLD OUT"}</span>
-                </span>
+                {activeStorage.stock > 0 ? (
+                  activeStorage.stock <= 3 ? (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-amber-400 uppercase">
+                      <span className="w-2 h-2 rounded-none bg-amber-400 animate-pulse" />
+                      <span>Only {activeStorage.stock} Left</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400 uppercase">
+                      <span className="w-1.5 h-1.5 rounded-none bg-emerald-400 animate-pulse" />
+                      <span>{activeStorage.stock} In Stock</span>
+                    </span>
+                  )
+                ) : (
+                  <span className="text-xs font-mono font-bold text-rose-400 uppercase">
+                    Sold Out
+                  </span>
+                )}
                 <span className="text-[10px] text-zinc-400 block font-sans mt-0.5">
-                  Ready for instant dispatch
+                  Buea Showroom Vault
                 </span>
               </div>
             </div>
 
             {/* Instant Hardware Specs Matrix (4 Pillars) */}
             {phone.specs && (
-              <div className="grid grid-cols-2 gap-px bg-white/10 border border-white/10 text-xs">
+              <div className="grid grid-cols-2 gap-px bg-white/10 border border-white/10 text-xs font-mono">
                 {phone.specs.processor && (
                   <div className="p-3 bg-[#0E0E12] space-y-0.5">
                     <div className="flex items-center gap-1.5 text-[#D4AF37]">
                       <Cpu className="w-3.5 h-3.5" />
-                      <span className="text-[9px] uppercase font-mono tracking-wider font-bold">PROCESSOR</span>
+                      <span className="text-[9px] uppercase tracking-wider font-bold">PROCESSOR</span>
                     </div>
-                    <p className="text-[11px] font-bold text-white truncate font-mono">{phone.specs.processor}</p>
+                    <p className="text-[11px] font-bold text-white truncate">{phone.specs.processor}</p>
                   </div>
                 )}
                 {phone.specs.rearCamera && (
                   <div className="p-3 bg-[#0E0E12] space-y-0.5">
                     <div className="flex items-center gap-1.5 text-[#D4AF37]">
                       <Camera className="w-3.5 h-3.5" />
-                      <span className="text-[9px] uppercase font-mono tracking-wider font-bold">MAIN CAMERA</span>
+                      <span className="text-[9px] uppercase tracking-wider font-bold">MAIN CAMERA</span>
                     </div>
-                    <p className="text-[11px] font-bold text-white truncate font-mono">{phone.specs.rearCamera.split("+")[0]}</p>
+                    <p className="text-[11px] font-bold text-white truncate">{phone.specs.rearCamera.split("+")[0]}</p>
                   </div>
                 )}
                 {phone.specs.battery && (
                   <div className="p-3 bg-[#0E0E12] space-y-0.5">
                     <div className="flex items-center gap-1.5 text-[#D4AF37]">
                       <BatteryCharging className="w-3.5 h-3.5" />
-                      <span className="text-[9px] uppercase font-mono tracking-wider font-bold">BATTERY LIFE</span>
+                      <span className="text-[9px] uppercase tracking-wider font-bold">BATTERY</span>
                     </div>
-                    <p className="text-[11px] font-bold text-white truncate font-mono">{phone.specs.battery}</p>
+                    <p className="text-[11px] font-bold text-white truncate">{phone.specs.battery}</p>
                   </div>
                 )}
                 {phone.specs.screen && (
                   <div className="p-3 bg-[#0E0E12] space-y-0.5">
                     <div className="flex items-center gap-1.5 text-[#D4AF37]">
                       <Smartphone className="w-3.5 h-3.5" />
-                      <span className="text-[9px] uppercase font-mono tracking-wider font-bold">DISPLAY</span>
+                      <span className="text-[9px] uppercase tracking-wider font-bold">DISPLAY</span>
                     </div>
-                    <p className="text-[11px] font-bold text-white truncate font-mono">{phone.specs.screen.split(" ")[0]} OLED</p>
+                    <p className="text-[11px] font-bold text-white truncate">{phone.specs.screen.split(" ")[0]} OLED</p>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Storage Capacity Selector (Sharp Modular Blocks) */}
-            <div className="space-y-2.5">
+            {/* Storage Capacity Selector */}
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
                   Select Storage:
@@ -659,7 +667,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
                       onClick={() => setSelectedStorageIdx(idx)}
                       className={`p-3 border text-left transition-all cursor-pointer rounded-none relative ${
                         isSelected
-                          ? "bg-[#181820] border-[#D4AF37] ring-1 ring-[#D4AF37]"
+                          ? "bg-[#181820] border-[#D4AF37] ring-1 ring-[#D4AF37] shadow-sm shadow-[#D4AF37]/10"
                           : "bg-[#101015] border-white/10 hover:border-white/25 text-zinc-300"
                       }`}
                     >
@@ -683,19 +691,19 @@ export default function PhoneDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* Color Finish Selector (If available) */}
+            {/* Color Finish Selector */}
             {phone.colorVariants && phone.colorVariants.length > 0 && (
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-                    Select Color:
+                    Select Color Finish:
                   </span>
                   <span className="text-xs text-zinc-300 font-mono font-semibold">
                     {currentColor.name}
                   </span>
                 </div>
 
-                <div className="flex flex-wrap gap-2.5">
+                <div className="flex flex-wrap gap-2">
                   {phone.colorVariants.map((color, idx) => {
                     const isSelected = selectedColorIdx === idx;
                     return (
@@ -703,7 +711,6 @@ export default function PhoneDetailPage({ params }: PageProps) {
                         key={color.id || idx}
                         onClick={() => {
                           setSelectedColorIdx(idx);
-                          // If color variant specifies an image, select it
                           if (color.image) {
                             const imgIdx = imagesList.indexOf(color.image);
                             if (imgIdx !== -1) setSelectedImageIdx(imgIdx);
@@ -716,9 +723,11 @@ export default function PhoneDetailPage({ params }: PageProps) {
                         }`}
                       >
                         <span
-                          className="w-4 h-4 rounded-none border border-white/20 shrink-0"
+                          className="w-4 h-4 rounded-none border border-white/20 shrink-0 flex items-center justify-center"
                           style={{ backgroundColor: color.hex }}
-                        />
+                        >
+                          {isSelected && <Check className="w-2.5 h-2.5 text-white stroke-[3]" />}
+                        </span>
                         <span className="text-[11px] font-mono text-zinc-200">{color.name}</span>
                       </button>
                     );
@@ -727,13 +736,13 @@ export default function PhoneDetailPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Acquisition & Order CTAs (Strict Straight Edges) */}
-            <div id="main-pdp-buy-box" className="space-y-2.5 pt-2">
+            {/* Acquisition & Order CTAs */}
+            <div id="main-pdp-buy-box" className="space-y-2.5 pt-1">
               
               {/* Primary Add to Cart Button */}
               <button
                 onClick={handleAddToCart}
-                className="w-full py-4 gold-gradient-bg text-black font-black text-xs sm:text-sm uppercase tracking-widest flex items-center justify-center gap-2 rounded-none shadow-lg shadow-amber-500/10 hover:opacity-95 transition-all cursor-pointer min-h-[50px]"
+                className="w-full py-4 gold-gradient-bg text-black font-extrabold text-xs sm:text-sm uppercase tracking-widest flex items-center justify-center gap-2 rounded-none shadow-lg shadow-amber-500/10 hover:opacity-95 transition-all cursor-pointer min-h-[50px] font-mono"
               >
                 {isAdded ? (
                   <>
@@ -750,33 +759,33 @@ export default function PhoneDetailPage({ params }: PageProps) {
 
               {/* 1-Tap WhatsApp Fast Order */}
               <a
-                href={`https://wa.me/${settings.whatsappCleanNumber || "237699442100"}?text=${encodeURIComponent(
+                href={`https://wa.me/${cleanWaNumber}?text=${encodeURIComponent(
                   `Hello ${settings.storeName}, I want to order the ${phone.name} (${activeStorage.size}, ${currentColor.name}) for ${formatCFA(
                     currentPrice
                   )}. Please confirm availability and delivery dispatch.`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3.5 px-4 bg-[#0A1A10] hover:bg-[#0E2617] border border-[#25D366]/40 text-[#25D366] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 rounded-none transition-all min-h-[46px]"
+                className="w-full py-3.5 px-4 bg-[#0A1A10] hover:bg-[#0E2617] border border-[#25D366]/40 text-[#25D366] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 rounded-none transition-all min-h-[46px] font-mono"
               >
                 <MessageCircle className="w-4 h-4" />
-                <span>Order via WhatsApp (Instant Reply)</span>
+                <span>Order via WhatsApp (Instant Reply &lt; 15 mins)</span>
               </a>
 
-              {/* Secondary Row: Buy Now / Direct Checkout + Wishlist */}
+              {/* Secondary Row: Buy Now + Wishlist */}
               <div className="flex gap-2">
                 <button
                   onClick={handleBuyNow}
                   className="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-mono font-semibold text-xs uppercase tracking-wider rounded-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <span>Buy Now (Checkout)</span>
-                  <span>→</span>
+                  <span>Buy Now (Direct Checkout)</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
 
                 <button
                   onClick={() => toggleWishlist(phone.id)}
                   aria-label="Wishlist"
-                  className={`px-4 py-3 border rounded-none transition-colors ${
+                  className={`px-4 py-3 border rounded-none transition-colors cursor-pointer ${
                     inWish
                       ? "bg-rose-950/40 border-rose-500 text-rose-400"
                       : "bg-[#121217] border-white/10 text-zinc-400 hover:text-white"
@@ -799,12 +808,12 @@ export default function PhoneDetailPage({ params }: PageProps) {
               </Link>
 
               {/* Localized City Delivery Assurance Pill */}
-              <div className="p-3 bg-white/[0.03] border border-white/10 text-[11px] text-zinc-300 flex items-start gap-2.5 rounded-none">
+              <div className="p-3 bg-white/[0.03] border border-white/10 text-[11px] text-zinc-300 flex items-start gap-2.5 rounded-none font-mono">
                 <Truck className="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5" />
                 <div>
                   <span className="font-semibold text-white">Fast Nationwide Delivery:</span>
-                  <p className="text-zinc-400 text-[10px] mt-0.5 leading-normal">
-                    Free pickup at Check Point Molyko, Buea • Same-day bike delivery in Buea/Limbe • 24h Express Bus to Douala, Yaoundé &amp; all regions.
+                  <p className="text-zinc-400 text-[10px] mt-0.5 leading-normal font-sans">
+                    Free pickup at Check Point Molyko, Buea • Same-day bike delivery in Buea/Limbe • 24h Express to Douala, Yaoundé &amp; all cities.
                   </p>
                 </div>
               </div>
@@ -814,8 +823,8 @@ export default function PhoneDetailPage({ params }: PageProps) {
             {/* Highlights Checklist */}
             {phone.highlights && phone.highlights.length > 0 && (
               <div className="border-t border-white/10 pt-4 space-y-2">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block font-bold">
-                  Key Highlights &amp; Features
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[#D4AF37] block font-bold">
+                  Key Hardware Highlights
                 </span>
                 <div className="space-y-1.5 text-xs text-zinc-300 font-sans">
                   {phone.highlights.map((h, i) => (
@@ -833,9 +842,9 @@ export default function PhoneDetailPage({ params }: PageProps) {
         </div>
 
         {/* 3. Technical Specifications Blueprint Grid */}
-        <div className="mt-16 pt-12 border-t border-white/10 space-y-8">
+        <div className="mt-16 pt-10 border-t border-white/10 space-y-6">
           
-          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-white/10 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-white/10 pb-3">
             <div>
               <span className="text-[10px] font-mono uppercase text-[#D4AF37] tracking-widest font-bold block mb-1">
                 Full Specifications
@@ -858,9 +867,14 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 {phone.specs &&
                   Object.entries(phone.specs)
                     .slice(0, Math.ceil(Object.keys(phone.specs).length / 2))
-                    .map(([key, val]) => (
-                      <div key={key} className="p-3.5 flex items-baseline justify-between gap-4">
-                        <span className="text-zinc-500 font-mono text-[10px] uppercase tracking-wider shrink-0 font-bold">
+                    .map(([key, val], idx) => (
+                      <div
+                        key={key}
+                        className={`p-3.5 flex items-baseline justify-between gap-4 ${
+                          idx % 2 === 0 ? "bg-black/40" : "bg-[#0E0E12]"
+                        }`}
+                      >
+                        <span className="text-[#D4AF37] font-mono text-[10px] uppercase tracking-wider shrink-0 font-bold">
                           {key.replace(/([A-Z])/g, " $1")}
                         </span>
                         <span className="text-white font-mono text-right text-xs">
@@ -875,9 +889,14 @@ export default function PhoneDetailPage({ params }: PageProps) {
                 {phone.specs &&
                   Object.entries(phone.specs)
                     .slice(Math.ceil(Object.keys(phone.specs).length / 2))
-                    .map(([key, val]) => (
-                      <div key={key} className="p-3.5 flex items-baseline justify-between gap-4">
-                        <span className="text-zinc-500 font-mono text-[10px] uppercase tracking-wider shrink-0 font-bold">
+                    .map(([key, val], idx) => (
+                      <div
+                        key={key}
+                        className={`p-3.5 flex items-baseline justify-between gap-4 ${
+                          idx % 2 === 0 ? "bg-black/40" : "bg-[#0E0E12]"
+                        }`}
+                      >
+                        <span className="text-[#D4AF37] font-mono text-[10px] uppercase tracking-wider shrink-0 font-bold">
                           {key.replace(/([A-Z])/g, " $1")}
                         </span>
                         <span className="text-white font-mono text-right text-xs">
@@ -912,8 +931,8 @@ export default function PhoneDetailPage({ params }: PageProps) {
 
         {/* 4. Related Phones Archive */}
         {relatedPhones.length > 0 && (
-          <div className="mt-16 pt-12 border-t border-white/10 space-y-6">
-            <div className="flex items-baseline justify-between border-b border-white/10 pb-4">
+          <div className="mt-16 pt-10 border-t border-white/10 space-y-5">
+            <div className="flex items-baseline justify-between border-b border-white/10 pb-3">
               <h2 className="text-lg sm:text-xl font-bold text-white uppercase tracking-wider font-mono">
                 You May Also Like
               </h2>
@@ -922,7 +941,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6">
               {relatedPhones.map((relPhone) => (
                 <ProductCard key={relPhone.id} phone={relPhone} layout="grid" />
               ))}
