@@ -12,6 +12,31 @@ interface ProductCardProps {
   layout?: "grid" | "list";
 }
 
+function getConditionBadge(condition: string) {
+  if (condition === "Pre-Owned (UK / US Used)" || condition?.toLowerCase().includes("pre-owned") || condition?.toLowerCase().includes("used")) {
+    return {
+      label: "Pre-Owned (UK Used)",
+      className: "bg-amber-950/95 text-amber-300 border border-amber-500/40",
+    };
+  }
+  if (condition === "Certified Refurbished" || condition?.toLowerCase().includes("refurbished")) {
+    return {
+      label: "Refurbished",
+      className: "bg-purple-950/95 text-purple-300 border border-purple-500/40",
+    };
+  }
+  if (condition === "Open Box" || condition?.toLowerCase().includes("open box")) {
+    return {
+      label: "Open Box Demo",
+      className: "bg-sky-950/95 text-sky-300 border border-sky-500/40",
+    };
+  }
+  return {
+    label: "Brand New Sealed",
+    className: "bg-emerald-950/95 text-emerald-300 border border-emerald-500/40",
+  };
+}
+
 export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
   const { addItem } = useCart();
   const [isAddedToast, setIsAddedToast] = useState(false);
@@ -21,6 +46,7 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
   const defaultStorage = phone.storageVariants?.[0] || { id: "s1", size: "Standard", price: phone.basePrice, stock: 1 };
   const displayPrice = defaultStorage?.price && defaultStorage.price > 0 ? defaultStorage.price : phone.basePrice;
   const activeImage = primaryImage;
+  const conditionBadge = getConditionBadge(phone.condition);
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -45,13 +71,9 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
             className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
           />
           <span
-            className={`absolute top-2 left-2 px-2 py-0.5 rounded-none text-[9.5px] font-bold uppercase tracking-wider font-mono ${
-              phone.condition === "Certified Refurbished"
-                ? "bg-amber-950/90 text-amber-300 border border-amber-500/30"
-                : "bg-emerald-950/90 text-emerald-300 border border-emerald-500/30"
-            }`}
+            className={`absolute top-2 left-2 px-2 py-0.5 rounded-none text-[9px] font-bold uppercase tracking-wider font-mono ${conditionBadge.className}`}
           >
-            {phone.condition === "Certified Refurbished" ? "Clean Pre-Owned" : "Brand New Sealed"}
+            {conditionBadge.label}
           </span>
         </Link>
 
@@ -112,13 +134,9 @@ export function ProductCard({ phone, layout = "grid" }: ProductCardProps) {
       {/* Condition Badge */}
       <div className="absolute top-2.5 left-2.5 z-10">
         <span
-          className={`px-2 py-0.5 rounded-none text-[9.5px] font-bold uppercase tracking-wider font-mono ${
-            phone.condition === "Certified Refurbished"
-              ? "bg-amber-950/90 text-amber-300 border border-amber-500/30"
-              : "bg-emerald-950/90 text-emerald-300 border border-emerald-500/30"
-          }`}
+          className={`px-2 py-0.5 rounded-none text-[9px] font-bold uppercase tracking-wider font-mono ${conditionBadge.className}`}
         >
-          {phone.condition === "Certified Refurbished" ? "Pre-Owned" : "Brand New"}
+          {conditionBadge.label}
         </span>
       </div>
 

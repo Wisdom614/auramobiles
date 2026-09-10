@@ -26,6 +26,12 @@ export interface PhoneSpecs {
   waterResistance: string;
 }
 
+export type PhoneCondition =
+  | "Brand New"
+  | "Pre-Owned (UK / US Used)"
+  | "Certified Refurbished"
+  | "Open Box";
+
 export interface Phone {
   id: string;
   slug: string;
@@ -42,7 +48,7 @@ export interface Phone {
   isFeatured?: boolean;
   isDeal?: boolean;
   dealEndsInHours?: number;
-  condition: "Brand New" | "Certified Refurbished";
+  condition: PhoneCondition;
   warranty: string;
   storageVariants: StorageVariant[];
   colorVariants: ColorVariant[];
@@ -337,8 +343,8 @@ export const PHONES: Phone[] = [
     isFeatured: false,
     isDeal: true,
     dealEndsInHours: 12,
-    condition: "Brand New",
-    warranty: "Official Apple Warranty",
+    condition: "Pre-Owned (UK / US Used)",
+    warranty: "Official Boutique Warranty (6 Months)",
     storageVariants: [
       { id: "128gb", size: "128GB", price: 720000, stock: 6 },
       { id: "256gb", size: "256GB", price: 790000, stock: 10 },
@@ -396,7 +402,7 @@ export const PHONES: Phone[] = [
     isBestSeller: true,
     isFeatured: true,
     isDeal: false,
-    condition: "Certified Refurbished",
+    condition: "Pre-Owned (UK / US Used)",
     warranty: "AURA Certified Hardware Guarantee",
     storageVariants: [
       { id: "128gb", size: "128GB", price: 320000, stock: 24 },
@@ -463,7 +469,7 @@ export const PHONES: Phone[] = [
     isFeatured: true,
     isDeal: true,
     dealEndsInHours: 36,
-    condition: "Brand New",
+    condition: "Open Box",
     warranty: "Official Samsung Warranty",
     storageVariants: [
       { id: "256gb", size: "256GB", price: 950000, stock: 5 },

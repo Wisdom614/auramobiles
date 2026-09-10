@@ -58,7 +58,7 @@ function mapDbPhoneToModel(row: any): Phone {
     isNew: row.is_new ?? true,
     isBestSeller: row.is_bestseller ?? false,
     isFeatured: row.is_featured ?? false,
-    condition: row.condition === "Certified Refurbished" ? "Certified Refurbished" : "Brand New",
+    condition: (row.condition as Phone["condition"]) || "Brand New",
     warranty: row.warranty || "Official Boutique Warranty",
     storageVariants,
     colorVariants: row.color_variants || [

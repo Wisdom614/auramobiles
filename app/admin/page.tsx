@@ -118,6 +118,7 @@ export default function AdminDashboardPage() {
   // Search & Filter State
   const [phoneSearch, setPhoneSearch] = useState("");
   const [phoneBrandFilter, setPhoneBrandFilter] = useState("all");
+  const [phoneConditionFilter, setPhoneConditionFilter] = useState<"all" | Phone["condition"]>("all");
   const [phoneStockFilter, setPhoneStockFilter] = useState<"all" | "in_stock" | "low_stock" | "out_of_stock">("all");
 
   const [orderSearch, setOrderSearch] = useState("");
@@ -840,6 +841,21 @@ export default function AdminDashboardPage() {
     showToast(`${phone.name} (${currentPrimary.size}) stock updated: ${newStock} units`);
   };
 
+  const handleQuickConditionChange = async (phone: Phone, newCondition: Phone["condition"]) => {
+    let defaultWarranty = phone.warranty;
+    if (newCondition === "Brand New") defaultWarranty = "Official Boutique 1-Year Warranty";
+    else if (newCondition === "Pre-Owned (UK / US Used)") defaultWarranty = "6-Month AURA Inspection & Hardware Warranty";
+    else if (newCondition === "Certified Refurbished") defaultWarranty = "6-Month Certified Refurbished Warranty";
+    else if (newCondition === "Open Box") defaultWarranty = "9-Month Showroom Demo Warranty";
+
+    const updatedPhone: Phone = { ...phone, condition: newCondition, warranty: defaultWarranty };
+    setPhones((prev) => prev.map((p) => (p.id === phone.id ? updatedPhone : p)));
+    if (supabase) {
+      await updatePhoneInDB(phone.id, updatedPhone);
+    }
+    showToast(`Condition updated to "${newCondition}" for ${phone.name}!`, "success");
+  };
+
   // WhatsApp Message Link Generators
   const getOrderWhatsAppUrl = (
     order: Order,
@@ -1111,6 +1127,7 @@ export default function AdminDashboardPage() {
       p.name.toLowerCase().includes(phoneSearch.toLowerCase()) ||
       p.brand.toLowerCase().includes(phoneSearch.toLowerCase());
     const matchesBrand = phoneBrandFilter === "all" || p.brand.toLowerCase() === phoneBrandFilter.toLowerCase();
+    const matchesCondition = phoneConditionFilter === "all" || p.condition === phoneConditionFilter;
     const totalStock = p.storageVariants.reduce((sum, v) => sum + v.stock, 0);
     const matchesStock =
       phoneStockFilter === "all"
@@ -1120,7 +1137,7 @@ export default function AdminDashboardPage() {
         : phoneStockFilter === "low_stock"
         ? totalStock > 0 && totalStock <= 3
         : totalStock === 0;
-    return matchesQuery && matchesBrand && matchesStock;
+    return matchesQuery && matchesBrand && matchesCondition && matchesStock;
   });
 
   const filteredOrders = orders.filter((o) => {
@@ -1674,7 +1691,7 @@ export default function AdminDashboardPage() {
                 <select
                   value={phoneBrandFilter}
                   onChange={(e) => setPhoneBrandFilter(e.target.value)}
-                  className="w-full sm:w-44 bg-black border border-white/15 rounded-none px-3 py-2 font-mono text-xs text-white focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full sm:w-36 bg-black border border-white/15 rounded-none px-3 py-2 font-mono text-xs text-white focus:outline-none focus:border-[#D4AF37]"
                 >
                   <option value="all">ALL BRANDS</option>
                   <option value="Apple">Apple</option>
@@ -1685,13 +1702,26 @@ export default function AdminDashboardPage() {
                   <option value="Infinix">Infinix</option>
                   <option value="OnePlus">OnePlus</option>
                 </select>
+
+                {/* Condition Filter */}
+                <select
+                  value={phoneConditionFilter}
+                  onChange={(e) => setPhoneConditionFilter(e.target.value as any)}
+                  className="w-full sm:w-44 bg-black border border-white/15 rounded-none px-3 py-2 font-mono text-xs text-[#D4AF37] focus:outline-none focus:border-[#D4AF37]"
+                >
+                  <option value="all">ALL CONDITIONS</option>
+                  <option value="Brand New">✨ BRAND NEW</option>
+                  <option value="Pre-Owned (UK / US Used)">♻️ PRE-OWNED (UK/US)</option>
+                  <option value="Certified Refurbished">🔧 REFURBISHED</option>
+                  <option value="Open Box">📦 OPEN BOX DEMO</option>
+                </select>
               </div>
 
               {/* Stock Status Filter Chips */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
                 {(
                   [
-                    { id: "all", label: "ALL UNITS" },
+                    { id: "all", label: "ALL STOCK" },
                     { id: "in_stock", label: "IN STOCK" },
                     { id: "low_stock", label: "LOW STOCK (≤3)" },
                     { id: "out_of_stock", label: "OUT OF STOCK" },
@@ -1725,7 +1755,7 @@ export default function AdminDashboardPage() {
                   <thead>
                     <tr className="border-b border-white/10 bg-white/[0.02] text-white/40 font-mono text-[10px] uppercase tracking-widest">
                       <th className="py-3.5 px-4 font-medium">DEVICE MODEL</th>
-                      <th className="py-3.5 px-4 font-medium">CONDITION</th>
+                      <th className="py-3.5 px-4 font-medium">CONDITION / STATUS</th>
                       <th className="py-3.5 px-4 font-medium">BASE PRICE (FCFA)</th>
                       <th className="py-3.5 px-4 font-medium">STOCK & QUICK COUNTER</th>
                       <th className="py-3.5 px-4 font-medium text-right">ACTIONS</th>
@@ -1759,15 +1789,29 @@ export default function AdminDashboardPage() {
                           </td>
 
                           <td className="py-3.5 px-4">
-                            <span
-                              className={`inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-mono uppercase tracking-wider border ${
-                                phone.condition === "Brand New"
-                                  ? "bg-[#D4AF37]/15 text-[#F3E5AB] border-[#D4AF37]/30"
-                                  : "bg-white/10 text-white/80 border-white/20"
-                              }`}
-                            >
-                              {phone.condition.toUpperCase()}
-                            </span>
+                            <div className="flex flex-col gap-1">
+                              <select
+                                value={phone.condition || "Brand New"}
+                                onChange={(e) => handleQuickConditionChange(phone, e.target.value as Phone["condition"])}
+                                className={`text-[10px] font-mono uppercase tracking-wider font-bold py-1 px-2 border rounded-none bg-black focus:outline-none cursor-pointer transition ${
+                                  phone.condition === "Brand New"
+                                    ? "border-emerald-500/40 text-emerald-400 bg-emerald-950/20 hover:border-emerald-400"
+                                    : phone.condition === "Pre-Owned (UK / US Used)"
+                                    ? "border-amber-500/40 text-amber-400 bg-amber-950/20 hover:border-amber-400"
+                                    : phone.condition === "Certified Refurbished"
+                                    ? "border-purple-500/40 text-purple-300 bg-purple-950/20 hover:border-purple-400"
+                                    : "border-sky-500/40 text-sky-400 bg-sky-950/20 hover:border-sky-400"
+                                }`}
+                              >
+                                <option value="Brand New" className="bg-[#0A0A0D] text-white">✨ BRAND NEW</option>
+                                <option value="Pre-Owned (UK / US Used)" className="bg-[#0A0A0D] text-white">♻️ PRE-OWNED (UK/US)</option>
+                                <option value="Certified Refurbished" className="bg-[#0A0A0D] text-white">🔧 REFURBISHED</option>
+                                <option value="Open Box" className="bg-[#0A0A0D] text-white">📦 OPEN BOX</option>
+                              </select>
+                              <span className="text-[9px] font-mono text-white/40 truncate max-w-[150px]" title={phone.warranty}>
+                                {phone.warranty || "Boutique Warranty"}
+                              </span>
+                            </div>
                           </td>
 
                           <td className="py-3.5 px-4 font-bold text-white">
@@ -3329,6 +3373,46 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
 
+                    {/* Condition & Warranty Selector */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">
+                          Device Condition *
+                        </label>
+                        <select
+                          value={newPhone.condition}
+                          onChange={(e) => {
+                            const cond = e.target.value as Phone["condition"];
+                            let defaultWarranty = newPhone.warranty;
+                            if (cond === "Brand New") defaultWarranty = "Official Boutique 1-Year Warranty";
+                            else if (cond === "Pre-Owned (UK / US Used)") defaultWarranty = "6-Month AURA Inspection & Hardware Warranty";
+                            else if (cond === "Certified Refurbished") defaultWarranty = "6-Month Certified Refurbished Warranty";
+                            else if (cond === "Open Box") defaultWarranty = "9-Month Showroom Demo Warranty";
+                            setNewPhone({ ...newPhone, condition: cond, warranty: defaultWarranty });
+                          }}
+                          className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-[#D4AF37] font-bold focus:border-[#D4AF37] focus:outline-none"
+                        >
+                          <option value="Brand New">✨ Brand New (Factory Sealed)</option>
+                          <option value="Pre-Owned (UK / US Used)">♻️ Pre-Owned (UK / US Used - Grade A+)</option>
+                          <option value="Certified Refurbished">🔧 Certified Refurbished (AURA Inspected)</option>
+                          <option value="Open Box">📦 Open Box (Display / Demo Unit)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">
+                          Warranty / Guarantee
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Official Boutique Warranty"
+                          value={newPhone.warranty}
+                          onChange={(e) => setNewPhone({ ...newPhone, warranty: e.target.value })}
+                          className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                        />
+                      </div>
+                    </div>
+
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="text-[10px] font-mono text-white/70 uppercase tracking-wider">Tagline / Luxury Subtitle</label>
@@ -3747,6 +3831,48 @@ export default function AdminDashboardPage() {
                           <option value="Infinix">Infinix</option>
                           <option value="OnePlus">OnePlus</option>
                         </select>
+                      </div>
+                    </div>
+
+                    {/* Condition & Warranty Selector */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">
+                          Device Condition *
+                        </label>
+                        <select
+                          value={editingPhone.condition || "Brand New"}
+                          onChange={(e) => {
+                            const cond = e.target.value as Phone["condition"];
+                            let defaultWarranty = editingPhone.warranty;
+                            if (!defaultWarranty || defaultWarranty === "Official Boutique Warranty") {
+                              if (cond === "Brand New") defaultWarranty = "Official Boutique 1-Year Warranty";
+                              else if (cond === "Pre-Owned (UK / US Used)") defaultWarranty = "6-Month AURA Inspection & Hardware Warranty";
+                              else if (cond === "Certified Refurbished") defaultWarranty = "6-Month Certified Refurbished Warranty";
+                              else if (cond === "Open Box") defaultWarranty = "9-Month Showroom Demo Warranty";
+                            }
+                            setEditingPhone({ ...editingPhone, condition: cond, warranty: defaultWarranty });
+                          }}
+                          className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-[#D4AF37] font-bold focus:border-[#D4AF37] focus:outline-none"
+                        >
+                          <option value="Brand New">✨ Brand New (Factory Sealed)</option>
+                          <option value="Pre-Owned (UK / US Used)">♻️ Pre-Owned (UK / US Used - Grade A+)</option>
+                          <option value="Certified Refurbished">🔧 Certified Refurbished (AURA Inspected)</option>
+                          <option value="Open Box">📦 Open Box (Display / Demo Unit)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/70 uppercase tracking-wider mb-1.5">
+                          Warranty / Guarantee
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Official Boutique Warranty"
+                          value={editingPhone.warranty || ""}
+                          onChange={(e) => setEditingPhone({ ...editingPhone, warranty: e.target.value })}
+                          className="w-full bg-black border border-white/15 rounded-none px-3.5 py-2.5 text-xs text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                        />
                       </div>
                     </div>
 

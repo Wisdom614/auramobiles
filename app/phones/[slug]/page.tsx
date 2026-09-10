@@ -387,8 +387,24 @@ export default function PhoneDetailPage({ params }: PageProps) {
 
               {/* Condition Tag */}
               <div className="absolute top-3 left-4 flex items-center gap-2 z-10 pointer-events-none">
-                <span className="text-[10px] font-mono tracking-widest text-[#D4AF37] uppercase font-bold bg-black/85 border border-[#D4AF37]/40 px-2.5 py-1">
-                  {phone.condition === "Certified Refurbished" ? "Clean Pre-Owned (UK Used)" : "100% Brand New Sealed"}
+                <span
+                  className={`text-[10px] font-mono tracking-widest uppercase font-bold px-2.5 py-1 border ${
+                    phone.condition === "Pre-Owned (UK / US Used)" || phone.condition?.toLowerCase().includes("used")
+                      ? "bg-amber-950/95 text-amber-300 border-amber-500/50"
+                      : phone.condition === "Certified Refurbished" || phone.condition?.toLowerCase().includes("refurbished")
+                      ? "bg-purple-950/95 text-purple-300 border-purple-500/50"
+                      : phone.condition === "Open Box" || phone.condition?.toLowerCase().includes("open box")
+                      ? "bg-sky-950/95 text-sky-300 border-sky-500/50"
+                      : "bg-emerald-950/95 text-emerald-300 border-emerald-500/50"
+                  }`}
+                >
+                  {phone.condition === "Pre-Owned (UK / US Used)"
+                    ? "Clean Pre-Owned (UK / US Used)"
+                    : phone.condition === "Certified Refurbished"
+                    ? "Certified Refurbished (Grade A+)"
+                    : phone.condition === "Open Box"
+                    ? "Open Box / Demo Unit"
+                    : "100% Brand New Sealed"}
                 </span>
                 {phone.isNew && (
                   <span className="text-[10px] font-mono tracking-widest text-white uppercase font-bold bg-[#D4AF37]/25 border border-white/20 px-2 py-1">
@@ -617,6 +633,27 @@ export default function PhoneDetailPage({ params }: PageProps) {
                   Buea Showroom Vault
                 </span>
               </div>
+            </div>
+
+            {/* Hardware Condition Status Banner */}
+            <div className="flex items-center justify-between p-3.5 bg-[#0D0D12] border border-white/15 text-xs font-mono">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-[#D4AF37] rounded-none"></span>
+                <span className="text-zinc-300 text-[11px] uppercase font-bold">Hardware Condition:</span>
+              </div>
+              <span
+                className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
+                  phone.condition === "Pre-Owned (UK / US Used)" || phone.condition?.toLowerCase().includes("used")
+                    ? "bg-amber-950/90 text-amber-300 border-amber-500/50"
+                    : phone.condition === "Certified Refurbished" || phone.condition?.toLowerCase().includes("refurbished")
+                    ? "bg-purple-950/90 text-purple-300 border-purple-500/50"
+                    : phone.condition === "Open Box" || phone.condition?.toLowerCase().includes("open box")
+                    ? "bg-sky-950/90 text-sky-300 border-sky-500/50"
+                    : "bg-emerald-950/90 text-emerald-300 border-emerald-500/50"
+                }`}
+              >
+                {phone.condition || "Brand New"}
+              </span>
             </div>
 
             {/* Instant Hardware Specs Matrix (4 Pillars) */}

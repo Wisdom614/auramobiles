@@ -227,11 +227,24 @@ function PhonesCatalogContent() {
 
         // 3. Condition Filter
         if (selectedCondition !== "all") {
-          if (selectedCondition === "new" && phone.condition !== "Brand New")
+          if (selectedCondition === "new" && phone.condition !== "Brand New") {
             return false;
+          }
+          if (
+            selectedCondition === "preowned" &&
+            phone.condition !== "Pre-Owned (UK / US Used)"
+          ) {
+            return false;
+          }
           if (
             selectedCondition === "refurbished" &&
             phone.condition !== "Certified Refurbished"
+          ) {
+            return false;
+          }
+          if (
+            selectedCondition === "openbox" &&
+            phone.condition !== "Open Box"
           ) {
             return false;
           }
@@ -593,11 +606,13 @@ function PhonesCatalogContent() {
                   <span className="text-[10.5px] uppercase text-[#D4AF37] tracking-wider font-bold block">
                     Device Condition
                   </span>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {[
                       { label: "All Units", val: "all" },
-                      { label: "Brand New", val: "new" },
-                      { label: "Pre-Owned", val: "refurbished" },
+                      { label: "Brand New Sealed", val: "new" },
+                      { label: "Pre-Owned (UK Used)", val: "preowned" },
+                      { label: "Refurbished", val: "refurbished" },
+                      { label: "Open Box", val: "openbox" },
                     ].map((c) => {
                       const isSelected = selectedCondition === c.val;
                       return (
@@ -605,7 +620,7 @@ function PhonesCatalogContent() {
                           key={c.val}
                           type="button"
                           onClick={() => setSelectedCondition(c.val)}
-                          className={`py-2 px-2 text-center text-xs font-bold border transition-colors rounded-none cursor-pointer uppercase ${
+                          className={`py-2 px-2 text-center text-xs font-bold border transition-colors rounded-none cursor-pointer uppercase truncate ${
                             isSelected
                               ? "bg-[#D4AF37]/20 text-white border-[#D4AF37]"
                               : "bg-black/60 text-zinc-400 hover:text-white border-white/10 hover:border-white/25"
