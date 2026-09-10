@@ -5,13 +5,13 @@ import {
   X,
   Download,
   ShieldCheck,
-  CheckCircle2,
   PhoneCall,
   MapPin,
-  Calendar,
   FileText,
-  Clock,
   Check,
+  Sparkles,
+  Truck,
+  CheckCircle2,
 } from "lucide-react";
 import { Order } from "@/lib/data/mock-orders";
 import { formatCFA } from "@/lib/formatters";
@@ -58,22 +58,22 @@ export function OrderReceiptModal({ order, isOpen, onClose }: OrderReceiptModalP
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto bg-black/90 backdrop-blur-sm animate-in fade-in duration-200 font-sans">
       
       {/* Modal Container */}
-      <div className="relative w-full max-w-2xl bg-[#0E0E12] border border-white/20 shadow-2xl overflow-hidden my-auto max-h-[95vh] flex flex-col">
+      <div className="relative w-full max-w-3xl bg-[#0E0E12] border border-white/20 shadow-2xl overflow-hidden my-auto max-h-[95vh] flex flex-col rounded-none">
         
         {/* Viewfinder crosshairs */}
         <span className="absolute top-2 left-2 text-[#D4AF37] font-mono text-xs select-none z-20">+</span>
         <span className="absolute top-2 right-2 text-[#D4AF37] font-mono text-xs select-none z-20">+</span>
 
-        {/* Top Header Bar */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-[#141419] relative z-10">
+        {/* Top Control Bar */}
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10 bg-[#141419] relative z-10">
           <div className="flex items-center gap-2.5">
             <FileText className="w-4 h-4 text-[#D4AF37]" />
             <div>
               <span className="text-xs font-bold text-white uppercase tracking-widest block font-mono">
-                Official Invoice &amp; Receipt
+                Official Proof of Purchase &amp; Warranty
               </span>
               <span className="text-[10px] text-zinc-400 font-mono">
-                {invoiceNumber} • {order.id}
+                {invoiceNumber} • Reference #{order.id}
               </span>
             </div>
           </div>
@@ -82,7 +82,7 @@ export function OrderReceiptModal({ order, isOpen, onClose }: OrderReceiptModalP
             <button
               onClick={handleDownloadPdf}
               disabled={isDownloading}
-              className="px-3 py-1.5 gold-gradient-bg text-black font-extrabold text-[11px] uppercase tracking-wider flex items-center gap-1.5 hover:opacity-95 transition-all disabled:opacity-50 cursor-pointer font-mono"
+              className="px-3 py-1.5 gold-gradient-bg text-black font-extrabold text-[11px] uppercase tracking-wider flex items-center gap-1.5 hover:opacity-95 transition-all disabled:opacity-50 cursor-pointer font-mono rounded-none"
             >
               {downloadSuccess ? (
                 <>
@@ -105,7 +105,7 @@ export function OrderReceiptModal({ order, isOpen, onClose }: OrderReceiptModalP
             <button
               onClick={onClose}
               aria-label="Close modal"
-              className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/10"
+              className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/10 rounded-none"
             >
               <X className="w-4 h-4" />
             </button>
@@ -115,42 +115,61 @@ export function OrderReceiptModal({ order, isOpen, onClose }: OrderReceiptModalP
         {/* Modal Scrollable Body */}
         <div className="overflow-y-auto p-5 sm:p-6 flex-1 space-y-4">
           
-          {/* Header Details Table */}
-          <div className="border border-white/15 bg-black text-white text-xs">
+          {/* Document Container */}
+          <div className="border border-white/15 bg-black text-white text-xs rounded-none">
             
-            {/* Top Bar with Boutique Title */}
-            <div className="bg-[#141419] text-white p-4 border-b border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h3 className="font-extrabold text-sm tracking-widest text-white uppercase font-mono">
-                  {settings.storeName || "AURA LUXE MOBILE"}
-                </h3>
-                <p className="text-[10px] font-mono text-zinc-400">
-                  BUEA (MOLYKO) • DELIVERS NATIONWIDE • REPUBLIC OF CAMEROON
-                </p>
-              </div>
-              <div className="text-left sm:text-right">
-                <span className="text-[10px] font-mono text-[#D4AF37] font-bold block">
-                  {invoiceNumber}
-                </span>
-                <span className="text-[10px] font-mono text-zinc-400">{formattedDate}</span>
+            {/* Top Luxury Header with 24K Gold Bar */}
+            <div className="bg-[#121217] text-white p-5 border-b border-white/15 relative">
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#D4AF37]" />
+              
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 bg-black border border-[#D4AF37]/50 text-[#D4AF37] font-black text-xs flex items-center justify-center font-mono">
+                      A
+                    </span>
+                    <h3 className="font-black text-base tracking-widest text-white uppercase font-sans">
+                      {settings.storeName || "AURA LUXE MOBILE"}
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-[#D4AF37] uppercase tracking-wider block font-bold">
+                    Official Luxury Smartphone Boutique &amp; Verification Hub
+                  </span>
+                  <p className="text-[10px] font-mono text-zinc-400">
+                    {settings.bueaAddress || "Check Point, Molyko, Buea"} • Nationwide Delivery • Republic of Cameroon
+                  </p>
+                </div>
+
+                <div className="text-left sm:text-right font-mono space-y-1">
+                  <span className="text-[9px] uppercase tracking-widest text-[#D4AF37] font-bold block">
+                    OFFICIAL PROOF OF PURCHASE
+                  </span>
+                  <span className="text-sm font-bold text-white block">
+                    {invoiceNumber}
+                  </span>
+                  <span className="text-[10px] text-zinc-400 block">{formattedDate}</span>
+                  <span className="inline-flex items-center gap-1 text-[9.5px] font-bold text-emerald-400 bg-emerald-950/50 border border-emerald-500/30 px-2 py-0.5 mt-0.5">
+                    ● VERIFIED AUTHENTIC
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Client & Order Particulars Table */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-white/15">
-              {/* Left Cell */}
-              <div className="p-4 space-y-1.5">
-                <span className="text-[9px] font-bold uppercase tracking-widest text-[#D4AF37] block font-mono">
-                  CUSTOMER &amp; DELIVERY ADDRESS
+            {/* Client & Logistics Dual Ledger */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-white/15 bg-[#0C0C10]">
+              {/* Left Cell: Client Details */}
+              <div className="p-4 space-y-1.5 font-mono">
+                <span className="text-[9.5px] font-bold uppercase tracking-widest text-[#D4AF37] block">
+                  DELIVERED TO (CLIENT DETAILS):
                 </span>
-                <p className="font-bold text-white text-sm">
+                <p className="font-bold text-white text-sm font-sans">
                   {order.customer?.fullName || "Valued Customer"}
                 </p>
-                <p className="text-zinc-400 text-[11px] font-mono flex items-center gap-1.5">
+                <p className="text-zinc-300 text-[11px] flex items-center gap-1.5">
                   <PhoneCall className="w-3 h-3 text-[#D4AF37]" />
-                  <span>{order.customer?.phone || "WhatsApp Phone"}</span>
+                  <span>WhatsApp: {order.customer?.phone || "Confirmed via order"}</span>
                 </p>
-                <p className="text-zinc-400 text-[11px] font-mono flex items-center gap-1.5">
+                <p className="text-zinc-400 text-[11px] flex items-center gap-1.5">
                   <MapPin className="w-3 h-3 text-[#D4AF37]" />
                   <span>
                     {order.customer?.address || "Showroom Collection"},{" "}
@@ -159,23 +178,23 @@ export function OrderReceiptModal({ order, isOpen, onClose }: OrderReceiptModalP
                 </p>
               </div>
 
-              {/* Right Cell */}
-              <div className="p-4 space-y-1.5 bg-[#121217]/50 font-mono">
-                <span className="text-[9px] font-bold uppercase tracking-widest text-[#D4AF37] block">
-                  ORDER DETAILS
+              {/* Right Cell: Order Particulars */}
+              <div className="p-4 space-y-1.5 font-mono">
+                <span className="text-[9.5px] font-bold uppercase tracking-widest text-[#D4AF37] block">
+                  LOGISTICS &amp; STATUS:
                 </span>
                 <div className="flex justify-between text-[11px]">
-                  <span className="text-zinc-400">ORDER ID:</span>
+                  <span className="text-zinc-400">ORDER REF:</span>
                   <span className="text-white font-bold">#{order.id}</span>
                 </div>
                 <div className="flex justify-between text-[11px]">
-                  <span className="text-zinc-400">TRACKING CODE:</span>
-                  <span className="text-white font-bold">{order.trackingNumber}</span>
+                  <span className="text-zinc-400">TRACKING:</span>
+                  <span className="text-[#D4AF37] font-bold">{order.trackingNumber || order.id}</span>
                 </div>
                 <div className="flex justify-between text-[11px]">
                   <span className="text-zinc-400">PAYMENT:</span>
                   <span className="text-white uppercase">
-                    {order.customer?.paymentMethod?.replace(/_/g, " ") || "Cash on Delivery"}
+                    {order.customer?.paymentMethod?.replace(/_/g, " ") || "Pay on Delivery"}
                   </span>
                 </div>
                 <div className="flex justify-between text-[11px]">
@@ -192,11 +211,11 @@ export function OrderReceiptModal({ order, isOpen, onClose }: OrderReceiptModalP
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-[#141419] border-b border-white/15 text-[10px] font-bold uppercase tracking-widest text-zinc-400 font-mono">
-                    <th className="py-2.5 px-3.5">SMARTPHONE</th>
-                    <th className="py-2.5 px-3.5 text-center">SPECS</th>
+                    <th className="py-2.5 px-3.5">SMARTPHONE DESCRIPTION</th>
+                    <th className="py-2.5 px-3.5 text-center">SPECS / COLOR</th>
                     <th className="py-2.5 px-3.5 text-center">QTY</th>
                     <th className="py-2.5 px-3.5 text-right">UNIT PRICE</th>
-                    <th className="py-2.5 px-3.5 text-right">TOTAL</th>
+                    <th className="py-2.5 px-3.5 text-right">AMOUNT (FCFA)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10 text-zinc-200">
@@ -204,12 +223,13 @@ export function OrderReceiptModal({ order, isOpen, onClose }: OrderReceiptModalP
                     <tr key={idx} className="hover:bg-white/5">
                       <td className="py-3 px-3.5">
                         <p className="font-bold text-white text-xs">{item.name}</p>
-                        <p className="text-[10px] font-mono text-zinc-400">
-                          {item.brand} • 100% Authentic Device
+                        <p className="text-[10px] font-mono text-zinc-400 mt-0.5">
+                          {item.brand} • 100% Authentic Device • QC Inspected
                         </p>
                       </td>
                       <td className="py-3 px-3.5 text-center text-zinc-300 whitespace-nowrap text-[11px] font-mono">
-                        {item.storage} • {item.color}
+                        <span className="font-bold text-white block">{item.storage}</span>
+                        <span className="text-zinc-400 text-[10px] block">{item.color}</span>
                       </td>
                       <td className="py-3 px-3.5 text-center font-bold text-white font-mono">
                         {item.quantity}
@@ -226,38 +246,47 @@ export function OrderReceiptModal({ order, isOpen, onClose }: OrderReceiptModalP
               </table>
             </div>
 
-            {/* Totals Row */}
-            <div className="border-t border-white/15 p-4 bg-[#121217] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="text-[10px] font-mono text-zinc-400 space-y-1">
-                <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>OFFICIAL WARRANTY ENCLOSED</span>
+            {/* Warranty Certificate & Financial Totals Block */}
+            <div className="border-t border-white/15 p-5 bg-[#0C0C10] grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+              
+              {/* Left Column (7 cols): Official Warranty Certificate */}
+              <div className="md:col-span-7 space-y-2 p-3.5 bg-[#121217] border border-[#D4AF37]/30 text-[10.5px] font-mono text-zinc-300">
+                <div className="flex items-center gap-1.5 text-[#D4AF37] font-bold uppercase text-[10px]">
+                  <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                  <span>OFFICIAL BOUTIQUE WARRANTY &amp; RETURN POLICY</span>
                 </div>
-                <p className="text-zinc-500 font-sans">Free technical support &amp; warranty coverage at Buea showroom or via nationwide delivery.</p>
+                <ul className="space-y-1 text-zinc-400 text-[10px]">
+                  <li>• Covered by 6 to 12-Month Official Boutique Hardware Guarantee.</li>
+                  <li>• 7-Day Immediate Technical Defect Replacement Guarantee.</li>
+                  <li>• Live Apple / Samsung IMEI database verification before unboxing.</li>
+                  <li>• Quality Control Sign-off: AURA Quality Control Lab, Buea Hub.</li>
+                </ul>
               </div>
 
-              <div className="w-full sm:w-60 space-y-1.5 text-xs font-mono">
+              {/* Right Column (5 cols): Financial Ledger */}
+              <div className="md:col-span-5 space-y-2 text-xs font-mono">
                 <div className="flex justify-between text-zinc-400 text-[11px]">
-                  <span>SUBTOTAL:</span>
+                  <span>HARDWARE SUBTOTAL:</span>
                   <span className="text-zinc-200">{formatCFA(order.subtotal)}</span>
                 </div>
                 {order.discount > 0 && (
                   <div className="flex justify-between text-emerald-400 text-[11px]">
-                    <span>DISCOUNT:</span>
-                    <span>- {formatCFA(order.discount)}</span>
+                    <span>VOUCHER / DISCOUNT:</span>
+                    <span>-{formatCFA(order.discount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-zinc-400 text-[11px]">
-                  <span>DELIVERY:</span>
+                  <span>DELIVERY LOGISTICS:</span>
                   <span className="text-zinc-200">
-                    {order.deliveryFee === 0 ? "FREE" : formatCFA(order.deliveryFee)}
+                    {order.deliveryFee === 0 ? <strong className="text-emerald-400">FREE (VIP)</strong> : formatCFA(order.deliveryFee)}
                   </span>
                 </div>
-                <div className="pt-2 border-t border-white/15 flex justify-between font-bold text-sm text-white">
-                  <span>TOTAL DUE:</span>
+                <div className="pt-2 border-t border-white/15 flex justify-between items-baseline font-bold text-white bg-black/60 p-2 border border-white/10">
+                  <span className="text-xs uppercase tracking-wider">TOTAL DUE:</span>
                   <span className="text-[#D4AF37] text-base">{formatCFA(order.total)}</span>
                 </div>
               </div>
+
             </div>
 
           </div>
@@ -267,19 +296,19 @@ export function OrderReceiptModal({ order, isOpen, onClose }: OrderReceiptModalP
         {/* Modal Footer Controls */}
         <div className="px-5 py-3.5 border-t border-white/10 bg-[#141419] flex items-center justify-between gap-3 font-mono">
           <span className="text-[10px] text-zinc-400 font-sans">
-            Click &quot;Download PDF&quot; to save or print your receipt.
+            Official verifiable proof of purchase. Click &quot;Download PDF&quot; to print or save.
           </span>
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-white/5 border border-white/15 text-zinc-300 font-bold text-xs uppercase tracking-wider hover:bg-white/10 transition-colors cursor-pointer"
+              className="px-4 py-2 bg-white/5 border border-white/15 text-zinc-300 font-bold text-xs uppercase tracking-wider hover:bg-white/10 transition-colors cursor-pointer rounded-none"
             >
               Close
             </button>
             <button
               onClick={handleDownloadPdf}
               disabled={isDownloading}
-              className="px-4 py-2 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:opacity-95 transition-all disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 gold-gradient-bg text-black font-extrabold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:opacity-95 transition-all disabled:opacity-50 cursor-pointer rounded-none"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Download PDF</span>
