@@ -206,13 +206,32 @@ CREATE TABLE IF NOT EXISTS public.customer_reviews (
     phone_id TEXT NOT NULL REFERENCES public.phones(id) ON DELETE CASCADE,
     client_name TEXT NOT NULL,
     rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    title TEXT,
     comment TEXT,
     city TEXT,
     is_verified BOOLEAN DEFAULT true,
+    order_id TEXT,
+    variant_purchased TEXT,
+    condition TEXT,
+    helpful_count INT DEFAULT 0 CHECK (helpful_count >= 0),
+    aspect_ratings JSONB,
+    concierge_response JSONB,
+    status TEXT NOT NULL DEFAULT 'published' CHECK (status IN ('published', 'pending', 'hidden')),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Backwards-compatible safety migrations
+ALTER TABLE public.customer_reviews ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE public.customer_reviews ADD COLUMN IF NOT EXISTS order_id TEXT;
+ALTER TABLE public.customer_reviews ADD COLUMN IF NOT EXISTS variant_purchased TEXT;
+ALTER TABLE public.customer_reviews ADD COLUMN IF NOT EXISTS condition TEXT;
+ALTER TABLE public.customer_reviews ADD COLUMN IF NOT EXISTS helpful_count INT DEFAULT 0;
+ALTER TABLE public.customer_reviews ADD COLUMN IF NOT EXISTS aspect_ratings JSONB;
+ALTER TABLE public.customer_reviews ADD COLUMN IF NOT EXISTS concierge_response JSONB;
+ALTER TABLE public.customer_reviews ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'published';
+
 -- --------------------------------------------------------------------
+
 -- 9. PERFORMANCE INDEXING STRATEGY
 -- --------------------------------------------------------------------
 -- Phones indexes

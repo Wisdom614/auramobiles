@@ -6,6 +6,7 @@ import { CartProvider } from "@/lib/store/cart-context";
 import { WishlistProvider } from "@/lib/store/wishlist-context";
 import { CompareProvider } from "@/lib/store/compare-context";
 import { OrdersProvider } from "@/lib/store/orders-context";
+import { ReviewsProvider } from "@/lib/store/reviews-context";
 import { AiProvider } from "@/lib/store/ai-context";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
@@ -13,15 +14,18 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     <SettingsProvider>
       <AuthProvider>
         <OrdersProvider>
-          <WishlistProvider>
-            <CompareProvider>
-              <CartProvider>
-                <AiProvider>{children}</AiProvider>
-              </CartProvider>
-            </CompareProvider>
-          </WishlistProvider>
+          <ReviewsProvider>
+            <WishlistProvider>
+              <CompareProvider>
+                <CartProvider>
+                  <AiProvider>{children}</AiProvider>
+                </CartProvider>
+              </CompareProvider>
+            </WishlistProvider>
+          </ReviewsProvider>
         </OrdersProvider>
       </AuthProvider>
     </SettingsProvider>
   );
 }
+

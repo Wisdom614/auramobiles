@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { Phone, PHONES } from "@/lib/data/phones";
 import { Order, OrderStatus } from "@/lib/data/mock-orders";
+import { CustomerReview, INITIAL_REVIEWS } from "@/lib/data/mock-reviews";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "";
@@ -755,5 +756,157 @@ export function subscribeToTradeIns(onUpdate: (tradeIn: any) => void) {
     supabase.removeChannel(channel);
   };
 }
+
+// ==========================================================
+// 8. CUSTOMER REVIEWS DB LAYER
+// ==========================================================
+
+export function mapDbReviewToModel(row: any): CustomerReview {
+  return {
+    id: row.id,
+    phoneId: row.phone_id || "",
+    phoneName: row.phone_name || row.phones?.name || "Official Flagship",
+    clientName: row.client_name || "Valued Customer",
+    city: row.city || "Buea",
+    rating: Number(row.rating || 5),
+    title: row.title || "Excellent Quality & Service",
+    comment: row.comment || "",
+    isVerified: row.is_verified !== false,
+    orderId: row.order_id || undefined,
+    variantPurchased: row.variant_purchased || undefined,
+    condition: row.condition || "Brand New Sealed",
+    helpfulCount: Number(row.helpful_count || 0),
+    aspectRatings: row.aspect_ratings || {
+      batteryHealth: 5,
+      deliverySpeed: 5,
+      conditionAccuracy: 5,
+    },
+    conciergeResponse: row.concierge_response || undefined,
+    createdAt: row.created_at || new Date().toISOString(),
+    status: row.status || "published",
+  };
+}
+
+export function mapModelToDbReview(rev: CustomerReview): any {
+  return {
+    id: rev.id,
+    phone_id: rev.phoneId,
+    client_name: rev.clientName,
+    rating: rev.rating,
+    title: rev.title,
+    comment: rev.comment,
+    city: rev.city,
+    is_verified: rev.isVerified,
+    order_id: rev.orderId,
+    variant_purchased: rev.variantPurchased,
+    condition: rev.condition,
+    helpful_count: rev.helpfulCount,
+    aspect_ratings: rev.aspectRatings,
+    concierge_response: rev.conciergeResponse,
+    status: rev.status,
+    created_at: rev.createdAt,
+  };
+}
+
+export async function getReviewsFromDB(): Promise<CustomerReview[] | null> {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase
+      .from("customer_reviews")
+      .select("*, phones(name)")
+      .order("created_at", { ascending: false });
+
+    if (error || !data || data.length === 0) return null;
+    return data.map(mapDbReviewToModel);
+  } catch {
+    return null;
+  }
+}
+
+export async function insertReviewToDB(rev: CustomerReview): Promise<boolean> {
+  // Sync to localStorage
+  try {
+    const cached = localStorage.getItem("aura_reviews_v1");
+    const currentList: CustomerReview[] = cached ? JSON.parse(cached) : INITIAL_REVIEWS;
+    const filtered = currentList.filter((r) => r.id !== rev.id);
+    localStorage.setItem("aura_reviews_v1", JSON.stringify([rev, ...filtered]));
+  } catch {}
+
+  if (!supabase) return true;
+  try {
+    const payload = mapModelToDbReview(rev);
+    const { error } = await supabase.from("customer_reviews").upsert(payload);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+export async function updateReviewInDB(
+  id: string,
+  updates: Partial<CustomerReview>
+): Promise<boolean> {
+  // Sync to localStorage
+  try {
+    const cached = localStorage.getItem("aura_reviews_v1");
+    const currentList: CustomerReview[] = cached ? JSON.parse(cached) : INITIAL_REVIEWS;
+    const updatedList = currentList.map((r) => (r.id === id ? { ...r, ...updates } : r));
+    localStorage.setItem("aura_reviews_v1", JSON.stringify(updatedList));
+  } catch {}
+
+  if (!supabase) return true;
+  try {
+    const dbPayload: any = {};
+    if (updates.rating !== undefined) dbPayload.rating = updates.rating;
+    if (updates.title !== undefined) dbPayload.title = updates.title;
+    if (updates.comment !== undefined) dbPayload.comment = updates.comment;
+    if (updates.helpfulCount !== undefined) dbPayload.helpful_count = updates.helpfulCount;
+    if (updates.status !== undefined) dbPayload.status = updates.status;
+    if (updates.conciergeResponse !== undefined) dbPayload.concierge_response = updates.conciergeResponse;
+    if (updates.isVerified !== undefined) dbPayload.is_verified = updates.isVerified;
+
+    const { error } = await supabase.from("customer_reviews").update(dbPayload).eq("id", id);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+export async function deleteReviewFromDB(id: string): Promise<boolean> {
+  try {
+    const cached = localStorage.getItem("aura_reviews_v1");
+    const currentList: CustomerReview[] = cached ? JSON.parse(cached) : INITIAL_REVIEWS;
+    const filtered = currentList.filter((r) => r.id !== id);
+    localStorage.setItem("aura_reviews_v1", JSON.stringify(filtered));
+  } catch {}
+
+  if (!supabase) return true;
+  try {
+    const { error } = await supabase.from("customer_reviews").delete().eq("id", id);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+export function subscribeToReviews(onUpdate: (payload: any) => void) {
+  if (!supabase) return () => {};
+
+  const channel = supabase
+    .channel("public:customer_reviews")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "customer_reviews" },
+      (payload) => {
+        onUpdate(payload);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
 
 

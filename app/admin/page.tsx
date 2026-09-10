@@ -45,12 +45,17 @@ import {
   Wrench,
   Camera,
   Wand2,
+  Star,
+  ThumbsUp,
+  PenTool,
 } from "lucide-react";
 import { formatCFA } from "@/lib/formatters";
 import { Phone, PHONES, StorageVariant } from "@/lib/data/phones";
 import { FLAGSHIP_PRESETS, FlagshipPreset } from "@/lib/data/flagship-presets";
 import { Order, INITIAL_ORDERS, OrderStatus } from "@/lib/data/mock-orders";
+import { CustomerReview } from "@/lib/data/mock-reviews";
 import { useSettings, DEFAULT_SETTINGS, SiteSettings } from "@/lib/store/settings-context";
+import { useReviews } from "@/lib/store/reviews-context";
 import {
   supabase,
   getPhonesFromDB,
@@ -74,12 +79,20 @@ import { uploadToCloudinary } from "@/lib/cloudinary/upload";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "orders" | "trade-ins" | "site-settings" | "settings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "orders" | "trade-ins" | "reviews" | "site-settings" | "settings">("overview");
 
   // Boutique Site Settings State
   const { settings, updateSettings } = useSettings();
   const [siteForm, setSiteForm] = useState<SiteSettings>(settings);
   const [isSavingSiteSettings, setIsSavingSiteSettings] = useState(false);
+
+  // Customer Reviews Moderation State
+  const { reviews, replyToReview, updateReviewStatus, deleteReview } = useReviews();
+  const [reviewSearch, setReviewSearch] = useState("");
+  const [reviewStatusFilter, setReviewStatusFilter] = useState<"all" | "published" | "hidden">("all");
+  const [replyingReview, setReplyingReview] = useState<CustomerReview | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [replyAuthor, setReplyAuthor] = useState("Wisdom (AURA Concierge)");
 
   useEffect(() => {
     setSiteForm(settings);
@@ -1292,6 +1305,23 @@ export default function AdminDashboardPage() {
             </button>
 
             <button
+              onClick={() => setActiveTab("reviews")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-none font-mono text-xs uppercase tracking-wider border transition ${
+                activeTab === "reviews"
+                  ? "bg-[#D4AF37] text-black font-bold border-[#D4AF37]"
+                  : "bg-black/40 text-white/60 hover:text-white border-white/10 hover:border-white/25"
+              }`}
+            >
+              <Star className="w-3.5 h-3.5" />
+              <span>Reviews</span>
+              <span className={`px-1.5 py-0.5 rounded-none text-[10px] font-mono ${
+                activeTab === "reviews" ? "bg-black/20 text-black font-bold" : "bg-white/10 text-white/70"
+              }`}>
+                {reviews.length}
+              </span>
+            </button>
+
+            <button
               onClick={() => setActiveTab("site-settings")}
               className={`flex items-center gap-2 px-4 py-2 rounded-none font-mono text-xs uppercase tracking-wider border transition ${
                 activeTab === "site-settings"
@@ -2135,6 +2165,218 @@ export default function AdminDashboardPage() {
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: CUSTOMER REVIEWS & MODERATION */}
+        {activeTab === "reviews" && (
+          <div className="space-y-8 animate-fade-in">
+            {/* Header & Ledger Metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border border-white/10 bg-black divide-y sm:divide-y-0 sm:divide-x divide-white/10">
+              <div className="p-5 bg-[#0B0B0E] space-y-1">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-white/40 block">
+                  TOTAL REVIEWS
+                </span>
+                <div className="text-2xl font-mono text-white font-light">
+                  {reviews.length} VERIFIED
+                </div>
+                <div className="text-[11px] font-mono text-zinc-400">Across full boutique catalog</div>
+              </div>
+
+              <div className="p-5 bg-[#0B0B0E] space-y-1">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-white/40 block">
+                  AVERAGE BOUTIQUE SCORE
+                </span>
+                <div className="text-2xl font-mono text-[#D4AF37] font-bold flex items-center gap-2">
+                  <span>
+                    {reviews.length > 0
+                      ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+                      : "5.0"}
+                  </span>
+                  <Star className="w-4 h-4 fill-[#D4AF37] text-[#D4AF37]" />
+                </div>
+                <div className="text-[11px] font-mono text-emerald-400">100% Positive feedback rating</div>
+              </div>
+
+              <div className="p-5 bg-[#0B0B0E] space-y-1">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-white/40 block">
+                  CONCIERGE REPLIES
+                </span>
+                <div className="text-2xl font-mono text-cyan-400 font-light">
+                  {reviews.filter((r) => !!r.conciergeResponse).length} RESPONSES
+                </div>
+                <div className="text-[11px] font-mono text-zinc-400">Official boutique endorsements</div>
+              </div>
+
+              <div className="p-5 bg-[#0B0B0E] space-y-1">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-white/40 block">
+                  MODERATION STATUS
+                </span>
+                <div className="text-2xl font-mono text-emerald-400 font-light">
+                  {reviews.filter((r) => r.status === "published").length} PUBLISHED
+                </div>
+                <div className="text-[11px] font-mono text-zinc-400">Live on customer storefront</div>
+              </div>
+            </div>
+
+            {/* Filter & Search Bar */}
+            <div className="p-4 bg-[#0A0A0D] border border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+              <div className="flex-1 relative">
+                <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-3" />
+                <input
+                  type="text"
+                  value={reviewSearch}
+                  onChange={(e) => setReviewSearch(e.target.value)}
+                  placeholder="Search reviews by customer name, city, phone model, or keywords..."
+                  className="w-full bg-black border border-white/15 rounded-none pl-9 pr-3.5 py-2 font-mono text-xs text-white placeholder-zinc-600 focus:border-[#D4AF37] focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-mono uppercase text-zinc-400 font-bold">STATUS:</span>
+                <select
+                  value={reviewStatusFilter}
+                  onChange={(e) => setReviewStatusFilter(e.target.value as any)}
+                  className="bg-black border border-white/15 rounded-none px-3 py-2 font-mono text-xs text-white focus:border-[#D4AF37] focus:outline-none"
+                >
+                  <option value="all">All Reviews</option>
+                  <option value="published">Published Only</option>
+                  <option value="hidden">Hidden</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Reviews Table */}
+            <div className="border border-white/10 bg-[#0A0A0D] overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-white/10 bg-white/[0.02] text-white/40 font-mono text-[10px] uppercase tracking-widest">
+                    <th className="py-3 px-4 font-medium">PHONE MODEL</th>
+                    <th className="py-3 px-4 font-medium">CUSTOMER / CITY</th>
+                    <th className="py-3 px-4 font-medium">RATING</th>
+                    <th className="py-3 px-4 font-medium">REVIEW HEADLINE &amp; COMMENT</th>
+                    <th className="py-3 px-4 font-medium">CONCIERGE REPLY</th>
+                    <th className="py-3 px-4 font-medium">STATUS</th>
+                    <th className="py-3 px-4 font-medium text-right">ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5 font-mono text-xs">
+                  {(() => {
+                    const filtered = reviews.filter((r) => {
+                      const matchesSearch =
+                        !reviewSearch ||
+                        r.clientName.toLowerCase().includes(reviewSearch.toLowerCase()) ||
+                        r.city.toLowerCase().includes(reviewSearch.toLowerCase()) ||
+                        r.phoneName.toLowerCase().includes(reviewSearch.toLowerCase()) ||
+                        r.title.toLowerCase().includes(reviewSearch.toLowerCase()) ||
+                        r.comment.toLowerCase().includes(reviewSearch.toLowerCase());
+
+                      const matchesStatus =
+                        reviewStatusFilter === "all" || r.status === reviewStatusFilter;
+
+                      return matchesSearch && matchesStatus;
+                    });
+
+                    if (filtered.length === 0) {
+                      return (
+                        <tr>
+                          <td colSpan={7} className="py-8 text-center text-white/40">
+                            NO CUSTOMER REVIEWS MATCH CURRENT FILTERS
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    return filtered.map((r) => (
+                      <tr key={r.id} className="hover:bg-white/[0.03] transition">
+                        <td className="py-3.5 px-4">
+                          <span className="font-bold text-white block">{r.phoneName}</span>
+                          <span className="text-[10px] text-zinc-500">{r.variantPurchased || "Standard"}</span>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-white font-semibold">{r.clientName}</span>
+                            {r.isVerified && (
+                              <span className="text-emerald-400 text-[10px]">✓</span>
+                            )}
+                          </div>
+                          <span className="text-[10.5px] text-[#D4AF37] block">{r.city}</span>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-1 text-[#D4AF37]">
+                            <Star className="w-3.5 h-3.5 fill-[#D4AF37]" />
+                            <span className="font-bold">{r.rating}.0</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 max-w-sm">
+                          <span className="text-white font-bold block truncate">{r.title}</span>
+                          <span className="text-zinc-400 text-[11px] line-clamp-2">{r.comment}</span>
+                        </td>
+                        <td className="py-3.5 px-4 max-w-xs">
+                          {r.conciergeResponse ? (
+                            <div className="p-2 bg-black/60 border border-white/10 text-[10.5px] space-y-0.5">
+                              <span className="text-[#D4AF37] font-bold block">{r.conciergeResponse.responderName}</span>
+                              <span className="text-zinc-300 line-clamp-2">{r.conciergeResponse.response}</span>
+                            </div>
+                          ) : (
+                            <span className="text-zinc-600 text-[10px]">No response yet</span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span
+                            className={`px-2 py-0.5 text-[9.5px] font-bold uppercase ${
+                              r.status === "published"
+                                ? "bg-emerald-950/80 text-emerald-400 border border-emerald-500/40"
+                                : "bg-zinc-800 text-zinc-400 border border-zinc-600"
+                            }`}
+                          >
+                            {r.status}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right space-x-2">
+                          <button
+                            onClick={() => {
+                              setReplyingReview(r);
+                              setReplyText(r.conciergeResponse?.response || "");
+                              setReplyAuthor(r.conciergeResponse?.responderName || "Wisdom (AURA Concierge)");
+                            }}
+                            className="px-2.5 py-1 bg-white/5 hover:bg-white/10 text-[#D4AF37] border border-white/10 text-[10.5px] transition cursor-pointer"
+                            title="Reply to review"
+                          >
+                            {r.conciergeResponse ? "Edit Reply" : "Reply"}
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              updateReviewStatus(
+                                r.id,
+                                r.status === "published" ? "hidden" : "published"
+                              )
+                            }
+                            className="px-2 py-1 bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10 text-[10px] transition cursor-pointer"
+                            title={r.status === "published" ? "Hide review" : "Publish review"}
+                          >
+                            {r.status === "published" ? "Hide" : "Publish"}
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              if (confirm("Are you sure you want to permanently delete this customer review?")) {
+                                deleteReview(r.id);
+                              }
+                            }}
+                            className="px-2 py-1 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-500/30 text-[10px] transition cursor-pointer"
+                            title="Delete review"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ));
+                  })()}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
@@ -4334,6 +4576,100 @@ export default function AdminDashboardPage() {
                   </a>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONCIERGE REPLY MODAL */}
+      {replyingReview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto bg-black/90 backdrop-blur-sm animate-in fade-in duration-200 font-sans">
+          <div className="relative w-full max-w-xl bg-[#0D0D12] border-2 border-[#D4AF37] shadow-2xl text-white p-6 space-y-5 my-auto">
+            {/* Close Button */}
+            <button
+              onClick={() => setReplyingReview(null)}
+              className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 transition border border-white/10 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Header */}
+            <div className="border-b border-white/10 pb-3 space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37] font-bold block">
+                OFFICIAL BOUTIQUE ENDORSEMENT
+              </span>
+              <h3 className="text-base sm:text-lg font-bold uppercase text-white font-mono">
+                Reply to {replyingReview.clientName} ({replyingReview.phoneName})
+              </h3>
+            </div>
+
+            {/* Customer Review Summary Card */}
+            <div className="p-3 bg-black border border-white/10 space-y-1.5 text-xs font-mono">
+              <div className="flex items-center justify-between text-[#D4AF37]">
+                <span>{replyingReview.rating}★ Review: &quot;{replyingReview.title}&quot;</span>
+                <span className="text-zinc-500">{replyingReview.city}</span>
+              </div>
+              <p className="text-zinc-300 font-sans text-xs italic leading-relaxed">
+                &quot;{replyingReview.comment}&quot;
+              </p>
+            </div>
+
+            {/* Reply Input Form */}
+            <div className="space-y-4 text-xs font-mono">
+              <div className="space-y-1.5">
+                <label className="text-zinc-400 uppercase tracking-wider block font-bold">
+                  Responder Name / Title:
+                </label>
+                <input
+                  type="text"
+                  value={replyAuthor}
+                  onChange={(e) => setReplyAuthor(e.target.value)}
+                  placeholder="e.g. Wisdom (AURA Concierge)"
+                  className="w-full bg-black border border-white/20 px-3 py-2 text-white focus:border-[#D4AF37] focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-zinc-400 uppercase tracking-wider block font-bold">
+                  Official Concierge Response:
+                </label>
+                <textarea
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  rows={4}
+                  placeholder="Type your official response to appear publicly on the phone details page..."
+                  className="w-full bg-black border border-white/20 p-3 text-white focus:border-[#D4AF37] focus:outline-none leading-relaxed font-sans text-xs"
+                />
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="pt-3 border-t border-white/10 flex items-center justify-end gap-3 font-mono text-xs">
+              <button
+                type="button"
+                onClick={() => setReplyingReview(null)}
+                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-zinc-300 uppercase tracking-wider border border-white/10 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!replyText.trim()) return;
+                  await replyToReview(
+                    replyingReview.id,
+                    replyText.trim(),
+                    replyAuthor.trim() || "AURA Concierge"
+                  );
+                  showToast("Official response published to product page!", "success");
+                  setReplyingReview(null);
+                }}
+                disabled={!replyText.trim()}
+                className="px-6 py-2 gold-gradient-bg text-black font-extrabold uppercase tracking-wider transition hover:opacity-95 disabled:opacity-50 cursor-pointer"
+              >
+                Publish Response
+              </button>
             </div>
           </div>
         </div>

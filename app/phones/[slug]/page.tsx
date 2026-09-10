@@ -32,6 +32,8 @@ import { useWishlist } from "@/lib/store/wishlist-context";
 import { useSettings } from "@/lib/store/settings-context";
 import { ProductCard } from "@/components/product/product-card";
 import { StickyMobilePdpBar } from "@/components/product/sticky-mobile-pdp-bar";
+import { ProductReviewsSection } from "@/components/reviews/product-reviews-section";
+import { useReviews } from "@/lib/store/reviews-context";
 import { getPhoneBySlugFromDB, getPhonesFromDB } from "@/lib/supabase/client";
 
 interface PageProps {
@@ -44,6 +46,7 @@ export default function PhoneDetailPage({ params }: PageProps) {
   const { settings } = useSettings();
   const { addItem } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const { getPhoneStats } = useReviews();
 
   const [phone, setPhone] = useState<Phone | null>(null);
   const [relatedPhones, setRelatedPhones] = useState<Phone[]>([]);
@@ -540,11 +543,22 @@ export default function PhoneDetailPage({ params }: PageProps) {
                   {phone.brand.toUpperCase()} • Official Flagship
                 </span>
                 
-                <div className="flex items-center gap-1 text-xs text-amber-300 font-mono">
-                  <Star className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
-                  <span className="font-bold">{phone.rating}</span>
-                  <span className="text-zinc-500 font-sans">({phone.reviewCount} reviews)</span>
-                </div>
+                {(() => {
+                  const stats = getPhoneStats(phone.id);
+                  const displayRating = stats.totalReviews > 0 ? stats.averageRating : phone.rating;
+                  const displayReviewCount = stats.totalReviews > 0 ? stats.totalReviews : phone.reviewCount;
+                  return (
+                    <a
+                      href="#reviews-section"
+                      className="flex items-center gap-1 text-xs text-amber-300 font-mono hover:text-[#D4AF37] transition cursor-pointer"
+                      title="Jump to Customer Reviews"
+                    >
+                      <Star className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
+                      <span className="font-bold">{displayRating}</span>
+                      <span className="text-zinc-500 font-sans">({displayReviewCount} reviews)</span>
+                    </a>
+                  );
+                })()}
               </div>
 
               <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">
@@ -929,7 +943,10 @@ export default function PhoneDetailPage({ params }: PageProps) {
 
         </div>
 
-        {/* 4. Related Phones Archive */}
+        {/* 4. Real Customer Reviews & Ratings Section */}
+        <ProductReviewsSection phone={phone} />
+
+        {/* 5. Related Phones Archive */}
         {relatedPhones.length > 0 && (
           <div className="mt-16 pt-10 border-t border-white/10 space-y-5">
             <div className="flex items-baseline justify-between border-b border-white/10 pb-3">
