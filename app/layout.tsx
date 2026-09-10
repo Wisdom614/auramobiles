@@ -44,6 +44,8 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
+import { StorefrontLayoutShell } from "@/components/layout/storefront-layout-shell";
+
 export default function RootLayout({
   children,
 }: {
@@ -59,17 +61,7 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <NavigationProgressBar />
           </Suspense>
-          <div className="flex flex-col min-h-screen w-full overflow-x-hidden">
-            <Navbar />
-            <main className="flex-1 pb-20 md:pb-0 w-full overflow-x-hidden">{children}</main>
-            <Footer />
-            <MobileNav />
-            <CartDrawer />
-            <CartToast />
-            <AiModal />
-            <FloatingConcierge />
-            <FloatingWhatsApp />
-          </div>
+          <StorefrontLayoutShell>{children}</StorefrontLayoutShell>
         </AppProviders>
       </body>
     </html>
